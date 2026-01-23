@@ -44,7 +44,7 @@
         'src\modules\Network\Network.psm1',
         'src\modules\Privacy\Tasks.psm1',
         'src\modules\Privacy\Hosts.psm1',
-        'src\modules\Extras\Extras.psm1',
+        # Extras module excluded related to standard release
         'src\ui\Colors.psm1',
         'src\ui\Menu.psm1',
         'src\ui\gui\GUI.psm1'
@@ -77,7 +77,6 @@
         'Backup-HostsFile', 'Add-WinDebloat7HostsBlock', 'Remove-WinDebloat7HostsBlock',
         'Get-WinDebloat7HostsStatus', 'Get-WinDebloat7TelemetryDomains',
         # Extras (only available in Extras edition)
-        'Invoke-WinDebloat7DefenderRemover', 'Invoke-WinDebloat7Activation',
         # UI
         'Show-MainMenu', 'Show-WinDebloat7GUI'
     )
