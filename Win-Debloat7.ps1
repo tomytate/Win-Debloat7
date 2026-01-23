@@ -29,7 +29,7 @@
     Applies the moderate profile without prompts (for automation).
     
 .NOTES
-    Version: 1.1.0
+    Version: 1.2.0
     Author: Tomy Tolledo
     License: MIT
     Requires: PowerShell 7.5+, Administrator privileges
@@ -44,9 +44,20 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [ValidateScript({ Test-Path $_ -PathType Leaf })]
+    [ArgumentCompleter({
+            param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+            $profilesDir = Join-Path (Split-Path $commandAst.Extent.File -Parent) "profiles"
+            Get-ChildItem -Path $profilesDir -Filter "*.yaml" | 
+            Where-Object { $_.Name -like "$wordToComplete*" } |
+            ForEach-Object {
+                [System.Management.Automation.CompletionResult]::new($_.FullName, $_.Name, 'ParameterValue', $_.Name)
+            }
+        })]
     [string]$ProfileFile,
     
     [switch]$Unattended,
+    
+    [switch]$Maintenance,
     
     [switch]$NoGui
 )
@@ -93,6 +104,9 @@ try {
 catch {
     Write-Host "CRITICAL ERROR: Failed to load framework." -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
+    if ($_.Exception.InnerException) {
+        Write-Host "Inner Exception: $($_.Exception.InnerException.Message)" -ForegroundColor Red
+    }
     Write-Host ""
     Write-Host "Troubleshooting:" -ForegroundColor Yellow
     Write-Host "  1. Ensure you extracted ALL files from the ZIP" -ForegroundColor Gray
@@ -107,6 +121,12 @@ catch {
 Write-Host "Framework loaded." -ForegroundColor Gray
 
 # Launch Application
+if ($Maintenance) {
+    Write-Log -Message "Starting Maintenance Mode..." -Level Info
+    Invoke-WinDebloat7Maintenance
+    exit 0
+}
+
 if ($ProfileFile) {
     # CLI Mode
     # Modules are already loaded by the manifest
@@ -128,19 +148,32 @@ if ($ProfileFile) {
             Write-Log -Message "Operation cancelled by user." -Level Warning
             exit 0
         }
-        
-        # Create snapshot before changes
-        Write-Log -Message "Creating pre-optimization snapshot..." -Level Info
-        New-WinDebloat7Snapshot -Name "Pre-$($config.metadata.name)" -Description "Auto-created before $($config.metadata.name) profile"
     }
     else {
         Write-Log -Message "Unattended mode - skipping confirmation" -Level Info
     }
     
+    # Create snapshot before changes (ALWAYS, unless specifically disabled, which isn't a flag yet)
+    Write-Log -Message "Creating pre-optimization snapshot..." -Level Info
+    New-WinDebloat7Snapshot -Name "Pre-$($config.metadata.name)" -Description "Auto-created before $($config.metadata.name) profile"
+    
+    # Benchmark Pre
+    Write-Log -Message "Benchmarking system state (Pre-Optimization)..." -Level Info
+    $preBench = Measure-WinDebloat7System
+    
     # Apply modules
     Remove-WinDebloat7Bloatware -Config $config -Confirm:$false
     Set-WinDebloat7Privacy -Config $config -Confirm:$false
     Set-WinDebloat7Performance -Config $config -Confirm:$false
+    
+    # Benchmark Post
+    Write-Log -Message "Benchmarking system state (Post-Optimization)..." -Level Info
+    $postBench = Measure-WinDebloat7System
+    
+    # Generate Report
+    $report = Compare-WinDebloat7Benchmarks -Reference $preBench -Difference $postBench
+    Write-Host "`n$report" -ForegroundColor Gray
+    Write-Log -Message "Optimization Report generated on Desktop." -Level Success
     
     Write-Log -Message "Profile '$($config.metadata.name)' applied successfully." -Level Success
     exit 0

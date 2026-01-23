@@ -45,17 +45,19 @@ function Show-MainMenu {
         Write-WD7Host "  [4] Install Essential Apps" -Color White
         Write-WD7Host "  [5] Update Drivers" -Color White
         Write-WD7Host "  [6] Network & Privacy Settings" -Color White
-        Write-WD7Host "  [7] System Info" -Color White
-        Write-WD7Host "  [8] Snapshots / Restore" -Color White
+        Write-WD7Host "  [7] Benchmark System" -Color White
+        Write-WD7Host "  [8] System Info" -Color White
+        Write-WD7Host "  [9] Snapshots / Restore" -Color White
         
         # Show Extras options only if module is available
         if ($extrasAvailable) {
             Write-WD7Host ""
             Write-WD7Host "  ═══ ADVANCED (USE AT OWN RISK) ═══" -Color Warning
-            Write-WD7Host "  [9] Defender Remover ⚠️" -Color Warning
-            Write-WD7Host "  [0] Windows Activation ⚠️" -Color Warning
+            Write-WD7Host "  [D] Defender Remover ⚠️" -Color Warning
+            Write-WD7Host "  [A] Windows Activation ⚠️" -Color Warning
         }
         
+        Write-WD7Host "  [0] Register Weekly Maintenance" -Color Dark
         Write-WD7Host "  [Q] Quit" -Color Dark
         
         $choice = Read-Host "`nEnter selection"
@@ -76,9 +78,10 @@ function Show-MainMenu {
             "4" { Install-WinDebloat7Essentials }
             "5" { Update-WinDebloat7Drivers }
             "6" { Show-NetworkPrivacyMenu }
-            "7" { Show-SystemInfo }
-            "8" { Show-SnapshotMenu }
-            "9" { 
+            "7" { Invoke-WinDebloat7Benchmark }
+            "8" { Show-SystemInfo }
+            "9" { Show-SnapshotMenu }
+            "D" { 
                 if ($extrasAvailable) {
                     Invoke-WinDebloat7DefenderRemover
                     Read-Host "`nPress Enter to continue..."
@@ -88,7 +91,11 @@ function Show-MainMenu {
                     Start-Sleep -Seconds 2
                 }
             }
-            "0" { 
+            "d" { 
+                # Case insensitive handler for D
+                if ($extrasAvailable) { Invoke-WinDebloat7DefenderRemover; Read-Host "`nPress Enter..." } 
+            }
+            "A" { 
                 if ($extrasAvailable) {
                     Invoke-WinDebloat7Activation
                     Read-Host "`nPress Enter to continue..."
@@ -97,6 +104,24 @@ function Show-MainMenu {
                     Write-WD7Host "Extras module not installed. Download Extras edition for this feature." -Color Warning
                     Start-Sleep -Seconds 2
                 }
+            }
+            "A" { 
+                if ($extrasAvailable) {
+                    Invoke-WinDebloat7Activation
+                    Read-Host "`nPress Enter to continue..."
+                }
+                else {
+                    Write-WD7Host "Extras module not installed. Download Extras edition for this feature." -Color Warning
+                    Start-Sleep -Seconds 2
+                }
+            }
+            "a" { 
+                # Case insensitive handler for A
+                if ($extrasAvailable) { Invoke-WinDebloat7Activation; Read-Host "`nPress Enter..." } 
+            }
+            "0" {
+                Register-WinDebloat7Maintenance
+                Read-Host "`nPress Enter to continue..."
             }
             "Q" { exit }
             "q" { exit }
@@ -344,6 +369,29 @@ function Invoke-WindowsActivation {
         Write-WD7Host "Error: $($_.Exception.Message)" -Color Error
     }
     Read-Host "Press Enter..."
+}
+
+function Invoke-WinDebloat7Benchmark {
+    Show-WD7Header
+    Write-WD7Host "System Benchmarking" -Color Secondary
+    Write-Host "This will capture current system metrics and save a report to your Desktop." -ForegroundColor Gray
+    Write-Host "For strictly accurate comparison, run this before and after optimization." -ForegroundColor Gray
+    
+    $run = Read-Host "`nRun Benchmark? [Y/N]"
+    if ($run -notmatch '^[Yy]') { return }
+    
+    Write-Host "`nMeasuring system performance..." -ForegroundColor Cyan
+    $metrics = Measure-WinDebloat7System
+    
+    Write-Host "`nResults:" -ForegroundColor Green
+    $metrics | Format-List | Out-String | Write-Host
+    
+    # Save simple report if standalone
+    $reportPath = "$env:USERPROFILE\Desktop\Win-Debloat7_Benchmark_$(Get-Date -Format 'yyyyMMdd-HHmm').txt"
+    $metrics | Out-File $reportPath
+    Write-Host "Snapshot saved to: $reportPath" -ForegroundColor Gray
+    
+    Read-Host "`nPress Enter to continue..."
 }
 
 Export-ModuleMember -Function Show-MainMenu

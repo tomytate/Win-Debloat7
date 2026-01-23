@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.singleton.1.6.0.schema.json
+
+PackageIdentifier: TomyTolledo.WinDebloat7
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: Tomy Tolledo
+PublisherUrl: https://github.com/tomytate
+PublisherSupportUrl: https://github.com/tomytate/Win-Debloat7/issues
+Author: Tomy Tolledo
+PackageName: Win-Debloat7
+PackageUrl: https://github.com/tomytate/Win-Debloat7
+License: MIT
+LicenseUrl: https://github.com/tomytate/Win-Debloat7/blob/main/LICENSE
+Copyright: Copyright 2026 Tomy Tolledo
+ShortDescription: The Power User's Windows Optimization Platform.
+Description: |
+  Win-Debloat7 is a modern, modular, and safe Windows debloating and optimization framework designed for PowerShell 7.5+.
+  It provides a robust GUI and TUI to remove bloatware, enhance privacy, and optimize performance.
+Moniker: win-debloat7
+Tags:
+  - debloat
+  - optimize
+  - privacy
+  - powershell
+  - windows11
+ReleaseDate: 2026-01-24
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/tomytate/Win-Debloat7/releases/download/v1.2.0/Win-Debloat7-v1.2.0-Standard.zip
+    InstallerSha256: 45F80E1811350D98A0B3BEE4A905BEF35AAB98A87B0E0A66EF4727595ECECDE2
+    InstallerType: zip
+    NestedInstallerType: portable
+    NestedInstallerFiles:
+      - RelativeFilePath: Win-Debloat7.ps1
+        PortableCommandAlias: win-debloat7
+ManifestType: singleton
+ManifestVersion: 1.6.0

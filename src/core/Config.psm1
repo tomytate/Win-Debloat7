@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.Config
-    Version: 1.1.0
+    Version: 1.2.0
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -63,9 +63,21 @@ function Import-WinDebloat7Config {
     
     Write-Log -Message "Loading profile: $Path" -Level Info
     
+    # Check for vendored powershell-yaml module
+    $vendorPath = "$PSScriptRoot\..\modules\Vendor\powershell-yaml"
+    if (Test-Path $vendorPath) {
+        # Try to find the .psd1 file recursively in the vendor directory (handling version subfolders)
+        $moduleManifest = Get-ChildItem -Path $vendorPath -Filter "powershell-yaml.psd1" -Recurse | Select-Object -First 1
+        
+        if ($moduleManifest) {
+            Write-Log -Message "Loading vendored 'powershell-yaml' from $($moduleManifest.FullName)" -Level Debug
+            Import-Module $moduleManifest.FullName -Force -ErrorAction SilentlyContinue
+        }
+    }
+
     # Check for powershell-yaml module with user consent (SEC-001 fix)
     if (-not $SkipDependencyCheck) {
-        if (-not (Get-Module -ListAvailable -Name "powershell-yaml")) {
+        if (-not (Get-Module -Name "powershell-yaml" -ErrorAction SilentlyContinue) -and -not (Get-Module -ListAvailable -Name "powershell-yaml")) {
             Write-Log -Message "Module 'powershell-yaml' not found." -Level Warning
             
             # Prompt for user consent - security best practice
@@ -88,7 +100,7 @@ function Import-WinDebloat7Config {
                 throw "Dependency 'powershell-yaml' is required. Please install it manually: Install-PSResource powershell-yaml"
             }
         }
-        else {
+        elseif (-not (Get-Module -Name "powershell-yaml" -ErrorAction SilentlyContinue)) {
             Import-Module "powershell-yaml" -ErrorAction Stop
         }
     }
@@ -205,4 +217,53 @@ function Test-WinDebloat7Config {
     }
 }
 
-Export-ModuleMember -Function Import-WinDebloat7Config, Test-WinDebloat7Config
+
+<#
+.SYNOPSIS
+    Analyzes hardware to recommend an optimization profile.
+    
+.DESCRIPTION
+    Checks RAM and GPU to suggest 'Gaming', 'Performance', or 'Moderate'.
+    
+.OUTPUTS
+    [string] The recommended profile name.
+#>
+function Get-WinDebloat7RecommendedProfile {
+    [CmdletBinding()]
+    param()
+    
+    try {
+        # Check RAM (GB)
+        $ramObj = Get-CimInstance Win32_ComputerSystem -ErrorAction SilentlyContinue
+        $totalRamGB = if ($ramObj) { [math]::Round($ramObj.TotalPhysicalMemory / 1GB) } else { 8 }
+        
+        # Check GPU
+        $gpus = Get-CimInstance Win32_VideoController -ErrorAction SilentlyContinue 
+        $hasHighEndGpu = $false
+        if ($gpus) {
+            foreach ($gpu in $gpus) {
+                if ($gpu.Name -match 'NVIDIA|AMD|Radeon|GeForce|RTX|GTX') {
+                    $hasHighEndGpu = $true
+                    break
+                }
+            }
+        }
+        
+        # Logic
+        if ($totalRamGB -lt 8) {
+            return "Performance"
+        }
+        elseif ($totalRamGB -ge 16 -and $hasHighEndGpu) {
+            return "Gaming"
+        }
+        else {
+            return "Moderate"
+        }
+    }
+    catch {
+        Write-Log -Message "Failed to detect hardware for recommendation: $($_.Exception.Message)" -Level Warning
+        return "Moderate" # Fallback
+    }
+}
+
+Export-ModuleMember -Function Import-WinDebloat7Config, Test-WinDebloat7Config, Get-WinDebloat7RecommendedProfile

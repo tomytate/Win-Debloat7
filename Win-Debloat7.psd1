@@ -4,7 +4,7 @@
     # RootModule        = ''
 
     # Version number of this module.
-    ModuleVersion     = '1.1.0'
+    ModuleVersion     = '1.2.0'
 
     # ID used to uniquely identify this module
     GUID              = 'a1b2c3d4-e5f6-7890-1234-567890abcdef'
@@ -38,6 +38,8 @@
         'src\modules\Privacy\Privacy.psm1',
         'src\modules\Performance\Performance.psm1',
         'src\modules\Performance\Gaming.psm1',
+        'src\modules\Performance\Benchmark.psm1',
+        'src\modules\Maintenance\Maintenance.psm1',
         'src\modules\Windows11\Version-Detection.psm1',
         'src\modules\Software\Software.psm1',
         'src\modules\Drivers\Drivers.psm1',
@@ -62,6 +64,7 @@
         'Set-WinDebloat7Privacy',
         'Set-WinDebloat7Performance',
         'Set-WinDebloat7Gaming',
+        'Measure-WinDebloat7System', 'Compare-WinDebloat7Benchmarks',
         'Get-WindowsVersionInfo', 'Test-Windows11Version', 'Clear-WindowsVersionCache',
         # Software
         'Test-PackageManager', 'Install-PackageManager', 'Get-WinDebloat7EssentialsList',
@@ -76,6 +79,8 @@
         # Hosts Blocking
         'Backup-HostsFile', 'Add-WinDebloat7HostsBlock', 'Remove-WinDebloat7HostsBlock',
         'Get-WinDebloat7HostsStatus', 'Get-WinDebloat7TelemetryDomains',
+        # Maintenance
+        'Register-WinDebloat7Maintenance', 'Unregister-WinDebloat7Maintenance', 'Invoke-WinDebloat7Maintenance',
         # Extras (only available in Extras edition)
         # UI
         'Show-MainMenu', 'Show-WinDebloat7GUI'
@@ -104,12 +109,11 @@
             
             # Release Notes
             ReleaseNotes = @'
-## v1.1.0 (2026-01-23)
-- NEW: Premium WPF GUI (Press 2) with System Health Dashboard
-- NEW: Defender Remover & Windows Activation (CLI Extras)
-- NEW: Microsoft Office 365 (Online Installer) support
-- IMPROVED: PowerShell 7.5 optimizations (List[T], CliXml)
-- FIXED: Copilot detection & UI freezing issues
+## v1.2.0 (2026-01-24)
+- NEW: Real-time Telemetry Dashboard
+- NEW: System Benchmarking (Before/After reports)
+- NEW: Hardware-Aware Recommendations
+- NEW: Dual-Release (Standard/Extras) automation
 '@
         }
     }

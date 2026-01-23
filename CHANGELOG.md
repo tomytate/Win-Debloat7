@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-01-24
+
+### 🚀 New Features
+- **Real-time Monitoring Dashboard**:
+    - Live updates in the GUI every 5 seconds.
+    - Tracks **Active Internet Connections** and RAM Usage.
+    - Dynamic privacy status indicators.
+- **System Benchmarking**:
+    - New `Measure-WinDebloat7System` tool captured in `src/modules/Performance/Benchmark.psm1`.
+    - Generates before/after comparison reports on the Desktop.
+    - Integrated into CLI (auto-runs) and TUI (Menu Option 7).
+- **Hardware-Aware Recommendations**:
+    - Intelligent profile suggestion based on RAM and GPU (e.g. "Gaming" for 16GB+ & RTX).
+- **Dual-Release Distribution**:
+    - Automated creation of **Standard** (Safe) and **Extras** (Defender Remover/MAS) packages.
+    - GitHub Actions `release.yml` auto-publishes these assets.
+    - **Winget & Chocolatey** manifests auto-generated with SHA256 checksums.
+
+### 🛡️ Safety & Quality
+- **Global Unattended Safety**: `-Unattended` mode now forces a snapshot before changes.
+- **CI/CD Pipeline**:
+    - `ci.yml`: Runs Pester unit tests on every push.
+    - `security.yml`: Scans for secrets and security vulnerabilties.
+- **Unit Testing**:
+    - Standardized on **Pester 5**.
+    - Full coverage for Config parsing and System State detection.
+
 ## [1.1.0] - 2026-01-23
 
 ### 🚀 New Features

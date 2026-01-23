@@ -1,45 +1,48 @@
 # Contributing to Win-Debloat7
 
-Thank you for your interest in improving **Win-Debloat7**! This project has moved to a modular, configuration-driven architecture with a WPF GUI.
+Thank you for your interest in contributing to **Win-Debloat7**! We welcome improvements, bug fixes, and new features.
+
+## 🤝 Code of Conduct
+Please be respectful and inclusive. We prioritize safety and transparency in all code changes.
 
 ## 🛠️ Development Setup
-1.  **Requirement**: PowerShell 7.5 or newer is **mandatory**.
-2.  **Dependencies**: The project uses `PSResourceGet` to manage dependencies.
-3.  **Editor**: VS Code with the PowerShell extension is recommended.
+1. **Prerequisites**:
+   - Windows 10/11
+   - PowerShell 7.5+
+   - VS Code (Recommended) with PowerShell extension
 
-## 📂 Architecture
-The code is organized into modules in `src/`:
-- **`src/core/`**: Core logic (Logger, Config, State). **Do not modify** unless you are changing the framework itself.
-- **`src/modules/`**: Feature modules (Bloatware, Privacy, etc.). **Add new features here.**
-- **`src/ui/gui/`**: WPF GUI logic (`GUI.psm1`) and markup (`MainWindow.xaml`).
-- **`profiles/`**: YAML configuration files.
+2. **Clone the repo**:
+   ```powershell
+   git clone https://github.com/tomytate/Win-Debloat7.git
+   cd Win-Debloat7
+   ```
 
-## 🚀 How to Add a Feature
-1.  **Create a Module**: Create a new folder `src/modules/MyFeature/` and a `.psm1` file.
-2.  **Implement Logic**: Write a function `Set-WinDebloat7MyFeature` that accepts a `$Config` object.
-    ```powershell
-    function Set-WinDebloat7MyFeature {
-        param([Object]$Config)
-        Write-Log -Message "Doing something..." -Level Info
-    }
-    ```
-3.  **Update Schema**: Add relevant configuration keys to `profiles/schema.yaml` (if applicable).
-4.  **Register**: Import your module in `Win-Debloat7.psd1`.
+3. **Run Locally**:
+   ```powershell
+   ./Win-Debloat7.ps1 -NoGui
+   ```
 
-## 🎨 GUI Development
-If modifying the GUI:
-1.  **XAML**: Edit `src/ui/gui/MainWindow.xaml`. Keep styles consistent with `src/ui/Colors.psm1`.
-2.  **Logic**: Edit `src/ui/gui/GUI.psm1`.
-3.  **Responsiveness**: Always use the `$updateGui` helper in button handlers to prevent freezing.
+## 🧪 Testing
+- We use **Pester 5** for unit testing.
+- Run tests before submitting a PR:
+  ```powershell
+  Invoke-Pester -Path tests/Unit -Output Detailed
+  ```
 
-## 📝 Code Style
-- **Typed Parameters**: Always use `[string]`, `[int]`, `[switch]`, etc.
-- **Structured Logging**: Use `Write-Log` instead of `Write-Host`.
-- **Classes**: Use PowerShell Classes for complex data structures.
-- **Performance**: Use `[System.Collections.Generic.List[T]]` instead of array `+=`.
+## 📦 Project Structure
+- `src/core`: Core logic (Logging, Config, State)
+- `src/modules`: Individual features (Bloatware, Privacy, Performance)
+- `src/ui`: GUI and Menu systems
+- `profiles`: YAML configuration files
 
-## ✅ Pull Request Checklist
-- [ ] Code runs on PowerShell 7.5.
-- [ ] Logic respects the YAML configuration (no hardcoded actions).
-- [ ] `Write-Log` is used for all output.
-- [ ] GUI changes have been verified to not freeze the UI.
+## 📝 Pull Request Guidelines
+1. **One feature per PR**: Keep changes focused.
+2. **Descriptive Title**: e.g., "Add Firefox Telemetry Blocking".
+3. **Verify Safety**: Ensure no critical system components (like Bootloader) are touched.
+4. **Update Documentation**: If you change functionality, update `README.md`.
+
+## ⚠️ "Extras" Branch
+- Code related to **Defender Remover** or **Activation** goes into the `extras` branch ONLY.
+- The `main` branch must remain safe and compliant with Microsoft ToS.
+
+Thank you for helping build the Gold Standard of Windows Optimization!

@@ -16,7 +16,7 @@
     Output directory for release packages
     
 .EXAMPLE
-    .\Build-DualRelease.ps1 -Version "1.1.0"
+    .\Build-DualRelease.ps1 -Version "1.2.0"
 #>
 
 param(
@@ -225,13 +225,58 @@ Write-Host "   ✅ Extras release built: ${ExtrasSize}MB" -ForegroundColor Yello
 
 Write-Host "`n🔐 Generating checksums..." -ForegroundColor Cyan
 
-$checksums = @()
-Get-ChildItem -Path $DistPath -Filter "*.zip" | ForEach-Object {
-    $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
-    $checksums += "$hash  $($_.Name)"
-    Write-Host "   $($_.Name): $hash" -ForegroundColor Gray
+$checksums = @{}
+$distFiles = Get-ChildItem $DistPath -Filter "*.zip"
+$checksumFile = Join-Path $DistPath "SHA256SUMS.txt"
+$sb = [System.Text.StringBuilder]::new()
+
+foreach ($file in $distFiles) {
+    $hash = (Get-FileHash -Path $file.FullName -Algorithm SHA256).Hash
+    $line = "$hash  $($file.Name)"
+    $sb.AppendLine($line) | Out-Null
+    Write-Host "   $($file.Name): $hash" -ForegroundColor Gray
+    
+    # Store standard checksum for manifest updates
+    if ($file.Name -like "*Standard*") {
+        $checksums["Standard"] = $hash
+    }
 }
-$checksums | Set-Content "$DistPath\checksums.txt" -Encoding UTF8
+[System.IO.File]::WriteAllText($checksumFile, $sb.ToString())
+
+# 5. Update Distribution Manifests (Chocolatey/Winget)
+Write-Host "`n📝 Updating distribution manifests..." -ForegroundColor Cyan
+
+# Update Chocolatey NuSpec
+$nuspecPath = Join-Path $Root "build\chocolatey\Win-Debloat7.nuspec"
+if (Test-Path $nuspecPath) {
+    (Get-Content $nuspecPath) -replace "<version>.*</version>", "<version>$Version</version>" | Set-Content $nuspecPath
+    Write-Host "   Updated NuSpec version to $Version" -ForegroundColor Gray
+}
+
+# Update Chocolatey Install Script
+$chocoInstallPath = Join-Path $Root "build\chocolatey\tools\chocolateyinstall.ps1"
+if (Test-Path $chocoInstallPath) {
+    $content = Get-Content $chocoInstallPath
+    $content = $content -replace "\`$version\s*=\s*'.*'", "`$version     = '$Version'"
+    if ($checksums["Standard"]) {
+        $content = $content -replace "\`$checksum\s*=\s*`".*`"", "`$checksum    = `"$($checksums["Standard"])`""
+    }
+    Set-Content -Path $chocoInstallPath -Value $content
+    Write-Host "   Updated Chocolatey install script" -ForegroundColor Gray
+}
+
+# Update Winget Manifest
+$wingetPath = Join-Path $Root "build\winget\Win-Debloat7.yaml"
+if (Test-Path $wingetPath) {
+    $content = Get-Content $wingetPath
+    $content = $content -replace "PackageVersion: .*", "PackageVersion: $Version"
+    $content = $content -replace "InstallerUrl: .*", "InstallerUrl: https://github.com/tomytate/Win-Debloat7/releases/download/v$Version/Win-Debloat7-v$Version-Standard.zip"
+    if ($checksums["Standard"]) {
+        $content = $content -replace "InstallerSha256: .*", "InstallerSha256: $($checksums["Standard"])"
+    }
+    Set-Content -Path $wingetPath -Value $content
+    Write-Host "   Updated Winget manifest" -ForegroundColor Gray
+}
 
 # ═══════════════════════════════════════════════════════════════
 # CREATE RELEASE NOTES

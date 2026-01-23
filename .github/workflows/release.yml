@@ -1,46 +1,37 @@
-name: Build Release
+name: Release
 
 on:
   push:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
+    name: Build & Release
     runs-on: windows-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      - name: Setup PowerShell 7.5
-        uses: powershell/setup-powershell@v1
-        with:
-          pwsh-version: '7.5.x'
-      
-      - name: Extract version
-        id: version
+
+      - name: Build Dual Release
         shell: pwsh
         run: |
-          $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
-          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
-      
-      - name: Build dual releases
-        shell: pwsh
-        run: |
-          .\build\Build-DualRelease.ps1 -Version "${{ steps.version.outputs.VERSION }}"
-      
-      - name: Create GitHub Release
+          $tag = "${{ github.ref_name }}"
+          $version = $tag.TrimStart('v')
+          ./build/Build-DualRelease.ps1 -Version $version -OutputDir dist
+
+      - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             dist/*.zip
-            dist/checksums.txt
+            dist/SHA256SUMS.txt
             dist/RELEASE_NOTES.md
           body_path: dist/RELEASE_NOTES.md
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

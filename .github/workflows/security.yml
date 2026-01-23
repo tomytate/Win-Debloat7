@@ -1,0 +1,25 @@
+name: Security
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run PScriptAnalyzer Security Rules
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module PScriptAnalyzer -ErrorAction Stop
+          $rules = @('PSAvoidUsingPlainTextForPassword', 'PSAvoidUsingConvertToSecureStringWithPlainText')
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse -IncludeRule $rules
+          if ($results) {
+              $results | Format-Table
+              exit 1
+          }

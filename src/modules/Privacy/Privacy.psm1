@@ -147,18 +147,30 @@ function Set-WinDebloat7Privacy {
     }
     
     # 5. Copilot & Recall (25H2 Readiness)
+    # 5. Copilot & Recall (25H2 Readiness)
     if ($Config.privacy.disable_copilot) {
         $currentStep++
-        Write-Progress -Activity "Applying Privacy Settings" -Status "Disabling Windows Copilot" -PercentComplete (($currentStep / $totalSteps) * 100)
-        Write-Log -Message "Disabling Windows Copilot" -Level Info
+        Write-Progress -Activity "Applying Privacy Settings" -Status "Disabling Windows Copilot (HKCU + HKLM)" -PercentComplete (($currentStep / $totalSteps) * 100)
+        Write-Log -Message "Disabling Windows Copilot (HKCU + HKLM)" -Level Info
         
-        $results = @(
-            (Set-RegistryKey -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -Value 1),
-            (Set-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -Value 1)
+        $copilotKeys = @(
+            "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot"
         )
         
-        $successCount += ($results | Where-Object { $_ }).Count
-        $failCount += ($results | Where-Object { -not $_ }).Count
+        foreach ($key in $copilotKeys) {
+            # Ensure key exists
+            if (-not (Test-Path $key)) {
+                New-Item -Path $key -Force -ErrorAction SilentlyContinue | Out-Null
+            }
+            if (Set-RegistryKey -Path $key -Name "TurnOffWindowsCopilot" -Value 1) {
+                $successCount++
+            }
+            else {
+                $failCount++
+                Write-Log -Message "Failed to disable Copilot in $key" -Level Warning
+            }
+        }
     }
     
     if ($Config.privacy.disable_recall) {

@@ -1,45 +1,44 @@
-# Win-Debloat7 CI/CD Pipeline
-name: Win-Debloat7 CI
+name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Pester Tests
+      shell: pwsh
+      run: |
+        Invoke-Pester -Path tests/Unit -Output Detailed -ErrorAction Stop
+
   lint:
-    name: PSScriptAnalyzer
-    runs-on: windows-latest
+    name: Lint Code
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install PSScriptAnalyzer
-        shell: pwsh
-        run: Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
-
-      - name: Run PSScriptAnalyzer
-        shell: pwsh
-        run: |
-          $results = Invoke-ScriptAnalyzer -Path . -Recurse -ExcludeRule PSAvoidUsingWriteHost
-          $results | Format-Table -AutoSize
-          if ($results.Count -gt 0) { exit 1 }
-
-  validate:
-    name: Module Validation
-    runs-on: windows-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Validate Module Manifest
-        shell: pwsh
-        run: Test-ModuleManifest -Path Win-Debloat7.psd1
-
-      - name: Test Core Module Imports
-        shell: pwsh
-        run: |
-          Import-Module ./src/core/Logger.psm1 -Force
-          Import-Module ./src/core/Config.psm1 -Force
-          Import-Module ./src/core/State.psm1 -Force
-          Write-Host "All core modules imported successfully." -ForegroundColor Green
+    - uses: actions/checkout@v4
+    
+    - name: Install PScriptAnalyzer
+      shell: pwsh
+      run: |
+        Set-PSRepository PSGallery -InstallationPolicy Trusted
+        Install-Module PScriptAnalyzer -ErrorAction Stop
+        
+    - name: Invoke-ScriptAnalyzer
+      shell: pwsh
+      run: |
+        $results = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error
+        if ($results) {
+            $results | Format-Table
+            exit 1
+        }

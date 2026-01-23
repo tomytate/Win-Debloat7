@@ -1,0 +1,35 @@
+# Win-Debloat7 "Conservative" Profile
+# Best for: Work PCs, Enterprise environments, or cautious users.
+# Safety: Maximum. No app removal, minimal privacy tweaks.
+
+metadata:
+  name: "Conservative"
+  author: "Tomy Tolledo"
+  description: "Minimal changes for maximum stability."
+  version: "1.0.0"
+
+bloatware:
+  removal_mode: "Custom"
+  remove_list:
+    - "Microsoft.BingWeather"
+    - "Microsoft.GetHelp"
+    - "Microsoft.Getstarted"
+  exclude_list:
+    - "Microsoft.WindowsStore"
+    - "Microsoft.WindowsCalculator"
+
+privacy:
+  telemetry_level: "Basic"
+  disable_copilot: false
+  disable_recall: false
+  disable_advertising_id: true
+  block_telemetry_domains: false
+
+performance:
+  power_plan: "Balanced"
+  disable_background_apps: false
+  gaming_mode: false
+
+software:
+  package_manager: "Winget"
+  install_list: []

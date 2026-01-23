@@ -1,23 +1,29 @@
-# When extracted the debloat-softwares but not wiped
+# Build Artifacts
+dist/
+*.zip
+*.7z
+*.exe
+*.msi
 
-# Temporary folder for downloaded stuff
-!**/tmp/**/*.txt
-**/tmp/**/*.appx*
-**/tmp/**/*.cer
-**/tmp/**/*.exe
-**/tmp/**/*.ttf
-**/tmp/**/*.xml
-**/tmp/fonts/*
-**/tmp/winget-install/*
-
-# Downloaded temporary files
+# Temporary & Cache
+**/tmp/
 *.tmp
+*.log
+Benchmark_Report.md
+*.prof*
 
-# Ignore WSL2 moved files
-*.Identifier
+# Editors
+.vscode/
+.idea/
 
-# Ignore installers, WSL2 update in this case
-*.msi*
+# PowerShell
+*.ps1xml
+*.psd1~
+*.psm1~
+*.ps1~
+Modules/
 
-# GIMP project files
-*.xcf
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store

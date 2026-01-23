@@ -303,7 +303,10 @@ function Get-WinDebloat7NetworkStatus {
             DNSProvider = $provider
             IPv6Enabled = $ipv6Enabled
         }
+        
+        Write-Log -Message "Adapter '$($adapter.Name)': DNS provider detected as $provider ($($dnsServers -join ', '))" -Level Debug
     }
+
     
     return $results
 }

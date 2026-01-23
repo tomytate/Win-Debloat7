@@ -110,9 +110,13 @@ function Show-WinDebloat7GUI {
                 default { "Build $build" }
             }
             
-            $osName = if ($build -ge 22000) { "Windows 11" } else { "Windows 10" }
+            # 3.2 Hardware Recommendation
+            $recProfile = Get-WinDebloat7RecommendedProfile
             
-            (& $getCtrl "txtOSName").Text = $osName
+            # We'll append this to the OS Name for visibility or use a dedicated label if available.
+            # Since we can't edit XAML easily, we'll append to txtOSName or similar:
+            $osName = if ($build -ge 22000) { "Windows 11" } else { "Windows 10" }
+            (& $getCtrl "txtOSName").Text = "$osName (Rec: $recProfile)"
             (& $getCtrl "txtOSVersion").Text = "$verName (Build $build)"
             
             # RAM
@@ -137,36 +141,12 @@ function Show-WinDebloat7GUI {
             # Privacy score calculation
             $privacyScore = 100
             
-            # Check telemetry
-            $telemetryEnabled = $true
-            try {
-                $telemetryValue = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -ErrorAction SilentlyContinue
-                if ($telemetryValue -eq 0) { $telemetryEnabled = $false }
-            }
-            catch { }
+            # Retrieve robust system state
+            $sysState = Get-WinDebloat7SystemState
             
-            # Check Copilot
-            $copilotEnabled = $true
-            # Check Copilot (Check both User and Machine policies)
-            $copilotEnabled = $true
-            try {
-                $cpUser = Get-ItemPropertyValue -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -ErrorAction SilentlyContinue
-                $cpMachine = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -ErrorAction SilentlyContinue
-                
-                # If either policy is set to 1 (Disabled), then it's disabled
-                if (($cpUser -eq 1) -or ($cpMachine -eq 1)) { 
-                    $copilotEnabled = $false 
-                }
-            }
-            catch { }
-            
-            # Check Recall
-            $recallEnabled = $true
-            try {
-                $recallValue = Get-ItemPropertyValue -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsAI" -Name "DisableAIDataAnalysis" -ErrorAction SilentlyContinue
-                if ($recallValue -eq 1) { $recallEnabled = $false }
-            }
-            catch { }
+            $telemetryEnabled = $sysState.Telemetry
+            $copilotEnabled = $sysState.Copilot
+            $recallEnabled = $sysState.Recall
 
             # Calculate Health Score & status
             if (-not $telemetryEnabled) { $privacyScore += 0 } else { $privacyScore -= 25 }
@@ -222,12 +202,46 @@ function Show-WinDebloat7GUI {
             [System.Windows.Threading.Dispatcher]::PushFrame($frame)
         }
         
+        # 3.1 Real-time Monitoring Timer
+        $timer = [System.Windows.Threading.DispatcherTimer]::new()
+        $timer.Interval = [TimeSpan]::FromSeconds(5)
+        $timer.Add_Tick({
+                try {
+                    # Update Connections & Privacy Score (Background Check)
+                    $sysState = Get-WinDebloat7SystemState
+                
+                    # Update RAM & Connections (e.g. "16 | 12 Conn")
+                    $ram = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
+                    (& $getCtrl "txtRAM").Text = "$ram ($($sysState.ActiveConnections) Conn)"
+                
+                    # Re-calculate score/status
+                    $tEnabled = $sysState.Telemetry
+                    $cEnabled = $sysState.Copilot
+                    $rEnabled = $sysState.Recall
+                
+                    (& $getCtrl "txtTelemetryStatus").Text = if ($tEnabled) { "Enabled" } else { "Disabled" }
+                    (& $getCtrl "indicatorTelemetry").Fill = if ($tEnabled) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
+                    
+                    (& $getCtrl "txtCopilotStatus").Text = if ($cEnabled) { "Enabled" } else { "Disabled" }
+                    (& $getCtrl "indicatorCopilot").Fill = if ($cEnabled) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
+                    
+                    (& $getCtrl "txtRecallStatus").Text = if ($rEnabled) { "Enabled" } else { "Disabled" }
+                    (& $getCtrl "indicatorRecall").Fill = if ($rEnabled) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
+                }
+                catch { }
+            })
+        $timer.Start()
+        
+        # Stop timer on close
+        $window.Add_Closed({ $timer.Stop() })
+        
         # ═══════════════════════════════════════════════════════════════════════════════
         # DASHBOARD BUTTONS
         # ═══════════════════════════════════════════════════════════════════════════════
         (& $getCtrl "btnQuickOptimize").Add_Click({
                 $txtStatus.Text = "Creating Safety Snapshot..."
                 & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     # 1. Safety Snapshot
                     New-WinDebloat7Snapshot -Name "Auto-QuickOptimize" -Description "Created before Quick Optimize"
@@ -248,11 +262,15 @@ function Show-WinDebloat7GUI {
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
                 }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
+                }
             })
         
         (& $getCtrl "btnRemoveBloatware").Add_Click({
                 $txtStatus.Text = "Removing Bloatware..."
                 & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     $config = [pscustomobject]@{ bloatware = @{ removal_mode = "Moderate" } }
                     Remove-WinDebloat7Bloatware -Config $config -Confirm:$false
@@ -260,6 +278,9 @@ function Show-WinDebloat7GUI {
                 }
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
+                }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
         
@@ -273,6 +294,7 @@ function Show-WinDebloat7GUI {
         (& $getCtrl "btnApplyTweaks").Add_Click({
                 $txtStatus.Text = "Applying Tweaks..."
                 & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     $config = [pscustomobject]@{
                         privacy     = [pscustomobject]@{
@@ -295,6 +317,9 @@ function Show-WinDebloat7GUI {
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
                 }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
+                }
             })
         
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -303,6 +328,7 @@ function Show-WinDebloat7GUI {
         (& $getCtrl "btnBlockTelemetry").Add_Click({
                 $txtStatus.Text = "Blocking Telemetry..."
                 & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     Add-WinDebloat7HostsBlock -Confirm:$false
                     $txtStatus.Text = "Telemetry Blocked!"
@@ -310,11 +336,15 @@ function Show-WinDebloat7GUI {
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
                 }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
+                }
             })
         
         (& $getCtrl "btnDisableTasks").Add_Click({
                 $txtStatus.Text = "Disabling Tasks (Safe)..."
                 & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     Disable-WinDebloat7TelemetryTasks -Mode Safe -Confirm:$false
                     $txtStatus.Text = "Safe Tasks Disabled!"
@@ -322,17 +352,24 @@ function Show-WinDebloat7GUI {
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
                 }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
+                }
             })
         
         (& $getCtrl "btnAggressiveTasks").Add_Click({
                 $txtStatus.Text = "Disabling Tasks (Aggressive)..."
                 & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     Disable-WinDebloat7TelemetryTasks -Mode Aggressive -Confirm:$false
                     $txtStatus.Text = "Aggressive Tasks Disabled!"
                 }
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
+                }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
         
@@ -380,12 +417,16 @@ function Show-WinDebloat7GUI {
             
                 $txtStatus.Text = "Installing $($selectedApps.Count) apps..."
                 & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     Install-WinDebloat7Software -Packages $selectedApps.ToArray() -Quiet
                     $txtStatus.Text = "Installation Complete!"
                 }
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
+                }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
         
@@ -406,6 +447,7 @@ function Show-WinDebloat7GUI {
             
                 $txtStatus.Text = "Applying DNS: $provider..."
                 & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     Set-WinDebloat7DNS -Provider $provider
                 
@@ -418,6 +460,9 @@ function Show-WinDebloat7GUI {
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
                 }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
+                }
             })
         
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -426,6 +471,7 @@ function Show-WinDebloat7GUI {
         (& $getCtrl "btnCreateSnapshot").Add_Click({
                 $txtStatus.Text = "Creating Snapshot..."
                 & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     New-WinDebloat7Snapshot -Name "GUI-Snapshot" -Description "Created via GUI"
                     $txtStatus.Text = "Snapshot Created!"
@@ -440,6 +486,9 @@ function Show-WinDebloat7GUI {
                 }
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
+                }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
         
