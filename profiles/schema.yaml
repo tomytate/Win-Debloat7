@@ -1,0 +1,38 @@
+# Win-Debloat7 Profile Schema
+# Defines the structure and valid values for configuration profiles
+
+metadata:
+  name: string
+  version: string
+  author: string
+  description: string
+  target_os: [ "Windows 10", "Windows 11" ]
+  min_build: integer
+
+bloatware:
+  removal_mode: [ "Conservative", "Moderate", "Aggressive", "Custom" ]
+  custom_list: list<string>
+  exclude_list: list<string>
+
+privacy:
+  telemetry_level: [ "Security", "Basic", "Full" ]
+  disable_advertising_id: boolean
+  disable_activity_history: boolean
+  disable_location_tracking: boolean
+  disable_copilot: boolean
+  disable_recall: boolean
+
+performance:
+  power_plan: [ "Balanced", "HighPerformance", "Ultimate" ]
+  visual_effects: [ "Appearance", "Performance", "Custom" ]
+  disable_game_bar: boolean
+  disable_background_apps: boolean
+
+network:
+  dns_servers: list<string>
+  disable_ipv6: boolean
+
+software:
+  package_manager: [ "Winget", "Chocolatey" ]
+  install_list: list<string>
+  uninstall_list: list<string>

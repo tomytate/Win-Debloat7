@@ -1,0 +1,76 @@
+# Win-Debloat7 Custom Bloatware List
+# Add your own apps here if using "Custom" removal mode in a profile
+
+# This file is an example - copy it and reference in your profile like:
+# bloatware:
+#   removal_mode: "Custom"
+#   custom_list:
+#     - "Microsoft.3DBuilder"
+#     - "Microsoft.BingWeather"
+#     # ...add your apps here
+
+# ============================================
+# EXAMPLE BLOATWARE LIST (Moderate Preset)
+# ============================================
+
+apps:
+  # Microsoft Core Bloat
+  - "Microsoft.3DBuilder"
+  - "Microsoft.BingFinance"
+  - "Microsoft.BingNews"
+  - "Microsoft.BingSports"
+  - "Microsoft.BingWeather"
+  - "Microsoft.GetHelp"
+  - "Microsoft.Getstarted"
+  - "Microsoft.Microsoft3DViewer"
+  - "Microsoft.MicrosoftOfficeHub"
+  - "Microsoft.MicrosoftSolitaireCollection"
+  - "Microsoft.MixedReality.Portal"
+  - "Microsoft.OneConnect"
+  - "Microsoft.People"
+  - "Microsoft.PowerAutomateDesktop"
+  - "Microsoft.Print3D"
+  - "Microsoft.SkypeApp"
+  - "Microsoft.Todos"
+  - "Microsoft.WindowsAlarms"
+  - "Microsoft.WindowsFeedbackHub"
+  - "Microsoft.WindowsMaps"
+  - "Microsoft.WindowsSoundRecorder"
+  - "Microsoft.XboxApp"
+  - "Microsoft.YourPhone"
+  - "Microsoft.ZuneMusic"
+  - "Microsoft.ZuneVideo"
+  
+  # 25H2 / Newer Bloat
+  - "Microsoft.Copilot"
+  - "MicrosoftWindows.Client.CoPilot"
+  - "MicrosoftWindows.Client.WebExperience"
+  - "Microsoft.OutlookForWindows"
+  - "Microsoft.Windows.DevHome"
+  - "Clipchamp.Clipchamp"
+  
+  # Third Party Preinstalls
+  - "Disney"
+  - "SpotifyAB.SpotifyMusic"
+  - "PandoraMedia"
+  - "AmazonVideo.PrimeVideo"
+  - "Netflix"
+  - "Facebook"
+  - "Instagram"
+  - "Twitter"
+  - "TikTok"
+  - "CandyCrush"
+  - "BubbleWitch"
+  - "FarmVille"
+
+# ============================================
+# APPS TO PRESERVE (Always keep these)
+# ============================================
+
+preserve:
+  - "Microsoft.WindowsStore"         # Required for app updates
+  - "Microsoft.WindowsTerminal"      # Useful terminal
+  - "Microsoft.WindowsCalculator"    # Basic utility
+  - "Microsoft.Photos"               # Photo viewer
+  - "Microsoft.MSPaint"              # Paint
+  - "Microsoft.Notepad"              # Notepad

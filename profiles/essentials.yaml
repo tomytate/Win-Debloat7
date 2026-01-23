@@ -1,0 +1,69 @@
+# Win-Debloat7 Essentials Profile
+# One-click installation of recommended apps after debloating
+
+metadata:
+  name: "Essentials"
+  version: "1.0.0"
+  author: "Win-Debloat7 Team"
+  description: "Post-debloat essentials installer. Installs recommended browsers, runtimes, utilities, and drivers."
+  target_os: [ "Windows 10", "Windows 11" ]
+  min_build: 19045
+
+# No bloatware removal - this profile is for installation only
+bloatware:
+  removal_mode: "None"
+
+# Minimal privacy changes
+privacy:
+  telemetry_level: "Basic"
+  disable_advertising_id: true
+
+# Default performance
+performance:
+  power_plan: "Balanced"
+
+# Software installation via Winget
+software:
+  package_manager: "Winget"
+  
+  # Core Essentials - Install These First
+  install_list:
+    # Runtimes (Required by many apps)
+    - "Microsoft.DotNet.DesktopRuntime.8"
+    - "Microsoft.VCRedist.2015+.x64"
+    - "Microsoft.VCRedist.2015+.x86"
+    
+    # Browser
+    - "Mozilla.Firefox"
+    
+    # Archive Utility
+    - "7zip.7zip"
+    
+    # File Search
+    - "voidtools.Everything"
+    
+    # Terminal
+    - "Microsoft.WindowsTerminal"
+    
+    # PowerShell 7
+    - "Microsoft.PowerShell"
+    
+    # Media Player
+    - "VideoLAN.VLC"
+    
+    # Screenshot Tool
+    - "ShareX.ShareX"
+    
+    # Password Manager
+    - "Bitwarden.Bitwarden"
+    
+    # PDF Reader
+    - "SumatraPDF.SumatraPDF"
+    
+    # Text Editor
+    - "Notepad++.Notepad++"
+
+# Network configuration (for DNS privacy)
+network:
+  dns_servers: [ "1.1.1.1", "1.0.0.1" ]
+  disable_ipv6: false

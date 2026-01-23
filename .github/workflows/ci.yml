@@ -1,0 +1,45 @@
+# Win-Debloat7 CI/CD Pipeline
+name: Win-Debloat7 CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: PSScriptAnalyzer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse -ExcludeRule PSAvoidUsingWriteHost
+          $results | Format-Table -AutoSize
+          if ($results.Count -gt 0) { exit 1 }
+
+  validate:
+    name: Module Validation
+    runs-on: windows-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Module Manifest
+        shell: pwsh
+        run: Test-ModuleManifest -Path Win-Debloat7.psd1
+
+      - name: Test Core Module Imports
+        shell: pwsh
+        run: |
+          Import-Module ./src/core/Logger.psm1 -Force
+          Import-Module ./src/core/Config.psm1 -Force
+          Import-Module ./src/core/State.psm1 -Force
+          Write-Host "All core modules imported successfully." -ForegroundColor Green

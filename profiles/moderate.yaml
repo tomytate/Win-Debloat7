@@ -1,0 +1,41 @@
+metadata:
+  name: "Moderate"
+  version: "1.0.0"
+  author: "Win-Debloat7 Team"
+  description: "Recommended balance of performance and functionality. Removes obvious bloat but keeps useful apps."
+  target_os: [ "Windows 10", "Windows 11" ]
+  min_build: 19045
+
+bloatware:
+  removal_mode: "Moderate"
+  # Apps to explicitly PRESERVE even if removal_mode is Aggressive
+  exclude_list:
+    - "Microsoft.WindowsCalculator"
+    - "Microsoft.WindowsStore"
+    - "Microsoft.WindowsTerminal"
+    - "Microsoft.XboxApp"
+
+privacy:
+  telemetry_level: "Basic"
+  disable_advertising_id: true
+  disable_activity_history: true
+  disable_location_tracking: false
+  disable_copilot: true
+  disable_recall: true
+
+performance:
+  power_plan: "Balanced"
+  visual_effects: "Appearance"
+  disable_game_bar: false
+  disable_background_apps: true
+
+network:
+  dns_servers: [ "1.1.1.1", "8.8.8.8" ]
+  disable_ipv6: false
+
+software:
+  package_manager: "Winget"
+  install_list:
+    - "Microsoft.PowerShell"
+    - "Microsoft.VisualStudioCode"
+    - "7zip.7zip"

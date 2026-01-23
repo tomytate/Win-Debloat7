@@ -1,0 +1,73 @@
+name: Bug Report
+description: Report a bug in Win-Debloat7
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Before You Submit
+        - Ensure you are running **PowerShell 7.5+**.
+        - Verify the bug exists in the latest version (v1.1.0).
+
+  - type: dropdown
+    id: interface
+    attributes:
+      label: Interface
+      options:
+        - CLI (Interactive Menu)
+        - GUI (Premium Dashboard)
+        - Profile (Unattended)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this?
+      placeholder: |
+        1. Run `./Win-Debloat7.ps1`
+        2. Select "Launch Premium GUI"
+        3. Click "Quick Optimize"
+        4. Describe crash/error
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Windows 11 24H2
+        - Windows 11 23H2
+        - Windows 10 22H2
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: ps_version
+    attributes:
+      label: PowerShell Version
+      description: Run `$PSVersionTable.PSVersion` and paste the result.
+      placeholder: "7.5.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log Output
+      description: |
+        Please verify if there are logs in `$env:ProgramData\Win-Debloat7\Logs` and paste relevant lines here.
+        Alternatively, paste the error message from the GUI status bar.
+    validations:
+      required: false

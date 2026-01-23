@@ -1,0 +1,34 @@
+metadata:
+  name: "Gaming"
+  version: "1.0.0"
+  author: "Win-Debloat7 Team"
+  description: "Maximum performance for gamers. Aggressive bloatware removal with gaming-friendly settings."
+  target_os: [ "Windows 10", "Windows 11" ]
+  min_build: 19045
+
+bloatware:
+  removal_mode: "Aggressive"
+  # Apps to explicitly PRESERVE even in Aggressive mode
+  exclude_list:
+    - "Microsoft.WindowsStore"
+    - "Microsoft.WindowsTerminal"
+    - "Microsoft.XboxGamingOverlay"    # Keep for Game Bar if desired
+    - "Microsoft.XboxIdentityProvider" # Required for Xbox Live
+
+privacy:
+  telemetry_level: "Security"
+  disable_advertising_id: true
+  disable_activity_history: true
+  disable_location_tracking: true
+  disable_copilot: true
+  disable_recall: true
+
+performance:
+  power_plan: "Ultimate"
+  visual_effects: "Performance"
+  disable_game_bar: false             # Keep Game Bar for recording
+  disable_background_apps: true
+
+network:
+  dns_servers: [ "1.1.1.1", "1.0.0.1" ]
+  disable_ipv6: false

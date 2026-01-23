@@ -1,0 +1,23 @@
+# When extracted the debloat-softwares but not wiped
+
+# Temporary folder for downloaded stuff
+!**/tmp/**/*.txt
+**/tmp/**/*.appx*
+**/tmp/**/*.cer
+**/tmp/**/*.exe
+**/tmp/**/*.ttf
+**/tmp/**/*.xml
+**/tmp/fonts/*
+**/tmp/winget-install/*
+
+# Downloaded temporary files
+*.tmp
+
+# Ignore WSL2 moved files
+*.Identifier
+
+# Ignore installers, WSL2 update in this case
+*.msi*
+
+# GIMP project files
+*.xcf
