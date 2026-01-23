@@ -27,6 +27,13 @@ Import-Module "$PSScriptRoot\..\modules\Network\Network.psm1" -Force
 Import-Module "$PSScriptRoot\..\modules\Privacy\Tasks.psm1" -Force
 Import-Module "$PSScriptRoot\..\modules\Privacy\Hosts.psm1" -Force
 
+# Extras module (only present in Extras edition)
+$extrasModule = "$PSScriptRoot\..\modules\Extras\Extras.psm1"
+$extrasAvailable = Test-Path $extrasModule
+if ($extrasAvailable) {
+    Import-Module $extrasModule -Force -ErrorAction SilentlyContinue
+}
+
 function Show-MainMenu {
     while ($true) {
         Show-WD7Header
@@ -40,6 +47,15 @@ function Show-MainMenu {
         Write-WD7Host "  [6] Network & Privacy Settings" -Color White
         Write-WD7Host "  [7] System Info" -Color White
         Write-WD7Host "  [8] Snapshots / Restore" -Color White
+        
+        # Show Extras options only if module is available
+        if ($extrasAvailable) {
+            Write-WD7Host ""
+            Write-WD7Host "  ═══ ADVANCED (USE AT OWN RISK) ═══" -Color Warning
+            Write-WD7Host "  [9] Defender Remover ⚠️" -Color Warning
+            Write-WD7Host "  [0] Windows Activation ⚠️" -Color Warning
+        }
+        
         Write-WD7Host "  [Q] Quit" -Color Dark
         
         $choice = Read-Host "`nEnter selection"
@@ -62,6 +78,26 @@ function Show-MainMenu {
             "6" { Show-NetworkPrivacyMenu }
             "7" { Show-SystemInfo }
             "8" { Show-SnapshotMenu }
+            "9" { 
+                if ($extrasAvailable) {
+                    Invoke-WinDebloat7DefenderRemover
+                    Read-Host "`nPress Enter to continue..."
+                }
+                else {
+                    Write-WD7Host "Extras module not installed. Download Extras edition for this feature." -Color Warning
+                    Start-Sleep -Seconds 2
+                }
+            }
+            "0" { 
+                if ($extrasAvailable) {
+                    Invoke-WinDebloat7Activation
+                    Read-Host "`nPress Enter to continue..."
+                }
+                else {
+                    Write-WD7Host "Extras module not installed. Download Extras edition for this feature." -Color Warning
+                    Start-Sleep -Seconds 2
+                }
+            }
             "Q" { exit }
             "q" { exit }
             default { Write-WD7Host "Invalid selection." -Color Warning; Start-Sleep -Seconds 1 }

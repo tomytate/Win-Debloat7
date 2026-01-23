@@ -133,6 +133,31 @@ function Import-WinDebloat7Config {
             }
         }
         
+        # 5. Check for common typos (camelCase vs snake_case)
+        $typoMap = @{
+            'telemetry-level'       = 'telemetry_level'
+            'telemetryLevel'        = 'telemetry_level'
+            'powerPlan'             = 'power_plan'
+            'power-plan'            = 'power_plan'
+            'disableBackgroundApps' = 'disable_background_apps'
+            'removalMode'           = 'removal_mode'
+            'removal-mode'          = 'removal_mode'
+            'excludeList'           = 'exclude_list'
+            'customList'            = 'custom_list'
+            'disableCopilot'        = 'disable_copilot'
+            'disableRecall'         = 'disable_recall'
+        }
+        
+        foreach ($section in $Config.PSObject.Properties) {
+            if ($null -ne $section.Value -and $section.Value -is [PSCustomObject]) {
+                foreach ($prop in $section.Value.PSObject.Properties) {
+                    if ($typoMap.ContainsKey($prop.Name)) {
+                        Write-Log -Message "Config typo: '$($prop.Name)' should be '$($typoMap[$prop.Name])' in [$($section.Name)]" -Level Warning
+                    }
+                }
+            }
+        }
+        
         # Report validation errors
         if ($validationErrors.Count -gt 0) {
             foreach ($err in $validationErrors) {

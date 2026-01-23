@@ -66,12 +66,39 @@ try {
     
     Import-Module $manifestPath -Force -ErrorAction Stop
     
+    # Validate critical modules loaded
+    $requiredFunctions = @(
+        'Write-Log',
+        'Import-WinDebloat7Config',
+        'Remove-WinDebloat7Bloatware',
+        'Set-WinDebloat7Privacy',
+        'Set-WinDebloat7Performance',
+        'Show-MainMenu'
+    )
+    $missingFunctions = @()
+    
+    foreach ($fn in $requiredFunctions) {
+        if (-not (Get-Command $fn -ErrorAction SilentlyContinue)) {
+            $missingFunctions += $fn
+        }
+    }
+    
+    if ($missingFunctions.Count -gt 0) {
+        throw "Missing required functions: $($missingFunctions -join ', '). Try re-extracting the ZIP or check module files."
+    }
+    
     Start-WD7Logging
     Write-Log -Message "Win-Debloat7 initialized successfully." -Level Success
 }
 catch {
     Write-Host "CRITICAL ERROR: Failed to load framework." -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Troubleshooting:" -ForegroundColor Yellow
+    Write-Host "  1. Ensure you extracted ALL files from the ZIP" -ForegroundColor Gray
+    Write-Host "  2. Run from the Win-Debloat7 directory" -ForegroundColor Gray
+    Write-Host "  3. Verify PowerShell 7.5+ is installed" -ForegroundColor Gray
+    Write-Host "  4. Run: Get-Module -ListAvailable | Where Name -like '*yaml*'" -ForegroundColor Gray
     exit 1
 }
 
@@ -119,8 +146,25 @@ if ($ProfileFile) {
     exit 0
 }
 else {
-    # Interactive Mode (TUI Menu by default)
-    # User can press 2 to launch Premium GUI
-    Show-MainMenu
+    # Interactive Mode
+    if ($NoGui) {
+        # Force TUI mode
+        Show-MainMenu
+    }
+    elseif ($env:WT_SESSION -or $Host.UI.SupportsVirtualTerminal) {
+        # Windows Terminal or modern console detected - offer GUI option
+        try {
+            # Try to launch GUI, fall back to TUI on failure
+            Show-WinDebloat7GUI
+        }
+        catch {
+            Write-Log -Message "GUI failed to load, falling back to TUI: $($_.Exception.Message)" -Level Warning
+            Show-MainMenu
+        }
+    }
+    else {
+        # Legacy console or explicit TUI request
+        Show-MainMenu
+    }
 }
 
