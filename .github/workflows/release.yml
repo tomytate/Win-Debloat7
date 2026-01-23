@@ -18,6 +18,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install PowerShell 7.5
+        uses: powershell/setup-powershell@v1
+        with:
+          powershell-version: '7.5.0-preview.3'
+          prerelease: true
+
       - name: Build Dual Release
         shell: pwsh
         run: |
