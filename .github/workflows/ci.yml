@@ -17,11 +17,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install PowerShell 7.5
+    - name: Install PowerShell 7.5.4
       uses: powershell/setup-powershell@v1
       with:
-        powershell-version: '7.5.0-preview.3' # Pinning to ensuring 7.5 availability
-        prerelease: true
+        powershell-version: '7.5.4'
 
     - name: Run Pester Tests
       shell: pwsh
