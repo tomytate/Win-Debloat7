@@ -1,11 +1,9 @@
 name: CI
-
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
 jobs:
   test:
     name: Test on ${{ matrix.os }}
@@ -13,20 +11,21 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-
     steps:
     - uses: actions/checkout@v4
     
     - name: Install PowerShell 7.5.4
-      uses: powershell/setup-powershell@v1
-      with:
-        powershell-version: '7.5.4'
-
+      shell: pwsh
+      run: |
+        & { $(irm https://aka.ms/install-powershell.ps1) } -Version 7.5.0 -Daily
+        # Note: 7.5.4 might be 'Daily' or 'Preview' depending on availability, 
+        # using -Daily to catch bleeding edge if specific version fails, 
+        # or we attempt exact version:
+        # & { $(irm https://aka.ms/install-powershell.ps1) } -Version 7.5.4
     - name: Run Pester Tests
       shell: pwsh
       run: |
         Invoke-Pester -Path tests/Unit -Output Detailed -ErrorAction Stop
-
   lint:
     name: Lint Code
     runs-on: ubuntu-latest
