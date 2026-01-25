@@ -232,7 +232,7 @@ Download Standard here: https://github.com/tomytate/Win-Debloat7/releases
 $ExtrasReadme | Set-Content "$ExtrasPath\README-EXTRAS.md" -Encoding UTF8
 
 if ($exePath -and (Test-Path $exePath)) {
-    Copy-Item -Path $exePath -Destination "$ExtrasPath\Win-Debloat7.exe" -Force
+    Copy-Item -Path $exePath -Destination "$ExtrasPath\Win-Debloat7-Extras.exe" -Force
 }
 
 
