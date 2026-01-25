@@ -26,12 +26,10 @@ Tags:
 ReleaseDate: 2026-01-24
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/tomytate/Win-Debloat7/releases/download/v1.2.0/Win-Debloat7-v1.2.0-Standard.zip
-    InstallerSha256: 2A0E1772486FAC4CB7C4B2D9916BA0E91DDDBF0013AEC9088586393E0EAC7138
-    InstallerType: zip
-    NestedInstallerType: portable
-    NestedInstallerFiles:
-      - RelativeFilePath: Win-Debloat7.ps1
-        PortableCommandAlias: win-debloat7
+    InstallerUrl: https://github.com/tomytate/Win-Debloat7/releases/download/v1.2.0/Win-Debloat7.exe
+    InstallerSha256: CHANGE_ME_IN_BUILD_SCRIPT
+    InstallerType: portable
+    Commands:
+      - win-debloat7
 ManifestType: singleton
 ManifestVersion: 1.6.0

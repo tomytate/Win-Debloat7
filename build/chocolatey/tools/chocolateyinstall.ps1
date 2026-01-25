@@ -1,30 +1,38 @@
 $packageName = 'win-debloat7'
-$version     = '1.2.0'
-$url = "https://github.com/tomytate/Win-Debloat7/releases/download/v$version/Win-Debloat7-v$version-Standard.zip"
-$installDir = Join-Path $env:ProgramData "Win-Debloat7"
-$checksum    = "2A0E1772486FAC4CB7C4B2D9916BA0E91DDDBF0013AEC9088586393E0EAC7138" # Will be updated by build script
+$version = 'CHANGE_ME'
+$url = "https://github.com/tomytate/Win-Debloat7/releases/download/v$version/Win-Debloat7.exe"
+$checksum = "CHANGE_ME" 
+$toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
+$exePath = Join-Path $toolsDir "Win-Debloat7.exe"
 
 $packageArgs = @{
-    packageName   = $packageName
-    unzipLocation = $installDir
-    url           = $url
-    softwareName  = 'Win-Debloat7'
-    checksum      = $checksum
-    checksumType  = 'sha256'
+    packageName  = $packageName
+    fileType     = 'exe'
+    url          = $url
+    checksum     = $checksum
+    checksumType = 'sha256'
+    destination  = $toolsDir
+    fileName     = "Win-Debloat7.exe"
 }
 
-Install-ChocolateyZipPackage @packageArgs
+Get-ChocolateyWebFile @packageArgs
 
-# Create CLI Shim
-$shimPath = Join-Path $installDir "Win-Debloat7.ps1"
-Install-BinFile -Name "win-debloat7" -Path $shimPath
+# Create Shim (Chocolatey automatically shims executables in the package folder if not ignored, but let's be explicit)
+# Actually, just dropping it in tools/ is enough for automatic shimming if we don't name it .ignore.
+# But we might want a clean alias.
+# Install-BinFile -Name "win-debloat7" -Path $exePath # Not needed if file is in tools and named right?
+# Actually, the file is named Win-Debloat7.exe. Shim will be Win-Debloat7.exe. 
+# We want win-debloat7 (lowercase) alias too?
+Install-BinFile -Name "win-debloat7" -Path $exePath
 
 # Create Start Menu Shortcut
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("CommonPrograms")) "Win-Debloat7.lnk"
-Install-ChocolateyShortcut -ShortcutFilePath $shortcutPath `
-    -TargetPath "pwsh.exe" `
-    -Arguments "-NoProfile -ExecutionPolicy Bypass -File `"$shimPath`"" `
-    -IconLocation "$installDir\assets\icon.ico" `
-    -Description "Launch Win-Debloat7"
+$shortcutDir = Join-Path ([Environment]::GetFolderPath("CommonPrograms")) "Win-Debloat7"
+if (! (Test-Path $shortcutDir)) { New-Item $shortcutDir -ItemType Directory -Force | Out-Null }
+$shortcutPath = Join-Path $shortcutDir "Win-Debloat7.lnk"
 
-Write-Host "Win-Debloat7 installed to $installDir"
+Install-ChocolateyShortcut -ShortcutFilePath $shortcutPath `
+    -TargetPath "$exePath" `
+    -Description "Launch Win-Debloat7" `
+    -WindowStyle Maximize
+
+Write-Host "Win-Debloat7 installed to $toolsDir"
