@@ -131,11 +131,8 @@ choco install win-debloat7
 1. Download **Win-Debloat7-v1.2.0-Standard.zip** from [Releases](https://github.com/tomytate/Win-Debloat7/releases)
 2. Extract the ZIP file
 3. Open **PowerShell 7.5+** as Administrator
-4. Run:
-```powershell
-cd path\to\Win-Debloat7
-.\Win-Debloat7.ps1
-```
+3. Run **Win-Debloat7.exe**
+   *(Or right-click `Win-Debloat7.ps1` -> Run with PowerShell if you prefer)*
 
 ### Requirements
 - **Windows 10** 22H2+ or **Windows 11**

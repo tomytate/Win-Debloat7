@@ -40,6 +40,33 @@ if (Test-Path $OutputDir) {
 }
 New-Item -Path $DistPath -ItemType Directory -Force | Out-Null
 
+# --- COMPILE LAUNCHER EXE ---
+Write-Host "`n🔨 Compiling Launcher EXE..." -ForegroundColor Cyan
+$launcherSrc = "$Root\src\core\Launcher.cs"
+$csc = Join-Path ([Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) "csc.exe"
+$exePath = "$DistPath\Win-Debloat7.exe"
+
+if (-not (Test-Path $csc)) {
+    Write-Warning "C# Compiler (csc.exe) not found. Skipping EXE generation."
+    $exePath = $null
+}
+else {
+    # -target:winexe -> No console window (we handle console inside if needed, or stick to exe for wrapper)
+    # Actually Launcher.cs is designed as a Console app if we used Console. calls.
+    # Let's use /target:exe for Console app so we see output.
+    $args = "/target:exe", "/out:`"$exePath`"", "`"$launcherSrc`""
+    $p = Start-Process -FilePath $csc -ArgumentList $args -PassThru -Wait -NoNewWindow
+    
+    if ($p.ExitCode -eq 0) {
+        Write-Host "   ✅ Win-Debloat7.exe created." -ForegroundColor Green
+    }
+    else {
+        Write-Host "   ❌ Compilation failed." -ForegroundColor Red
+        $exePath = $null
+    }
+}
+
+
 # ═══════════════════════════════════════════════════════════════
 # BUILD 1: STANDARD (CLEAN) RELEASE
 # ═══════════════════════════════════════════════════════════════
@@ -111,6 +138,11 @@ https://github.com/tomytate/Win-Debloat7
 "@
 
 $StandardReadme | Set-Content "$StandardPath\README.md" -Encoding UTF8
+
+if ($exePath -and (Test-Path $exePath)) {
+    Copy-Item -Path $exePath -Destination "$StandardPath\Win-Debloat7.exe" -Force
+}
+
 
 # Create ZIP
 Write-Host "   Creating ZIP archive..." -ForegroundColor Gray
@@ -198,6 +230,11 @@ Download Standard here: https://github.com/tomytate/Win-Debloat7/releases
 "@
 
 $ExtrasReadme | Set-Content "$ExtrasPath\README-EXTRAS.md" -Encoding UTF8
+
+if ($exePath -and (Test-Path $exePath)) {
+    Copy-Item -Path $exePath -Destination "$ExtrasPath\Win-Debloat7.exe" -Force
+}
+
 
 # Create ZIP
 Write-Host "   Creating ZIP archive..." -ForegroundColor Gray
