@@ -12,7 +12,7 @@
 
 ### "Extras ZIP flagged as virus"
 *   **Cause**: The Extras edition contains **Defender Remover** and **MAS**, which are "HackTools".
-*   **Fix**: Pause Real-time protection to extract/run them. **Use the Standard Edition if you do not strictly need these tools.**
+*   **Fix**: Pause Real-time protection to run the tool. **Use the Standard Edition if you do not strictly need these tools.**
 
 ---
 

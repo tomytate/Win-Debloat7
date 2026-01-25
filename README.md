@@ -153,21 +153,17 @@ Win-Debloat7 leverages specific features in the latest PowerShell release:
 
 ## 🚀 Quick Start
 
-### Interactive Mode (GUI)
+### Interactive Mode (GUI) - Recommended
 ```powershell
-.\Win-Debloat7.ps1
+.\Win-Debloat7.exe
 ```
 Select **Option 2** to launch the premium GUI.
 
-### Profile Mode (Recommended)
-```powershell
-# Apply the moderate profile
-.\Win-Debloat7.ps1 -ProfileFile "profiles\moderate.yaml"
-```
+### Profile/Unattended Mode (Advanced)
+For automation (CICD/SCCM), we recommend cloning the repository or downloading the source code, as the Single-File EXE is optimized for interactive use.
 
-### Unattended Mode (Automation)
 ```powershell
-# No prompts, perfect for scripts
+# Using source code:
 .\Win-Debloat7.ps1 -ProfileFile "profiles\gaming.yaml" -Unattended
 ```
 

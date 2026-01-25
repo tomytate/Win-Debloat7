@@ -4,7 +4,7 @@ Win-Debloat7 is modular. You can run the entire suite using a Profile, or use in
 
 ## 🖥️ Graphical User Interface (GUI)
 
-Launch interactive mode with `.\Win-Debloat7.ps1` -> Option 2.
+Launch interactive mode with `.\Win-Debloat7.exe` -> Option 2.
 
 ### Tools Tab
 A command center for quick actions:

@@ -88,4 +88,5 @@ taskbar:
 4.  Run it:
     ```powershell
     .\Win-Debloat7.ps1 -ProfileFile "profiles\my-profile.yaml"
+    (Note: For automation, use the source script instead of the EXE)
     ```
