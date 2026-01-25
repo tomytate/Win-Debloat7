@@ -128,13 +128,11 @@ choco install win-debloat7
 ```
 
 ### Option 3: Standard Download (Recommended)
-1. Download **Win-Debloat7-v1.2.0-Standard.zip** from [Releases](https://github.com/tomytate/Win-Debloat7/releases)
-2. Extract the ZIP file
-3. Open **PowerShell 7.5+** as Administrator
-3. Run the executable:
-   * **Standard:** `Win-Debloat7.exe`
-   * **Extras:** `Win-Debloat7-Extras.exe`
-   *(Or right-click project scripts if you prefer)*
+1. Download the executable:
+   - **Recommended:** [Win-Debloat7.exe](https://github.com/tomytate/Win-Debloat7/releases) (Standard)
+   - **Advanced:** `Win-Debloat7-Extras.exe` (Includes MAS/Defender Remover)
+2. **Run the file directly.** (No installation needed)
+   - *It will automatically setup and launch the dashboard.*
 
 ### Requirements
 - **Windows 10** 22H2+ or **Windows 11**

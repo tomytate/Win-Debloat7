@@ -1,10 +1,13 @@
 param(
     [string]$SourceFile,
-    [string]$OutputFile
+    [string]$OutputFile,
+    [string]$Resource = ""
 )
 
 try {
     Write-Host "Compiling $SourceFile to $OutputFile..." -ForegroundColor Cyan
+    if ($Resource) { Write-Host "   Embedding Resource: $Resource" -ForegroundColor Gray }
+    
     if (-not (Test-Path $SourceFile)) { throw "Source file not found: $SourceFile" }
     
     # Locate CSC.exe (Classic .NET Framework)
@@ -21,7 +24,11 @@ try {
 
     # /target:exe = Console App
     # /nologo = Quiet
-    $args = "/target:exe", "/nologo", "/out:`"$OutputFile`"", "`"$SourceFile`""
+    $args = @("/target:exe", "/nologo", "/out:`"$OutputFile`"", "`"$SourceFile`"")
+    
+    if ($Resource) {
+        $args += "/resource:`"$Resource`""
+    }
     
     $p = Start-Process -FilePath $csc -ArgumentList $args -PassThru -Wait -NoNewWindow
     
