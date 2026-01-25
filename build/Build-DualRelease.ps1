@@ -41,29 +41,20 @@ if (Test-Path $OutputDir) {
 New-Item -Path $DistPath -ItemType Directory -Force | Out-Null
 
 # --- COMPILE LAUNCHER EXE ---
-Write-Host "`n🔨 Compiling Launcher EXE..." -ForegroundColor Cyan
+Write-Host "`n🔨 Compiling Launcher EXE (External Process)..." -ForegroundColor Cyan
 $launcherSrc = "$Root\src\core\Launcher.cs"
-$csc = Join-Path ([Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) "csc.exe"
 $exePath = "$DistPath\Win-Debloat7.exe"
+$compilerScript = "$PSScriptRoot\Compile-Launcher.ps1"
 
-if (-not (Test-Path $csc)) {
-    Write-Warning "C# Compiler (csc.exe) not found. Skipping EXE generation."
-    $exePath = $null
+# Run in separate process to avoid 'Type already exists' errors during repeated builds
+$p = Start-Process pwsh -ArgumentList "-NoProfile", "-File", "`"$compilerScript`"", "-SourceFile", "`"$launcherSrc`"", "-OutputFile", "`"$exePath`"" -Wait -PassThru -NoNewWindow
+
+if ($p.ExitCode -eq 0 -and (Test-Path $exePath)) {
+    Write-Host "   ✅ Win-Debloat7.exe compiled successfully." -ForegroundColor Green
 }
 else {
-    # -target:winexe -> No console window (we handle console inside if needed, or stick to exe for wrapper)
-    # Actually Launcher.cs is designed as a Console app if we used Console. calls.
-    # Let's use /target:exe for Console app so we see output.
-    $args = "/target:exe", "/out:`"$exePath`"", "`"$launcherSrc`""
-    $p = Start-Process -FilePath $csc -ArgumentList $args -PassThru -Wait -NoNewWindow
-    
-    if ($p.ExitCode -eq 0) {
-        Write-Host "   ✅ Win-Debloat7.exe created." -ForegroundColor Green
-    }
-    else {
-        Write-Host "   ❌ Compilation failed." -ForegroundColor Red
-        $exePath = $null
-    }
+    Write-Warning "   ❌ EXE Compilation failed. Standard/Extras builds will lack the launcher."
+    $exePath = $null
 }
 
 

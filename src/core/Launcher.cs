@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Windows.Forms; // Requires -target:winexe if we want no console, but we want console. actually we can just use MessageBox for errors.
 
 namespace WinDebloat7
 {
@@ -17,7 +16,7 @@ namespace WinDebloat7
                 if (!File.Exists(scriptPath))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Error: {scriptName} not found in the current directory.");
+                    Console.WriteLine("Error: " + scriptName + " not found in the current directory.");
                     Console.WriteLine("Please ensure the exe is in the same folder as the script.");
                     Console.ReadKey();
                     return;
@@ -26,7 +25,7 @@ namespace WinDebloat7
                 // Prepare Process Start Info
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = "pwsh.exe";
-                startInfo.Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\"";
+                startInfo.Arguments = string.Format("-NoProfile -ExecutionPolicy Bypass -File \"{0}\"", scriptPath);
                 startInfo.UseShellExecute = false; // Required for environment variables if needed, but true allows PATH lookup easier? actually false is better if we rely on PATH.
                 // Wait, UseShellExecute = true allows using system PATH to find 'pwsh'.
                 startInfo.UseShellExecute = true; 
@@ -36,7 +35,8 @@ namespace WinDebloat7
 
                 try 
                 {
-                    Process.Start(startInfo)?.WaitForExit();
+                    Process p = Process.Start(startInfo);
+                    if (p != null) p.WaitForExit();
                 }
                 catch (System.ComponentModel.Win32Exception)
                 {
@@ -52,7 +52,7 @@ namespace WinDebloat7
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                Console.WriteLine("An unexpected error occurred: " + ex.Message);
                 Console.ReadKey();
             }
         }
