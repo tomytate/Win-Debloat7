@@ -58,7 +58,7 @@ function Show-MainMenu {
         
         # Show Extras options only if module is available
         if ($extrasAvailable) {
-            Write-WD7Host ""
+            Write-WD7Host " "
             Write-WD7Host "  ═══ ADVANCED (USE AT OWN RISK) ═══" -Color Warning
             Write-WD7Host "  [D] Defender Remover ⚠️" -Color Warning
             Write-WD7Host "  [A] Windows Activation ⚠️" -Color Warning
