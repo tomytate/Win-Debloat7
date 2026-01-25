@@ -295,7 +295,6 @@ Win-Debloat7 modifies Windows system settings. **Before using:**
 
 - **PowerShell** community for amazing modules
 - **Chris Titus Tech**, **WinUtil**, **LeDragoX** for inspiration
-- All **[contributors](https://github.com/tomytate/Win-Debloat7/graphs/contributors)**
 
 ---
 
