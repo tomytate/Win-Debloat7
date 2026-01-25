@@ -26,6 +26,10 @@ Import-Module "$PSScriptRoot\..\modules\Drivers\Drivers.psm1" -Force
 Import-Module "$PSScriptRoot\..\modules\Network\Network.psm1" -Force
 Import-Module "$PSScriptRoot\..\modules\Privacy\Tasks.psm1" -Force
 Import-Module "$PSScriptRoot\..\modules\Privacy\Hosts.psm1" -Force
+Import-Module "$PSScriptRoot\..\modules\Tweaks\UI.psm1" -Force
+Import-Module "$PSScriptRoot\..\modules\Repair\Repair.psm1" -Force
+Import-Module "$PSScriptRoot\..\modules\Features\Features.psm1" -Force
+Import-Module "$PSScriptRoot\..\modules\Security\Security.psm1" -Force
 
 # Extras module (only present in Extras edition)
 $extrasModule = "$PSScriptRoot\..\modules\Extras\Extras.psm1"
@@ -48,6 +52,9 @@ function Show-MainMenu {
         Write-WD7Host "  [7] Benchmark System" -Color White
         Write-WD7Host "  [8] System Info" -Color White
         Write-WD7Host "  [9] Snapshots / Restore" -Color White
+        Write-WD7Host "  [X] Tweaks & Customization" -Color Secondary
+        Write-WD7Host "  [R] System Repair Tools" -Color Warning
+        Write-WD7Host "  [F] Windows Features Manager" -Color White
         
         # Show Extras options only if module is available
         if ($extrasAvailable) {
@@ -81,7 +88,13 @@ function Show-MainMenu {
             "7" { Invoke-WinDebloat7Benchmark }
             "8" { Show-SystemInfo }
             "9" { Show-SnapshotMenu }
-            "D" { 
+            "X" { Show-TweaksMenu }
+            "x" { Show-TweaksMenu }
+            "R" { Show-RepairMenu }
+            "r" { Show-RepairMenu }
+            "F" { Show-FeaturesMenu }
+            "f" { Show-FeaturesMenu }
+            "D" {  
                 if ($extrasAvailable) {
                     Invoke-WinDebloat7DefenderRemover
                     Read-Host "`nPress Enter to continue..."
@@ -105,7 +118,7 @@ function Show-MainMenu {
                     Start-Sleep -Seconds 2
                 }
             }
-            "A" { 
+            "a" { 
                 if ($extrasAvailable) {
                     Invoke-WinDebloat7Activation
                     Read-Host "`nPress Enter to continue..."
@@ -114,10 +127,6 @@ function Show-MainMenu {
                     Write-WD7Host "Extras module not installed. Download Extras edition for this feature." -Color Warning
                     Start-Sleep -Seconds 2
                 }
-            }
-            "a" { 
-                # Case insensitive handler for A
-                if ($extrasAvailable) { Invoke-WinDebloat7Activation; Read-Host "`nPress Enter..." } 
             }
             "0" {
                 Register-WinDebloat7Maintenance
@@ -128,6 +137,72 @@ function Show-MainMenu {
             default { Write-WD7Host "Invalid selection." -Color Warning; Start-Sleep -Seconds 1 }
         }
     }
+}
+
+function Show-TweaksMenu {
+    while ($true) {
+        Show-WD7Header
+        Write-WD7Host "Tweaks & Customization" -Color Secondary
+        
+        Write-WD7Host "  [1] UI Customization (Taskbar, Context Menu)" -Color White
+        Write-WD7Host "  [2] Advanced Removal (OneDrive, Edge, Xbox)" -Color White
+        Write-WD7Host "  [B] Back" -Color Dark
+        
+        $sel = Read-Host "`nSelect option"
+        
+        switch ($sel) {
+            "1" { Show-UICustomizationMenu }
+            "2" { Show-AdvancedRemovalMenu }
+            "B" { return }
+            "b" { return }
+        }
+    }
+}
+
+function Show-UICustomizationMenu {
+    Show-WD7Header
+    Write-WD7Host "UI Customization" -Color Secondary
+    
+    Write-Host "  [1] Align Taskbar: Left" -ForegroundColor White
+    Write-Host "  [2] Align Taskbar: Center" -ForegroundColor White
+    Write-Host "  [3] Context Menu: Classic (Win10)" -ForegroundColor White
+    Write-Host "  [4] Context Menu: Modern (Win11)" -ForegroundColor White
+    Write-Host "  [5] Hide 'Gallery' from Explorer" -ForegroundColor White
+    Write-Host "  [6] Hide 'Home' from Explorer" -ForegroundColor White
+    Write-Host "  [7] Disable Start Menu 'Recommended'" -ForegroundColor White
+    
+    $sel = Read-Host "`nSelect tweak to apply (or Enter to cancel)"
+    
+    switch ($sel) {
+        "1" { Set-WinDebloat7TaskbarAlignment -Alignment Left }
+        "2" { Set-WinDebloat7TaskbarAlignment -Alignment Center }
+        "3" { Set-WinDebloat7ContextMenu -Style Classic }
+        "4" { Set-WinDebloat7ContextMenu -Style Modern }
+        "5" { Set-WinDebloat7Explorer -HideGallery }
+        "6" { Set-WinDebloat7Explorer -HideHome }
+        "7" { Set-WinDebloat7StartMenu -DisableRecommended }
+    }
+    if ($sel) { Read-Host "Press Enter..." }
+}
+
+function Show-AdvancedRemovalMenu {
+    Show-WD7Header
+    Write-WD7Host "Advanced Application Removal" -Color Warning
+    
+    Write-Host "  [1] Uninstall OneDrive (Complete)" -ForegroundColor White
+    Write-Host "  [2] Uninstall Xbox Apps & Services" -ForegroundColor White
+    Write-Host "  [3] Uninstall Microsoft Edge (Warning: Experimental)" -ForegroundColor Red
+    Write-Host "  [4] Disable Windows 11 AI & Ads (Copilot/Recall)" -ForegroundColor White
+    
+    $sel = Read-Host "`nSelect removal option (or Enter to cancel)"
+    
+    switch ($sel) {
+        "1" { Uninstall-WinDebloat7OneDrive }
+        "2" { Uninstall-WinDebloat7Xbox }
+        "3" { Uninstall-WinDebloat7Edge }
+        "4" { Disable-WinDebloat7AIandAds }
+    }
+    if ($sel) { Read-Host "Press Enter..." }
 }
 
 
@@ -392,6 +467,47 @@ function Invoke-WinDebloat7Benchmark {
     Write-Host "Snapshot saved to: $reportPath" -ForegroundColor Gray
     
     Read-Host "`nPress Enter to continue..."
+}
+
+
+function Show-RepairMenu {
+    Show-WD7Header
+    Write-WD7Host "System Repair Tools" -Color Warning
+    
+    Write-Host "  [1] Repair Windows Image (SFC + DISM)" -ForegroundColor White
+    Write-Host "  [2] Reset Network Stack (IP/DNS/Winsock)" -ForegroundColor White
+    Write-Host "  [3] Reset Windows Update Components" -ForegroundColor White
+    Write-Host "  [4] Enable PUA Protection (Security)" -ForegroundColor White
+    Write-Host "  [5] Disable SMBv1 Protocol (Security)" -ForegroundColor White
+    
+    $sel = Read-Host "`nSelect repair option (or Enter to cancel)"
+    
+    switch ($sel) {
+        "1" { Repair-WinDebloat7System }
+        "2" { Reset-WinDebloat7Network }
+        "3" { Reset-WinDebloat7Update }
+        "4" { Enable-WinDebloat7PUAProtection }
+        "5" { Disable-WinDebloat7SMBv1 }
+    }
+    if ($sel) { Read-Host "Press Enter..." }
+}
+
+function Show-FeaturesMenu {
+    Show-WD7Header
+    Write-WD7Host "Windows Features Manager" -Color Secondary
+    
+    Write-Host "  [1] Disable Optional Features (Fax, IIS, WorkFolders)" -ForegroundColor White
+    Write-Host "  [2] Enable Optional Features (Revert)" -ForegroundColor White
+    Write-Host "  [3] Remove Legacy Capabilities (WordPad, Math, Steps Rec.)" -ForegroundColor White
+    
+    $sel = Read-Host "`nSelect option (or Enter to cancel)"
+    
+    switch ($sel) {
+        "1" { Set-WinDebloat7OptionalFeatures }
+        "2" { Set-WinDebloat7OptionalFeatures -Enable }
+        "3" { Remove-WinDebloat7Capabilities }
+    }
+    if ($sel) { Read-Host "Press Enter..." }
 }
 
 Export-ModuleMember -Function Show-MainMenu

@@ -2,7 +2,7 @@
 # Ideally we would use Windows Server Core for full fidelity, but specific WMI calls won't work there anyway.
 # This Dockerfile is primarily for unit testing logic that doesn't depend on Windows APIs (Config, Utils).
 
-FROM mcr.microsoft.com/powershell:7.4-ubuntu-22.04
+FROM mcr.microsoft.com/powershell:preview-ubuntu-22.04
 
 # Set working directory
 WORKDIR /app

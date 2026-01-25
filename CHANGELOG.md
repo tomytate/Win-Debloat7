@@ -2,23 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.2.0] - 2026-01-24
+## [1.2.0] - 2026-01-25
 
 ### 🚀 New Features
-- **Real-time Monitoring Dashboard**:
-    - Live updates in the GUI every 5 seconds.
-    - Tracks **Active Internet Connections** and RAM Usage.
-    - Dynamic privacy status indicators.
+- **GUI V2 "Command Center"**:
+    - Completely redesigned interface with **5-Tab Navigation**.
+    - **System Tweaks**: Consolidated Privacy, Performance, and General settings into one powerful hub.
+    - **Dashboard V2**: Modern "Glass" card layout with live RAM/Network metrics.
+- **Robust Detection Engine**:
+    - Fixed Windows 11 24H2/23H2 detection logic.
+    - Expanded **Bloatware Recognition** (Cortana, Maps, Legacy Apps).
+    - **Smart RAM**: Now displays Active TCP Connections alongside Memory usage.
 - **System Benchmarking**:
-    - New `Measure-WinDebloat7System` tool captured in `src/modules/Performance/Benchmark.psm1`.
-    - Generates before/after comparison reports on the Desktop.
-    - Integrated into CLI (auto-runs) and TUI (Menu Option 7).
+    - Generates before/after comparison reports.
 - **Hardware-Aware Recommendations**:
-    - Intelligent profile suggestion based on RAM and GPU (e.g. "Gaming" for 16GB+ & RTX).
+    - Intelligent profile suggestion based on RAM/GPU.
 - **Dual-Release Distribution**:
-    - Automated creation of **Standard** (Safe) and **Extras** (Defender Remover/MAS) packages.
-    - GitHub Actions `release.yml` auto-publishes these assets.
-    - **Winget & Chocolatey** manifests auto-generated with SHA256 checksums.
+    - Automated creation of Standard and Extras packages.
 
 ### 🛡️ Safety & Quality
 - **Global Unattended Safety**: `-Unattended` mode now forces a snapshot before changes.

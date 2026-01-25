@@ -417,7 +417,7 @@ function Install-WinDebloat7Software {
         Successful     = 0
         Failed         = 0
         Skipped        = 0
-        Details        = [System.Collections.Generic.List[hashtable]]::new()
+        Details        = @()
     }
     
     $current = 0
@@ -444,24 +444,24 @@ function Install-WinDebloat7Software {
                 if ($LASTEXITCODE -eq 0) {
                     Write-Log -Message "Installed: $pkg" -Level Success
                     $results.Successful++
-                    $results.Details.Add(@{ Package = $pkg; Status = "Success" })
+                    $results.Details += @{ Package = $pkg; Status = "Success" }
                 }
                 elseif ($output -match "already installed|No applicable|No available upgrade") {
                     Write-Log -Message "Already installed: $pkg" -Level Info
                     $results.Skipped++
-                    $results.Details.Add(@{ Package = $pkg; Status = "Skipped (Already Installed)" })
+                    $results.Details += @{ Package = $pkg; Status = "Skipped (Already Installed)" }
                 }
                 else {
                     Write-Log -Message "Failed to install: $pkg - Exit code: $LASTEXITCODE" -Level Warning
                     $results.Failed++
-                    $results.Details.Add(@{ Package = $pkg; Status = "Failed"; ExitCode = $LASTEXITCODE })
+                    $results.Details += @{ Package = $pkg; Status = "Failed"; ExitCode = $LASTEXITCODE }
                 }
             }
         }
         catch {
             Write-Log -Message "Error installing $pkg`: $($_.Exception.Message)" -Level Error
             $results.Failed++
-            $results.Details.Add(@{ Package = $pkg; Status = "Error"; Error = $_.Exception.Message })
+            $results.Details += @{ Package = $pkg; Status = "Error"; Error = $_.Exception.Message }
         }
     }
     
@@ -554,7 +554,7 @@ function Install-WinDebloat7Essentials {
     }
     
     # Collect packages from selected categories
-    $packagesToInstall = [System.Collections.Generic.List[string]]::new()
+    $packagesToInstall = @()
     
     foreach ($cat in $Categories) {
         if (-not $essentials.ContainsKey($cat)) { continue }
@@ -565,7 +565,7 @@ function Install-WinDebloat7Essentials {
         if ($InstallAll) {
             foreach ($app in $catData.Apps) {
                 $pkgId = if ($PackageManager -eq "Winget") { $app.Winget } else { $app.Choco }
-                $packagesToInstall.Add($pkgId)
+                $packagesToInstall += $pkgId
                 Write-Host "  [+] $($app.Name)" -ForegroundColor Green
             }
         }
@@ -587,7 +587,7 @@ function Install-WinDebloat7Essentials {
             if ($appSel -match '^[Aa]$') {
                 foreach ($app in $catData.Apps) {
                     $pkgId = if ($PackageManager -eq "Winget") { $app.Winget } else { $app.Choco }
-                    $packagesToInstall.Add($pkgId)
+                    $packagesToInstall += $pkgId
                 }
             }
             else {
@@ -596,7 +596,7 @@ function Install-WinDebloat7Essentials {
                     if ($appMap.ContainsKey([int]$num)) {
                         $app = $appMap[[int]$num]
                         $pkgId = if ($PackageManager -eq "Winget") { $app.Winget } else { $app.Choco }
-                        $packagesToInstall.Add($pkgId)
+                        $packagesToInstall += $pkgId
                     }
                 }
             }
@@ -610,7 +610,7 @@ function Install-WinDebloat7Essentials {
     
     Write-Host "`nInstalling $($packagesToInstall.Count) packages..." -ForegroundColor Cyan
     
-    $result = Install-WinDebloat7Software -Packages $packagesToInstall.ToArray() -PackageManager $PackageManager -Quiet
+    $result = Install-WinDebloat7Software -Packages $packagesToInstall -PackageManager $PackageManager -Quiet
     
     Write-Host "`n╔══════════════════════════════════════════╗" -ForegroundColor Green
     Write-Host "║         Installation Complete             ║" -ForegroundColor Green

@@ -51,6 +51,31 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!-- TabItem Style for System Tweaks -->
+        <Style x:Key="TweaksTabItem" TargetType="TabItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border Name="Border" Background="Transparent" BorderBrush="Transparent" BorderThickness="0,0,0,2" Margin="0,0,24,0" Padding="12,8">
+                            <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" Margin="0,2"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -91,22 +116,10 @@
                             <TextBlock Text="Dashboard" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
-                    <RadioButton x:Name="navTweaks" GroupName="nav" Style="{StaticResource NavButtonStyle}">
+                    <RadioButton x:Name="navSystemTweaks" GroupName="nav" Style="{StaticResource NavButtonStyle}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⚙️" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
                             <TextBlock Text="System Tweaks" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </RadioButton>
-                    <RadioButton x:Name="navPrivacy" GroupName="nav" Style="{StaticResource NavButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔒" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Privacy" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </RadioButton>
-                    <RadioButton x:Name="navPerformance" GroupName="nav" Style="{StaticResource NavButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🚀" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Performance" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
                     <RadioButton x:Name="navSoftware" GroupName="nav" Style="{StaticResource NavButtonStyle}">
@@ -115,17 +128,7 @@
                             <TextBlock Text="Software" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
-                    <RadioButton x:Name="navNetwork" GroupName="nav" Style="{StaticResource NavButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🌐" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Network" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </RadioButton>
-                    
-                    <TextBlock Text="SYSTEM" FontSize="11" FontWeight="SemiBold" 
-                               Foreground="{StaticResource TextSecondaryBrush}" Margin="16,20,0,10"/>
-                    
-                    <RadioButton x:Name="navSnapshots" GroupName="nav" Style="{StaticResource NavButtonStyle}">
+                    <RadioButton x:Name="navBackups" GroupName="nav" Style="{StaticResource NavButtonStyle}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="💾" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
                             <TextBlock Text="Backups" VerticalAlignment="Center"/>
@@ -137,12 +140,19 @@
                             <TextBlock Text="Settings" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
+                    
+                    <RadioButton x:Name="navTools" GroupName="nav" Style="{StaticResource NavButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🛠️" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Tools" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
                 </StackPanel>
 
                 <!-- Footer -->
                 <Border Grid.Row="2" Background="#151525" Padding="16" CornerRadius="12" Margin="12,0,12,16">
                     <StackPanel>
-                        <TextBlock Text="v1.1.0 | PowerShell 7.5+" FontSize="11" 
+                        <TextBlock Text="v1.2.0 | PowerShell 7.5+" FontSize="11" 
                                    Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                         <TextBlock Text="Windows 11 25H2 Ready" FontSize="10" 
                                    Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
@@ -170,7 +180,7 @@
                         <!-- Stats Row -->
                         <UniformGrid Rows="1" Columns="4" Margin="0,0,0,24">
                             <!-- OS Card -->
-                            <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="20" Margin="0,0,8,0">
+                            <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="0,0,8,0">
                                 <StackPanel>
                                     <TextBlock Text="💻" FontSize="24" Margin="0,0,0,12"/>
                                     <TextBlock Name="txtOSName" Text="Windows 11" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
@@ -178,7 +188,7 @@
                                 </StackPanel>
                             </Border>
                             <!-- Privacy Score -->
-                            <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="20" Margin="4,0">
+                            <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="4,0">
                                 <StackPanel>
                                     <TextBlock Text="🔒" FontSize="24" Margin="0,0,0,12"/>
                                     <StackPanel Orientation="Horizontal">
@@ -191,7 +201,7 @@
                                 </StackPanel>
                             </Border>
                             <!-- Bloatware -->
-                            <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="20" Margin="4,0">
+                            <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="4,0">
                                 <StackPanel>
                                     <TextBlock Text="🗑️" FontSize="24" Margin="0,0,0,12"/>
                                     <TextBlock Name="txtBloatwareCount" Text="--" FontSize="28" FontWeight="Bold" Foreground="White"/>
@@ -199,7 +209,7 @@
                                 </StackPanel>
                             </Border>
                             <!-- RAM -->
-                            <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="20" Margin="8,0,0,0">
+                            <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="8,0,0,0">
                                 <StackPanel>
                                     <TextBlock Text="🧠" FontSize="24" Margin="0,0,0,12"/>
                                     <StackPanel Orientation="Horizontal">
@@ -286,106 +296,139 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- TWEAKS VIEW -->
-                    <StackPanel x:Name="viewTweaks" Visibility="Collapsed">
+                    <!-- SYSTEM TWEAKS VIEW (CONSOLIDATED) -->
+                    <StackPanel x:Name="viewSystemTweaks" Visibility="Collapsed">
                         <TextBlock Text="System Tweaks" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
-                        <TextBlock Text="Customize Windows behavior" FontSize="14" 
+                        <TextBlock Text="Manage privacy, performance, and network settings" FontSize="14" 
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,24"/>
                         
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                        <TabControl Background="Transparent" BorderThickness="0" Margin="-12,0,0,0">
+                            <TabControl.Resources>
+                                <Style TargetType="TabPanel">
+                                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                                    <Setter Property="Margin" Value="0,0,0,16"/>
+                                </Style>
+                            </TabControl.Resources>
                             
-                            <Border Grid.Column="0" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="0,0,8,0">
-                                <StackPanel>
-                                    <TextBlock Text="System Features" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
-                                    <CheckBox Name="chkDarkTheme" Content=" Dark Theme" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkActivityHistory" Content=" Activity History" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkBackgroundApps" Content=" Background Apps" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkClipboardHistory" Content=" Clipboard History" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkHibernate" Content=" Hibernate Mode" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkLocation" Content=" Location Tracking" Foreground="White" Margin="0,8"/>
-                                </StackPanel>
-                            </Border>
-                            
-                            <Border Grid.Column="1" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="8,0,0,0">
-                                <StackPanel>
-                                    <TextBlock Text="AI &amp; Privacy" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
-                                    <CheckBox Name="chkTelemetry" Content=" Telemetry Collection" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkCopilot" Content=" Windows Copilot" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkRecall" Content=" Windows Recall (AI)" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkWindowsUpdate" Content=" Automatic Updates" Foreground="White" Margin="0,8"/>
+                            <!-- TAB 1: GENERAL -->
+                            <TabItem Header="General" Style="{StaticResource TweaksTabItem}">
+                                <Grid Margin="12,0,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
                                     
+                                    <Border Grid.Column="0" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="0,0,8,0">
+                                        <StackPanel>
+                                            <TextBlock Text="System Features" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                            <CheckBox Name="chkDarkTheme" Content=" Dark Theme" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkActivityHistory" Content=" Activity History" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkBackgroundApps" Content=" Background Apps" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkClipboardHistory" Content=" Clipboard History" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkHibernate" Content=" Hibernate Mode" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkLocation" Content=" Location Tracking" Foreground="White" Margin="0,8"/>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <Border Grid.Column="1" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="8,0,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="AI Integration" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                            <CheckBox Name="chkCopilot" Content=" Windows Copilot" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkRecall" Content=" Windows Recall (AI)" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkWindowsUpdate" Content=" Automatic Updates" Foreground="White" Margin="0,8"/>
+                                            
+                                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16"/>
+                                            
+                                            <Button Name="btnApplyTweaks" Content="Apply General Tweaks" Background="{StaticResource AccentBrush}" 
+                                                    Foreground="#0D0D0D" FontWeight="SemiBold" Padding="20,12" BorderThickness="0" Margin="0,8"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </TabItem>
+                            
+                            <!-- TAB 2: PRIVACY -->
+                            <TabItem Header="Privacy" Style="{StaticResource TweaksTabItem}">
+                                <StackPanel Margin="12,0,0,0">
+                                    <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24">
+                                        <StackPanel>
+                                            <TextBlock Text="Telemetry Controls" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                            <CheckBox Name="chkTelemetry" Content=" Telemetry Collection" Foreground="White" Margin="0,8,0,16"/>
+                                            
+                                            <Button Name="btnBlockTelemetry" Content="🔒 Block Telemetry Domains" Background="{StaticResource AccentBrush}" 
+                                                    Foreground="#0D0D0D" FontWeight="SemiBold" Padding="20,12" BorderThickness="0" 
+                                                    HorizontalAlignment="Left" Margin="0,8"/>
+                                            <Button Name="btnDisableTasks" Content="✓ Disable Tasks (Safe)" Background="Transparent" 
+                                                    Foreground="{StaticResource AccentBrush}" BorderBrush="{StaticResource AccentBrush}"
+                                                    FontWeight="SemiBold" Padding="20,12" BorderThickness="2" HorizontalAlignment="Left" Margin="0,8"/>
+                                            <Button Name="btnAggressiveTasks" Content="⚠ Disable Tasks (Aggressive)" Background="Transparent" 
+                                                    Foreground="{StaticResource ErrorBrush}" BorderBrush="{StaticResource ErrorBrush}"
+                                                    FontWeight="SemiBold" Padding="20,12" BorderThickness="2" HorizontalAlignment="Left" Margin="0,8"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </TabItem>
+                            
+                            <!-- TAB 3: PERFORMANCE -->
+                            <TabItem Header="Performance" Style="{StaticResource TweaksTabItem}">
+                                <Grid Margin="12,0,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Border Grid.Column="0" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="0,0,8,0">
+                                        <StackPanel>
+                                            <TextBlock Text="Power Plan" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                            <RadioButton Name="radBalanced" Content=" Balanced" GroupName="power" IsChecked="True" 
+                                                         Foreground="White" Margin="0,8"/>
+                                            <RadioButton Name="radHighPerf" Content=" High Performance" GroupName="power" 
+                                                         Foreground="White" Margin="0,8"/>
+                                            <RadioButton Name="radUltimate" Content=" Ultimate Performance" GroupName="power" 
+                                                         Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold" Margin="0,8"/>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <Border Grid.Column="1" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="8,0,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="Gaming Optimizations" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                            <CheckBox Name="chkGamingNetwork" Content=" Network (TCPNoDelay)" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkGamingInput" Content=" Raw Input (No Accel)" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkGamingMMCSS" Content=" System Priority (MMCSS)" Foreground="White" Margin="0,8"/>
+                                            <CheckBox Name="chkUltimatePlan" Content=" Ultimate Power Plan" Foreground="White" Margin="0,8"/>
                                     <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16"/>
-                                    
-                                    <Button Name="btnApplyTweaks" Content="Apply Tweaks" Background="{StaticResource AccentBrush}" 
-                                            Foreground="#0D0D0D" FontWeight="SemiBold" Padding="20,12" BorderThickness="0" Margin="0,8"/>
-                                    <Button Name="btnUndoTweaks" Content="Restore Defaults" Background="Transparent" 
-                                            Foreground="{StaticResource ErrorBrush}" BorderBrush="{StaticResource ErrorBrush}"
-                                            FontWeight="SemiBold" Padding="20,12" BorderThickness="2" Margin="0,8"/>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                    </StackPanel>
-
-                    <!-- PRIVACY VIEW -->
-                    <StackPanel x:Name="viewPrivacy" Visibility="Collapsed">
-                        <TextBlock Text="Privacy &amp; Security" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
-                        <TextBlock Text="Take control of your data" FontSize="14" 
-                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,24"/>
-                        
-                        <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24">
-                            <StackPanel>
-                                <TextBlock Text="Telemetry Controls" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
-                                <Button Name="btnBlockTelemetry" Content="🔒 Block Telemetry Domains" Background="{StaticResource AccentBrush}" 
-                                        Foreground="#0D0D0D" FontWeight="SemiBold" Padding="20,12" BorderThickness="0" 
-                                        HorizontalAlignment="Left" Margin="0,8"/>
-                                <Button Name="btnDisableTasks" Content="✓ Disable Tasks (Safe)" Background="Transparent" 
-                                        Foreground="{StaticResource AccentBrush}" BorderBrush="{StaticResource AccentBrush}"
-                                        FontWeight="SemiBold" Padding="20,12" BorderThickness="2" HorizontalAlignment="Left" Margin="0,8"/>
-                                <Button Name="btnAggressiveTasks" Content="⚠ Disable Tasks (Aggressive)" Background="Transparent" 
-                                        Foreground="{StaticResource ErrorBrush}" BorderBrush="{StaticResource ErrorBrush}"
-                                        FontWeight="SemiBold" Padding="20,12" BorderThickness="2" HorizontalAlignment="Left" Margin="0,8"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-
-                    <!-- PERFORMANCE VIEW -->
-                    <StackPanel x:Name="viewPerformance" Visibility="Collapsed">
-                        <TextBlock Text="Performance" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
-                        <TextBlock Text="Optimize for maximum performance" FontSize="14" 
-                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,24"/>
-                        
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                                            
+                                            <Button Name="btnApplyPerformance" Content="🚀 Apply Performance" Background="{StaticResource SecondaryBrush}" 
+                                                    Foreground="White" FontWeight="SemiBold" Padding="20,12" BorderThickness="0" Margin="0,8"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </TabItem>
                             
-                            <Border Grid.Column="0" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="0,0,8,0">
-                                <StackPanel>
-                                    <TextBlock Text="Power Plan" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
-                                    <RadioButton Name="radBalanced" Content=" Balanced" GroupName="power" IsChecked="True" 
-                                                 Foreground="White" Margin="0,8"/>
-                                    <RadioButton Name="radHighPerf" Content=" High Performance" GroupName="power" 
-                                                 Foreground="White" Margin="0,8"/>
-                                    <RadioButton Name="radUltimate" Content=" Ultimate Performance" GroupName="power" 
-                                                 Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold" Margin="0,8"/>
+                            <!-- TAB 4: NETWORK -->
+                            <TabItem Header="Network" Style="{StaticResource TweaksTabItem}">
+                                <StackPanel Margin="12,0,0,0">
+                                    <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24">
+                                        <StackPanel>
+                                            <TextBlock Text="DNS Provider" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
+                                            <ComboBox Name="cmbDnsProvider" Width="300" HorizontalAlignment="Left" Margin="0,0,0,16">
+                                                <ComboBoxItem Content="DHCP (Default)" IsSelected="True"/>
+                                                <ComboBoxItem Content="Cloudflare (1.1.1.1)"/>
+                                                <ComboBoxItem Content="Google (8.8.8.8)"/>
+                                                <ComboBoxItem Content="Quad9 (9.9.9.9)"/>
+                                                <ComboBoxItem Content="AdGuard"/>
+                                                <ComboBoxItem Content="OpenDNS"/>
+                                            </ComboBox>
+                                            
+                                            <CheckBox Name="chkDisableIPv6" Content=" Disable IPv6" Foreground="White" Margin="0,8"/>
+                                            
+                                            <Button Name="btnApplyDNS" Content="🌐 Apply DNS" Background="{StaticResource AccentBrush}" 
+                                                    Foreground="#0D0D0D" FontWeight="SemiBold" Padding="20,12" BorderThickness="0" 
+                                                    HorizontalAlignment="Left" Margin="0,16,0,0"/>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
-                            </Border>
-                            
-                            <Border Grid.Column="1" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="8,0,0,0">
-                                <StackPanel>
-                                    <TextBlock Text="Gaming Optimizations" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
-                                    <CheckBox Name="chkGamingNetwork" Content=" Network (TCPNoDelay)" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkGamingInput" Content=" Raw Input (No Accel)" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkGamingMMCSS" Content=" System Priority (MMCSS)" Foreground="White" Margin="0,8"/>
-                                    <CheckBox Name="chkUltimatePlan" Content=" Ultimate Power Plan" Foreground="White" Margin="0,8"/>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
+                            </TabItem>
+                        </TabControl>
                     </StackPanel>
 
                     <!-- SOFTWARE VIEW -->
@@ -438,35 +481,8 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- NETWORK VIEW -->
-                    <StackPanel x:Name="viewNetwork" Visibility="Collapsed">
-                        <TextBlock Text="Network" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
-                        <TextBlock Text="Configure DNS and network" FontSize="14" 
-                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,24"/>
-                        
-                        <Border Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24">
-                            <StackPanel>
-                                <TextBlock Text="DNS Provider" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
-                                <ComboBox Name="cmbDnsProvider" Width="300" HorizontalAlignment="Left" Margin="0,0,0,16">
-                                    <ComboBoxItem Content="DHCP (Default)" IsSelected="True"/>
-                                    <ComboBoxItem Content="Cloudflare (1.1.1.1)"/>
-                                    <ComboBoxItem Content="Google (8.8.8.8)"/>
-                                    <ComboBoxItem Content="Quad9 (9.9.9.9)"/>
-                                    <ComboBoxItem Content="AdGuard"/>
-                                    <ComboBoxItem Content="OpenDNS"/>
-                                </ComboBox>
-                                
-                                <CheckBox Name="chkDisableIPv6" Content=" Disable IPv6" Foreground="White" Margin="0,8"/>
-                                
-                                <Button Name="btnApplyDNS" Content="🌐 Apply DNS" Background="{StaticResource AccentBrush}" 
-                                        Foreground="#0D0D0D" FontWeight="SemiBold" Padding="20,12" BorderThickness="0" 
-                                        HorizontalAlignment="Left" Margin="0,16,0,0"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-
-                    <!-- SNAPSHOTS VIEW -->
-                    <StackPanel x:Name="viewSnapshots" Visibility="Collapsed">
+                    <!-- BACKUPS VIEW -->
+                    <StackPanel x:Name="viewBackups" Visibility="Collapsed">
                         <TextBlock Text="Backup &amp; Restore" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
                         <TextBlock Text="Manage system snapshots" FontSize="14" 
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,24"/>
@@ -489,6 +505,79 @@
                         </Border>
                     </StackPanel>
 
+                    <!-- TOOLS VIEW -->
+                    <StackPanel x:Name="viewTools" Visibility="Collapsed">
+                        <TextBlock Text="Tools &amp; Utilities" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
+                        <TextBlock Text="Advanced system tools and interface customization" FontSize="14" 
+                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,24"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- INTERFACE COLUMN -->
+                            <Border Grid.Column="0" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <TextBlock Text="🎨 Interface" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                    
+                                    <TextBlock Text="Taskbar Alignment" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,8"/>
+                                    <RadioButton Name="radTaskbarCenter" Content=" Center" GroupName="taskbar" IsChecked="True" Foreground="White" Margin="0,4"/>
+                                    <RadioButton Name="radTaskbarLeft" Content=" Left" GroupName="taskbar" Foreground="White" Margin="0,4"/>
+                                    
+                                    <TextBlock Text="Context Menu" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,16,0,8"/>
+                                    <RadioButton Name="radCtxModern" Content=" Modern (Win11)" GroupName="ctx" IsChecked="True" Foreground="White" Margin="0,4"/>
+                                    <RadioButton Name="radCtxClassic" Content=" Classic (Win10)" GroupName="ctx" Foreground="White" Margin="0,4"/>
+                                    
+                                    <CheckBox Name="chkHideGallery" Content=" Hide Gallery (Explorer)" Foreground="White" Margin="0,16,0,8"/>
+                                    <CheckBox Name="chkHideHome" Content=" Hide Home (Explorer)" Foreground="White" Margin="0,4"/>
+                                    
+                                    <Button Name="btnApplyUITweaks" Content="Apply UI Tweaks" Background="{StaticResource AccentBrush}" 
+                                            Foreground="#0D0D0D" FontWeight="SemiBold" Padding="16,10" BorderThickness="0" Margin="0,16,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- MAINTENANCE COLUMN -->
+                            <Border Grid.Column="1" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="4,0">
+                                <StackPanel>
+                                    <TextBlock Text="🛠️ Maintenance" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                    
+                                    <Button Name="btnUpdateDrivers" Content="🔄 Update Drivers" Background="Transparent" 
+                                            Foreground="{StaticResource AccentBrush}" BorderBrush="{StaticResource AccentBrush}"
+                                            Padding="16,10" BorderThickness="2" Margin="0,0,0,12"/>
+                                    
+                                    <Button Name="btnRepairSystem" Content="🛡️ Repair System (SFC)" Background="Transparent" 
+                                            Foreground="{StaticResource AccentBrush}" BorderBrush="{StaticResource AccentBrush}"
+                                            Padding="16,10" BorderThickness="2" Margin="0,0,0,12"/>
+                                            
+                                    <Button Name="btnResetNetwork" Content="🌐 Reset Network" Background="Transparent" 
+                                            Foreground="{StaticResource AccentBrush}" BorderBrush="{StaticResource AccentBrush}"
+                                            Padding="16,10" BorderThickness="2" Margin="0,0,0,12"/>
+                                            
+                                    <Button Name="btnWinUpdateReset" Content="🔧 Reset WinUpdate" Background="Transparent" 
+                                            Foreground="{StaticResource AccentBrush}" BorderBrush="{StaticResource AccentBrush}"
+                                            Padding="16,10" BorderThickness="2" Margin="0,0,0,12"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- ANALYSIS COLUMN -->
+                            <Border Grid.Column="2" Background="{StaticResource CardBrush}" CornerRadius="16" Padding="24" Margin="8,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="📊 Analysis" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                    
+                                    <Button Name="btnRunBenchmark" Content="⏱️ Run Benchmark" Background="{StaticResource SecondaryBrush}" 
+                                            Foreground="White"
+                                            Padding="20,12" BorderThickness="0" Margin="0,0,0,16"/>
+                                            
+                                    <TextBlock Text="Runs a full system benchmark comparing CPU, Disk, and Memory metrics before/after optimization." 
+                                               FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+
                     <!-- SETTINGS VIEW -->
                     <StackPanel x:Name="viewSettings" Visibility="Collapsed">
                         <TextBlock Text="Settings" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
@@ -509,7 +598,7 @@
                                 <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20"/>
                                 
                                 <TextBlock Text="About" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
-                                <TextBlock Text="Win-Debloat7 v1.1.0" FontSize="14" Foreground="White" Margin="0,4"/>
+                                <TextBlock Text="Win-Debloat7 v1.2.0" FontSize="14" Foreground="White" Margin="0,4"/>
                                 <TextBlock Text="Created by Tomy Tolledo" FontSize="13" 
                                            Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4"/>
                                 <TextBlock Text="PowerShell 7.5+ | Windows 11 25H2 Ready" FontSize="12" 

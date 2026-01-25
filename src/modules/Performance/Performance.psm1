@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Performance
-    Version: 1.1.0
+    Version: 1.2.0
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -127,21 +127,37 @@ function Set-WinDebloat7Performance {
         $failCount++
     }
     
-    # 2. Visual Effects (Registry)
+    # 2. Visual Effects (Registry) & Responsiveness
     if ($Config.performance.visual_effects -eq "Performance") {
         $currentStep++
-        Write-Progress -Activity "Applying Performance Settings" -Status "Optimizing Visual Effects" -PercentComplete (($currentStep / $totalSteps) * 100)
+        Write-Progress -Activity "Applying Performance Settings" -Status "Optimizing Visual Effects & Responsiveness" -PercentComplete (($currentStep / $totalSteps) * 100)
         Write-Log -Message "Optimizing Visual Effects for Performance" -Level Info
         
         $results = @(
             # Reduce Menu Delay
-            (Set-RegistryKey -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -Value "1" -Type String),
+            (Set-RegistryKey -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -Value "0" -Type String),
             # Disable Animation
-            (Set-RegistryKey -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name "MinAnimate" -Value "0" -Type String)
+            (Set-RegistryKey -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name "MinAnimate" -Value "0" -Type String),
+            # Reduce Mouse Hover Time
+            (Set-RegistryKey -Path "HKCU:\Control Panel\Mouse" -Name "MouseHoverTime" -Value "10" -Type String),
+            # Kill Hung Apps Faster
+            (Set-RegistryKey -Path "HKCU:\Control Panel\Desktop" -Name "HungAppTimeout" -Value "1000" -Type String),
+            (Set-RegistryKey -Path "HKCU:\Control Panel\Desktop" -Name "WaitToKillAppTimeout" -Value "2000" -Type String)
         )
         
         $successCount += ($results | Where-Object { $_ }).Count
         $failCount += ($results | Where-Object { -not $_ }).Count
+    }
+    
+    # 3. RAM Optimization (Service Host Split)
+    $ramGB = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB
+    if ($ramGB -gt 4) {
+        # Set Split Threshold to RAM size to reduce process overhead on modern systems
+        $ramKB = (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum).Sum / 1KB
+        if (Set-RegistryKey -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "SvcHostSplitThresholdInKB" -Value $ramKB -Type DWord) {
+            $successCount++
+            Write-Log -Message "Optimized Service Host Split Threshold" -Level Success
+        }
     }
     
     # 3. Game Mode & DVR

@@ -79,6 +79,23 @@ function New-WinDebloat7Snapshot {
     $snapshot.Name = $Name
     $snapshot.Description = $Description
     
+    # Bypass 24-hour restore point creation limit
+    $rpKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore"
+    try {
+        if (Test-Path $rpKey) {
+            Write-Log -Message "Bypassing Restore Point frequency limit..." -Level Debug
+            Set-ItemProperty -Path $rpKey -Name "SystemRestorePointCreationFrequency" -Value 0 -Type DWord -ErrorAction SilentlyContinue
+        }
+        # Enable System Restore for System Drive just in case
+        Enable-ComputerRestore -Drive "$env:SystemDrive\" -ErrorAction SilentlyContinue
+        
+        Checkpoint-Computer -Description "$Name ($Description)" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
+        Write-Log -Message "Restore point created successfully." -Level Success
+    }
+    catch {
+        Write-Log -Message "Restore point creation failed (Non-critical): $($_.Exception.Message)" -Level Warning
+    }
+
     # 1. Capture Services (PERF-002 fix: Filter to relevant services)
     $relevantServicePatterns = @(
         'DiagTrack', 'Telemetry', 'BITS', 'wuauserv', 'UsoSvc',
@@ -92,7 +109,7 @@ function New-WinDebloat7Snapshot {
     
     try {
         $snapshot.Services = @(
-            Get-Service | Where-Object $serviceFilter | 
+            Get-Service -ErrorAction SilentlyContinue | Where-Object $serviceFilter | 
             Select-Object Name, Status, StartType, DisplayName
         )
         Write-Log -Message "Captured $($snapshot.Services.Count) relevant services" -Level Debug

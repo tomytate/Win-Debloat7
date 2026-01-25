@@ -57,7 +57,7 @@
 
 ### 🔒 Privacy Hardening
 - Block telemetry at DNS + firewall levels
-- **Real-time monitoring dashboard**
+- **GUI V2 Command Center** (5-Tab Layout)
 - Disable **Copilot**, **Recall**, **Advertising ID**
 - Multiple DNS providers (Cloudflare, Quad9, etc.)
 
@@ -70,11 +70,18 @@
 - Power plan management (Ultimate Performance)
 - Benchmark before/after metrics
 
+### 🛠️ Maintenance & Tools
+- **New Tools Tab**: One-stop utility center
+- **Driver Updates**: Winget & SDIO integration
+- **System Repair**: One-click SFC/DISM fix
+- **Network Reset**: Fix connectivity issues
+- **UI Customization**: Taskbar & Context Menu tweaks
+
 ### 💾 System Snapshots
 - **DPAPI-encrypted** state backups
 - One-click rollback to any snapshot
 - Automatic backup before every change
-- Compare snapshots side-by-side
+- **Bypasses 24h Creation Limit**
 
 </td>
 </tr>
@@ -120,8 +127,8 @@ winget install TomyTate.WinDebloat7
 choco install win-debloat7
 ```
 
-### Option 3: Manual Download
-1. Download **[Latest Release](https://github.com/tomytate/Win-Debloat7/releases/latest)**
+### Option 3: Standard Download (Recommended)
+1. Download **Win-Debloat7-v1.2.0-Standard.zip** from [Releases](https://github.com/tomytate/Win-Debloat7/releases)
 2. Extract the ZIP file
 3. Open **PowerShell 7.5+** as Administrator
 4. Run:
@@ -136,6 +143,14 @@ cd path\to\Win-Debloat7
 - **Administrator** privileges
 
 > 💡 **Tip**: Windows Terminal is recommended for the best experience.
+
+---
+
+## 🚀 Why PowerShell 7.5?
+Win-Debloat7 leverages specific features in the latest PowerShell release:
+- **`ConvertTo-CliXml`**: Enables secure, in-memory encryption of system snapshots (no more plain-text exports).
+- **Array Performance**: Uses the optimized `+=` operator (8x faster in 7.5) for cleaner code without performance penalty.
+- **WebCmdlet Retries**: Native handling of HTTP 429/retries for reliable package downloads.
 
 ---
 

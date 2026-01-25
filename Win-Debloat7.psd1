@@ -36,7 +36,11 @@
         'src\core\Registry.psm1',
         'src\modules\Bloatware\Bloatware.psm1',
         'src\modules\Privacy\Privacy.psm1',
+        'src\modules\Privacy\Privacy.psm1',
         'src\modules\Performance\Performance.psm1',
+        'src\modules\Repair\Repair.psm1',
+        'src\modules\Features\Features.psm1',
+        'src\modules\Security\Security.psm1',
         'src\modules\Performance\Gaming.psm1',
         'src\modules\Performance\Benchmark.psm1',
         'src\modules\Maintenance\Maintenance.psm1',
@@ -60,9 +64,15 @@
         'New-WinDebloat7Snapshot', 'Restore-WinDebloat7Snapshot', 'Get-WinDebloat7Snapshot',
         'Set-RegistryKey', 'Get-RegistryKey', 'Test-RegistryKey', 'Export-RegistryKey',
         # Modules
-        'Get-WinDebloat7BloatwareList', 'Remove-WinDebloat7Bloatware',
+        'Get-WinDebloat7BloatwareList', 'Remove-WinDebloat7Bloatware', 'Uninstall-WinDebloat7OneDrive', 'Uninstall-WinDebloat7Edge', 'Uninstall-WinDebloat7Xbox', 'Disable-WinDebloat7AIandAds',
         'Set-WinDebloat7Privacy',
         'Set-WinDebloat7Performance',
+        # Repair
+        'Repair-WinDebloat7System', 'Reset-WinDebloat7Network', 'Reset-WinDebloat7Update',
+        # Features
+        'Set-WinDebloat7OptionalFeatures', 'Remove-WinDebloat7Capabilities',
+        # Security
+        'Disable-WinDebloat7SMBv1', 'Enable-WinDebloat7PUAProtection',
         'Set-WinDebloat7Gaming',
         'Measure-WinDebloat7System', 'Compare-WinDebloat7Benchmarks',
         'Get-WindowsVersionInfo', 'Test-Windows11Version', 'Clear-WindowsVersionCache',
@@ -109,11 +119,11 @@
             
             # Release Notes
             ReleaseNotes = @'
-## v1.2.0 (2026-01-24)
-- NEW: Real-time Telemetry Dashboard
-- NEW: System Benchmarking (Before/After reports)
-- NEW: Hardware-Aware Recommendations
-- NEW: Dual-Release (Standard/Extras) automation
+## v1.2.0 (2026-01-25)
+- NEW: GUI V2 "Command Center" (5-Tab Layout)
+- NEW: System Tweaks Hub (Privacy/Performance/Network)
+- NEW: Robust Windows 11 24H2 Detection
+- NEW: Smart RAM & Connection Monitoring
 '@
         }
     }

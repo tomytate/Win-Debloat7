@@ -59,7 +59,7 @@ param(
     
     [switch]$Maintenance,
     
-    [switch]$NoGui
+    [switch]$Gui
 )
 
 $scriptPath = Split-Path $MyInvocation.MyCommand.Path -Parent
@@ -180,14 +180,9 @@ if ($ProfileFile) {
 }
 else {
     # Interactive Mode
-    if ($NoGui) {
-        # Force TUI mode
-        Show-MainMenu
-    }
-    elseif ($env:WT_SESSION -or $Host.UI.SupportsVirtualTerminal) {
-        # Windows Terminal or modern console detected - offer GUI option
+    if ($Gui) {
+        # Launch GUI directly
         try {
-            # Try to launch GUI, fall back to TUI on failure
             Show-WinDebloat7GUI
         }
         catch {
@@ -196,7 +191,7 @@ else {
         }
     }
     else {
-        # Legacy console or explicit TUI request
+        # Default: Launch TUI (Menu)
         Show-MainMenu
     }
 }

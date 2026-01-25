@@ -1,10 +1,13 @@
 name: Release
+
 on:
   push:
     tags:
       - 'v*'
+
 permissions:
   contents: write
+
 jobs:
   build:
     name: Build & Release
@@ -14,23 +17,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Install PowerShell 7.5.4
         shell: pwsh
         run: |
            & { $(irm https://aka.ms/install-powershell.ps1) } -Version 7.5.4
+
       - name: Build Dual Release
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
           $version = $tag.TrimStart('v')
           ./build/Build-DualRelease.ps1 -Version $version -OutputDir dist
-      - name: Release
+
+      - name: Publish Release
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            dist/*.zip
+            dist/Win-Debloat7-v*-Standard.zip
+            dist/Win-Debloat7-v*-Extras.zip
             dist/SHA256SUMS.txt
-            dist/RELEASE_NOTES.md
           body_path: dist/RELEASE_NOTES.md
           draft: false
           prerelease: false

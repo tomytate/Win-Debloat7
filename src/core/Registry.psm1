@@ -150,7 +150,6 @@ function Get-RegistryKey {
         return $DefaultValue
     }
     catch {
-        Write-Log -Message "Registry key not found: $Path\$Name" -Level Debug
         return $DefaultValue
     }
 }

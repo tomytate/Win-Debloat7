@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Bloatware
-    Version: 1.1.0
+    Version: 1.2.0
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -198,4 +198,168 @@ function Remove-WinDebloat7Bloatware {
     Write-Log -Message "Bloatware removal complete: $successCount removed, $skippedCount preserved, $failCount failed" -Level $(if ($failCount -eq 0) { "Success" } else { "Warning" })
 }
 
-Export-ModuleMember -Function Get-WinDebloat7BloatwareList, Remove-WinDebloat7Bloatware
+#region Advanced Removal
+
+<#
+.SYNOPSIS
+    Removes OneDrive completely.
+    Adapted from Win-Debloat-Tools.
+#>
+function Uninstall-WinDebloat7OneDrive {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    param()
+
+    Write-Log -Message "Starting OneDrive Removal..." -Level Info
+
+    if ($PSCmdlet.ShouldProcess("System", "Uninstall OneDrive")) {
+        # 1. Kill Processes
+        Stop-Process -Name "OneDrive" -Force -ErrorAction SilentlyContinue
+        
+        # 2. Run Uninstaller
+        $uninstallers = @(
+            "$env:systemroot\System32\OneDriveSetup.exe",
+            "$env:systemroot\SysWOW64\OneDriveSetup.exe"
+        )
+        
+        foreach ($exe in $uninstallers) {
+            if (Test-Path $exe) {
+                Write-Log -Message "Running uninstaller: $exe" -Level Info
+                Start-Process -FilePath $exe -ArgumentList "/uninstall" -Wait -WindowStyle Hidden
+            }
+        }
+        
+        # 3. Cleanup Files
+        $paths = @(
+            "$env:localappdata\Microsoft\OneDrive",
+            "$env:programdata\Microsoft OneDrive",
+            "$env:userprofile\OneDrive"
+        )
+        foreach ($p in $paths) {
+            if (Test-Path $p) {
+                Remove-Item -Path $p -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+        
+        # 4. Registry Disable
+        Set-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -Value 1 -Type DWord
+        
+        Write-Log -Message "OneDrive removed and disabled." -Level Success
+    }
+}
+
+<#
+.SYNOPSIS
+    Removes Microsoft Edge (Advanced/Risky).
+    Adapted from Win-Debloat-Tools.
+#>
+function Uninstall-WinDebloat7Edge {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    param()
+
+    Write-Log -Message "Starting Edge Removal (Warning: This may break WebViews)..." -Level Warning
+
+    if ($PSCmdlet.ShouldProcess("Microsoft Edge", "Force Uninstall")) {
+        # 1. Prevent Reinstall
+        Set-RegistryKey -Path "HKLM:\SOFTWARE\Microsoft\EdgeUpdate" -Name "DoNotUpdateToEdgeWithChromium" -Value 1 -Type DWord
+
+        # 2. Find and Run Check for setup.exe in Program Files
+        $installerPattern = "$env:SystemDrive\Program Files (x86)\Microsoft\Edge\Application\*\Installer\setup.exe"
+        $installers = Get-ChildItem -Path $installerPattern -ErrorAction SilentlyContinue
+
+        if ($installers) {
+            foreach ($setup in $installers) {
+                Write-Log -Message "Running Edge uninstaller..." -Level Info
+                Start-Process -FilePath $setup.FullName -ArgumentList "--uninstall", "--system-level", "--verbose-logging", "--force-uninstall" -Wait -WindowStyle Hidden
+            }
+            Write-Log -Message "Edge uninstalled." -Level Success
+        }
+        else {
+            Write-Log -Message "Edge installer not found (could be already removed)." -Level Info
+        }
+        
+        # 3. Remove Appx
+        Get-AppxPackage -AllUsers *MicrosoftEdge* | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+    }
+}
+
+<#
+.SYNOPSIS
+    Removes Xbox Apps and Services.
+#>
+function Uninstall-WinDebloat7Xbox {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    param()
+
+    Write-Log -Message "Starting Xbox Removal..." -Level Info
+
+    if ($PSCmdlet.ShouldProcess("Xbox Services & Apps", "Uninstall")) {
+        # 1. Services
+        $services = @("XblAuthManager", "XblGameSave", "XboxGipSvc", "XboxNetApiSvc")
+        foreach ($svc in $services) {
+            Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
+            Set-Service -Name $svc -StartupType Disabled -ErrorAction SilentlyContinue
+        }
+
+        # 2. Apps
+        $apps = @(
+            "*XboxApp*", "*XboxGameOverlay*", "*XboxGamingOverlay*", "*XboxSpeechToTextOverlay*", 
+            "*GamingApp*", "*GamingServices*"
+        )
+        foreach ($app in $apps) {
+            Get-AppxPackage -AllUsers $app | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+        }
+        
+        Write-Log -Message "Xbox apps and services removed." -Level Success
+    }
+}
+
+#endregion
+
+#region AI & Ads (Win11)
+
+<#
+.SYNOPSIS
+    Disables Windows 11 AI features (Copilot, Recall) and Ads.
+#>
+function Disable-WinDebloat7AIandAds {
+    [CmdletBinding(SupportsShouldProcess)]
+    param()
+
+    Write-Log -Message "Disabling Windows 11 AI & Ads..." -Level Info
+    
+    if ($PSCmdlet.ShouldProcess("Windows AI", "Disable Copilot, Recall, Ads")) {
+        
+        # 1. Copilot (User & Machine)
+        Set-RegistryKey -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -Value 1 -Type DWord
+        Set-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -Value 1 -Type DWord
+        Set-RegistryKey -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowCopilotButton" -Value 0 -Type DWord
+        
+        # 2. Recall (AI Snapshots)
+        $aiPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"
+        Set-RegistryKey -Path $aiPath -Name "DisableAIDataAnalysis" -Value 1 -Type DWord
+        Set-RegistryKey -Path $aiPath -Name "AllowRecallEnablement" -Value 0 -Type DWord
+        Set-RegistryKey -Path $aiPath -Name "TurnOffSavingSnapshots" -Value 1 -Type DWord
+        
+        # 3. Edge AI & Sidebar
+        $edgePath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"
+        Set-RegistryKey -Path $edgePath -Name "HubsSidebarEnabled" -Value 0 -Type DWord
+        Set-RegistryKey -Path $edgePath -Name "CopilotCDPPageContext" -Value 0 -Type DWord
+        Set-RegistryKey -Path $edgePath -Name "ComposeInlineEnabled" -Value 0 -Type DWord
+        
+        # 4. Start Menu Ads / Suggestions
+        Set-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableWindowsConsumerFeatures" -Value 1 -Type DWord
+        
+        Write-Log -Message "AI and Ads features disabled." -Level Success
+    }
+}
+
+#endregion
+
+Export-ModuleMember -Function @(
+    "Get-WinDebloat7BloatwareList", 
+    "Remove-WinDebloat7Bloatware",
+    "Uninstall-WinDebloat7OneDrive",
+    "Uninstall-WinDebloat7Edge",
+    "Uninstall-WinDebloat7Xbox",
+    "Disable-WinDebloat7AIandAds"
+)

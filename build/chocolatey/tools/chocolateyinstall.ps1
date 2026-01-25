@@ -2,7 +2,7 @@ $packageName = 'win-debloat7'
 $version     = '1.2.0'
 $url = "https://github.com/tomytate/Win-Debloat7/releases/download/v$version/Win-Debloat7-v$version-Standard.zip"
 $installDir = Join-Path $env:ProgramData "Win-Debloat7"
-$checksum    = "45F80E1811350D98A0B3BEE4A905BEF35AAB98A87B0E0A66EF4727595ECECDE2" # Will be updated by build script
+$checksum    = "11AA4B5D4CA322E103011B2F3EAFDF687897BF9CE431AC3D3AE303A56A867743" # Will be updated by build script
 
 $packageArgs = @{
     packageName   = $packageName

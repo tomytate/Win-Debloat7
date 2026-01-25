@@ -46,30 +46,23 @@ New-Item -Path $DistPath -ItemType Directory -Force | Out-Null
 
 Write-Host "`n📦 Building STANDARD release (clean, no extras)..." -ForegroundColor Green
 
-# Store current branch
-$currentBranch = git -C $Root rev-parse --abbrev-ref HEAD 2>$null
-if (-not $currentBranch) { $currentBranch = "main" }
-
-# Checkout main branch
-Push-Location $Root
-try {
-    git checkout main -q 2>$null
-}
-catch {
-    Write-Host "   Note: Could not switch to main branch (may already be on main or not committed)" -ForegroundColor Yellow
-}
-Pop-Location
-
 $StandardPath = "$DistPath\Win-Debloat7-v$Version-Standard"
 New-Item -Path $StandardPath -ItemType Directory -Force | Out-Null
 
-# Copy files (exclude .git, build, dist, tests)
-$Exclusions = @('.git*', '.vs*', '.vscode', 'dist', 'tests', '*.zip', '*.7z', '*.rar')
+# Copy files (exclude .git, build, dist, tests, AND Extras module)
+# Note: "Extras" is the folder name in src/modules
+$StandardExclusions = @('.git*', '.vs*', '.vscode', 'dist', 'tests', '*.zip', '*.7z', '*.rar', 'Extras')
 
 Write-Host "   Copying files..." -ForegroundColor Gray
-Get-ChildItem -Path $Root -Exclude $Exclusions | Copy-Item -Destination $StandardPath -Recurse -Force
+Get-ChildItem -Path $Root -Exclude $StandardExclusions | Copy-Item -Destination $StandardPath -Recurse -Force
 
-# Remove build folder from package (but keep essential scripts)
+# Double check: Remove Extras module if it slipped in (due to Copy-Item exclusion quirks)
+if (Test-Path "$StandardPath\src\modules\Extras") {
+    Remove-Item -Path "$StandardPath\src\modules\Extras" -Recurse -Force
+    Write-Host "   Ensured Extras module is removed from Standard build." -ForegroundColor Gray
+}
+
+# Remove build folder from package
 Remove-Item -Path "$StandardPath\build" -Recurse -Force -ErrorAction SilentlyContinue
 
 # Create README for Standard
@@ -133,30 +126,25 @@ Write-Host "   ✅ Standard release built: ${StandardSize}MB" -ForegroundColor G
 
 Write-Host "`n📦 Building EXTRAS release (includes MAS/Defender)..." -ForegroundColor Yellow
 
-# Check if extras branch exists
-$extrasExists = git -C $Root branch --list extras 2>$null
-if ($extrasExists) {
-    Push-Location $Root
-    git checkout extras -q 2>$null
-    Pop-Location
-    
-    $ExtrasPath = "$DistPath\Win-Debloat7-v$Version-Extras"
-    New-Item -Path $ExtrasPath -ItemType Directory -Force | Out-Null
-    
-    Write-Host "   Copying files from extras branch..." -ForegroundColor Gray
-    Get-ChildItem -Path $Root -Exclude $Exclusions | Copy-Item -Destination $ExtrasPath -Recurse -Force
-    Remove-Item -Path "$ExtrasPath\build" -Recurse -Force -ErrorAction SilentlyContinue
+$ExtrasPath = "$DistPath\Win-Debloat7-v$Version-Extras"
+New-Item -Path $ExtrasPath -ItemType Directory -Force | Out-Null
+
+# Copy ALL files (only exclude git/build artifacts)
+$ExtrasExclusions = @('.git*', '.vs*', '.vscode', 'dist', 'tests', '*.zip', '*.7z', '*.rar')
+
+Write-Host "   Copying files..." -ForegroundColor Gray
+# We want Extras module here, so we don't exclude 'Extras'
+Get-ChildItem -Path $Root -Exclude $ExtrasExclusions | Copy-Item -Destination $ExtrasPath -Recurse -Force
+
+# Verify Extras module exists
+if (-not (Test-Path "$ExtrasPath\src\modules\Extras\Extras.psm1")) {
+    Write-Host "   ⚠️  Extras module missing! Did you pull the latest code?" -ForegroundColor Red
 }
 else {
-    Write-Host "   ⚠️  Extras branch not found - creating placeholder..." -ForegroundColor Yellow
-    $ExtrasPath = "$DistPath\Win-Debloat7-v$Version-Extras"
-    New-Item -Path $ExtrasPath -ItemType Directory -Force | Out-Null
-    
-    # Copy standard files as base
-    Get-ChildItem -Path $StandardPath | Copy-Item -Destination $ExtrasPath -Recurse -Force
-    
-    Write-Host "   Note: Create 'extras' branch with MAS/Defender module for full Extras build" -ForegroundColor Yellow
+    Write-Host "   ✅ Extras module verified." -ForegroundColor Green
 }
+
+Remove-Item -Path "$ExtrasPath\build" -Recurse -Force -ErrorAction SilentlyContinue
 
 # Create WARNING README for Extras
 $ExtrasReadme = @"
@@ -294,6 +282,8 @@ $ReleaseNotes = @"
 
 - Full debloating and optimization
 - Privacy hardening & performance tweaks
+- **System Repair & Network Reset**
+- **AI Control (Disable Copilot/Recall)**
 - GUI and CLI interfaces
 - **No antivirus flags** | **Fully supported**
 
@@ -317,7 +307,7 @@ $ReleaseNotes = @"
 
 ## 🔐 SHA256 Checksums
 ``````
-$($checksums -join "`n")
+$($sb.ToString().Trim())
 ``````
 "@
 
