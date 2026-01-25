@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo.png" alt="Win-Debloat7 Logo" width="120" height="120">
+
 # Win-Debloat7
 
 ### The Professional Windows Optimization Framework
