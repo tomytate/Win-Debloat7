@@ -18,10 +18,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install PowerShell 7.5.4
+      - name: Install PowerShell 7.5 (Preview)
         shell: pwsh
         run: |
-           & { $(irm https://aka.ms/install-powershell.ps1) } -Version 7.5.4
+           & { $(irm https://aka.ms/install-powershell.ps1) } -Validation -Quiet -Preview
 
       - name: Build Dual Release
         shell: pwsh

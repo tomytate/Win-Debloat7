@@ -17,14 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install PowerShell 7.5.4
+    - name: Install PowerShell 7.5 (Preview)
       shell: pwsh
       run: |
-        & { $(irm https://aka.ms/install-powershell.ps1) } -UseMSI -Quiet -Preview
-        # Note: 7.5.4 might be 'Daily' or 'Preview' depending on availability, 
-        # using -Daily to catch bleeding edge if specific version fails, 
-        # or we attempt exact version:
-        # & { $(irm https://aka.ms/install-powershell.ps1) } -Version 7.5.4
+        # Use Zip install instead of MSI to prevent potential UI hangs/cancellations
+        & { $(irm https://aka.ms/install-powershell.ps1) } -Validation -Quiet -Preview
 
     - name: Run Pester Tests
       shell: pwsh
