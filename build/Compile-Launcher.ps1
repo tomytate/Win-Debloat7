@@ -1,7 +1,8 @@
 param(
     [string]$SourceFile,
     [string]$OutputFile,
-    [string]$Resource = ""
+    [string]$Resource = "",
+    [string]$Icon = ""
 )
 
 try {
@@ -28,6 +29,11 @@ try {
     
     if ($Resource) {
         $args += "/resource:`"$Resource`""
+    }
+    
+    if ($Icon -and (Test-Path $Icon)) {
+        Write-Host "   Adding Icon: $Icon" -ForegroundColor Gray
+        $args += "/win32icon:`"$Icon`""
     }
     
     $p = Start-Process -FilePath $csc -ArgumentList $args -PassThru -Wait -NoNewWindow

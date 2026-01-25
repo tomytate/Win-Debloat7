@@ -32,6 +32,15 @@ New-Item -Path $DistPath -ItemType Directory -Force | Out-Null
 $compilerScript = "$PSScriptRoot\Compile-Launcher.ps1"
 $commonExclusions = @('.git*', '.vs*', '.vscode', 'dist', 'tests', '*.zip', '*.7z', '*.rar', 'build')
 
+# --- PREPARE ICON ---
+$iconSource = "$Root\assets\logo.png"
+$iconDest = "$Root\assets\logo.ico"
+if (Test-Path $iconSource) {
+    Write-Host "`n🎨 Generatng app icon..." -ForegroundColor Cyan
+    $convertScript = "$PSScriptRoot\Convert-Logo.ps1"
+    Start-Process pwsh -ArgumentList "-NoProfile", "-File", "`"$convertScript`"", "-InputPng", "`"$iconSource`"", "-OutputIco", "`"$iconDest`"" -Wait -NoNewWindow
+}
+
 # ═══════════════════════════════════════════════════════════════
 # MAIN BUILD LOOP
 # ═══════════════════════════════════════════════════════════════
@@ -67,7 +76,7 @@ foreach ($variant in @("Standard", "Extras")) {
     Write-Host "   🔨 Compiling $exeName with embedded payload..." -ForegroundColor Gray
     
     # Run compiler
-    $p = Start-Process pwsh -ArgumentList "-NoProfile", "-File", "`"$compilerScript`"", "-SourceFile", "`"$launcherSrc`"", "-OutputFile", "`"$exeOut`"", "-Resource", "`"$payloadZip`"" -Wait -PassThru -NoNewWindow
+    $p = Start-Process pwsh -ArgumentList "-NoProfile", "-File", "`"$compilerScript`"", "-SourceFile", "`"$launcherSrc`"", "-OutputFile", "`"$exeOut`"", "-Resource", "`"$payloadZip`"", "-Icon", "`"$iconDest`"" -Wait -PassThru -NoNewWindow
     
     if ($p.ExitCode -eq 0 -and (Test-Path $exeOut)) {
         $size = [math]::Round((Get-Item $exeOut).Length / 1MB, 2)
