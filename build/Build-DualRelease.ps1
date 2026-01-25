@@ -146,3 +146,43 @@ $($sb.ToString().Trim())
 $ReleaseNotes | Set-Content "$DistPath\RELEASE_NOTES.md" -Encoding UTF8
 
 Write-Host "`n✅ Build Complete." -ForegroundColor Green
+
+# ═══════════════════════════════════════════════════════════════
+# UPDATE MANIFESTS (CHOCOLATEY & WINGET)
+# ═══════════════════════════════════════════════════════════════
+
+Write-Host "`n📝 Updating distribution manifests..." -ForegroundColor Cyan
+
+# 1. Update Chocolatey NuSpec
+$nuspecPath = Join-Path $Root "build\chocolatey\Win-Debloat7.nuspec"
+if (Test-Path $nuspecPath) {
+    (Get-Content $nuspecPath) -replace "<version>.*</version>", "<version>$Version</version>" | Set-Content $nuspecPath
+    Write-Host "   Updated NuSpec version to $Version" -ForegroundColor Gray
+}
+
+# 2. Update Chocolatey Install Script
+$chocoInstallPath = Join-Path $Root "build\chocolatey\tools\chocolateyinstall.ps1"
+if (Test-Path $chocoInstallPath) {
+    $content = Get-Content $chocoInstallPath
+    $content = $content -replace "\`$version\s*=\s*'.*'", "`$version     = '$Version'"
+    if ($checksums["Standard"]) {
+        $content = $content -replace "\`$checksum\s*=\s*`".*`"", "`$checksum    = `"$($checksums["Standard"])`""
+    }
+    Set-Content -Path $chocoInstallPath -Value $content
+    Write-Host "   Updated Chocolatey install script" -ForegroundColor Gray
+}
+
+# 3. Update Winget Manifest
+$wingetPath = Join-Path $Root "build\winget\Win-Debloat7.yaml"
+if (Test-Path $wingetPath) {
+    $content = Get-Content $wingetPath
+    $content = $content -replace "PackageVersion: .*", "PackageVersion: $Version"
+    $content = $content -replace "InstallerUrl: .*", "InstallerUrl: https://github.com/tomytate/Win-Debloat7/releases/download/v$Version/Win-Debloat7.exe"
+    if ($checksums["Standard"]) {
+        $content = $content -replace "InstallerSha256: .*", "InstallerSha256: $($checksums["Standard"])"
+    }
+    Set-Content -Path $wingetPath -Value $content
+    Write-Host "   Updated Winget manifest" -ForegroundColor Gray
+}
+
+Write-Host "`n🚀 Manifests Ready for Publication!" -ForegroundColor Green
