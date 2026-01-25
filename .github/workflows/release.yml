@@ -21,7 +21,8 @@ jobs:
       - name: Install PowerShell 7.5 (Preview)
         shell: pwsh
         run: |
-           & { $(irm https://aka.ms/install-powershell.ps1) } -Validation -Quiet -Preview
+           # Use simple Zip install (default) preventing MSI parameter issues
+           & { $(irm https://aka.ms/install-powershell.ps1) } -Preview
 
       - name: Build Dual Release
         shell: pwsh
