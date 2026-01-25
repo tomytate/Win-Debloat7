@@ -1,5 +1,8 @@
 # About Win-Debloat7
 
+## 📖 Description
+**Win-Debloat7** is a professional-grade Windows 10/11 optimization framework tailored for power users, gamers, and system administrators. It streamlines the removal of pre-installed bloatware, hardens system privacy by disabling invasive telemetry, and tunes performance settings—all while prioritizing **safety** and **reversibility** via automated snapshots.
+
 ## 🛡️ The Philosophy
 Win-Debloat7 was born from a simple frustration: Windows optimization scripts are often **opaque**, **destructive**, and **outdated**.
 

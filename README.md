@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="assets/logo.png" alt="Win-Debloat7 Logo" width="120" height="120">
-
 # Win-Debloat7
 
 ### The Professional Windows Optimization Framework
@@ -18,7 +16,7 @@
 
 ---
 
-![Dashboard Preview](assets/screenshot-dashboard.png)
+![Dashboard Preview](assets/ss-dashboard.png)
 
 </div>
 
@@ -228,9 +226,13 @@ performance:
 
 <div align="center">
 
-| Dashboard | Privacy Settings | Software Installer |
-|:---------:|:----------------:|:------------------:|
-| ![Dashboard](assets/ss-dashboard.png) | ![Privacy](assets/ss-privacy.png) | ![Software](assets/ss-software.png) |
+| Premium GUI | Software Manager |
+|:---:|:---:|
+| ![Dashboard](assets/ss-dashboard.png) | ![Software](assets/ss-software.png) |
+
+| CLI (Standard) | CLI (Extras) |
+|:---:|:---:|
+| ![CLI Standard](assets/ss-tuistandard.png) | ![CLI Extras](assets/ss-TUIExtra.png) |
 
 </div>
 
@@ -263,8 +265,8 @@ Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for:
 | Privacy hardening | ✅ | ✅ |
 | System snapshots | ✅ | ✅ |
 | GUI + CLI | ✅ | ✅ |
-| MAS (Activation) | ❌ | ⚠️ |
-| Defender Remover | ❌ | ⚠️ |
+| MAS (Activation) | ❌ | ✅ |
+| Defender Remover | ❌ | ✅ |
 | Antivirus flags | None | Likely |
 | Recommended | **Yes** | Advanced only |
 
@@ -295,7 +297,6 @@ Win-Debloat7 modifies Windows system settings. **Before using:**
 
 - **PowerShell** community for amazing modules
 - **Chris Titus Tech**, **WinUtil**, **LeDragoX** for inspiration
-- All **[contributors](https://github.com/tomytate/Win-Debloat7/graphs/contributors)**
 
 ---
 
