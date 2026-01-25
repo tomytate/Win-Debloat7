@@ -41,8 +41,7 @@ For portable usage (USB drives) or offline systems.
 1.  Go to the **[Releases Page](https://github.com/tomytate/Win-Debloat7/releases)**.
 2.  Download the **Standard Edition** ZIP (`Win-Debloat7-vX.X.X-Standard.zip`).
 3.  Extract the archive.
-4.  Right-click `Win-Debloat7.ps1` and select "Run with PowerShell 7".
-    *   *Or run from terminal:* `.\Win-Debloat7.ps1`
+
 
 ### ⚠️ Extras Edition
 For advanced users needing **Defender Remover** or **MAS** (Activation), download the **Extras Edition**.  
