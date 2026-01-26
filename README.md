@@ -7,9 +7,9 @@
 ### The Professional Windows Optimization Framework
 
 [![GitHub Downloads](https://img.shields.io/github/downloads/tomytate/Win-Debloat7/total?style=for-the-badge&color=00D4FF)](https://github.com/tomytate/Win-Debloat7/releases)
-[![WinGet](https://img.shields.io/badge/WinGet-v1.2.0-00D4FF?style=for-the-badge&logo=windows&logoColor=white)](https://winstall.app)
-[![Chocolatey](https://img.shields.io/badge/Chocolatey-v1.2.0-7B2CBF?style=for-the-badge&logo=chocolatey&logoColor=white)](https://community.chocolatey.org/packages)
-[![Docker](https://img.shields.io/badge/Docker-CI%20Tested-0078D4?style=for-the-badge&logo=docker&logoColor=white)](Dockerfile)
+[![WinGet](https://img.shields.io/badge/WinGet-v1.2.0-00D4FF?style=for-the-badge&logo=windows&logoColor=white)](https://winstall.app/apps/TomyTate.WinDebloat7)
+[![Chocolatey](https://img.shields.io/chocolatey/v/win-debloat7?style=for-the-badge&logo=chocolatey&logoColor=white)](https://community.chocolatey.org/packages/win-debloat7)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?style=for-the-badge&logo=windows)](README.md)
 [![License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge&color=00FF88)](LICENSE)
 
 **Modern • Modular • Reversible**

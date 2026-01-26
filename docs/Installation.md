@@ -34,15 +34,16 @@ choco install win-debloat7
 
 ---
 
-## 📂 Method 3: Portable / Manual
+## 📂 Method 3: Direct Download (Portable)
 
 For portable usage (USB drives) or offline systems.
 
 1.  Go to the **[Releases Page](https://github.com/tomytate/Win-Debloat7/releases)**.
-2.  Download the **Standard Edition** ZIP (`Win-Debloat7-vX.X.X-Standard.zip`).
-3.  Extract the archive.
-
+2.  Download the **Single-File Executable**:
+    *   **Standard**: `Win-Debloat7.exe` (Recommended)
+    *   **Extras**: `Win-Debloat7-Extras.exe`
+3.  **Run the file.** No extraction needed.
 
 ### ⚠️ Extras Edition
-For advanced users needing **Defender Remover** or **MAS** (Activation), download the **Extras Edition**.  
-*Note: This will likely trigger your Antivirus. You must create an exclusion for the extraction folder.*
+For advanced users needing **Defender Remover** or **MAS** (Activation).  
+*Note: This will likely trigger your Antivirus. You must add an exclusion.*
