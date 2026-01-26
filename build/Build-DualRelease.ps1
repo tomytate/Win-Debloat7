@@ -33,12 +33,9 @@ $compilerScript = "$PSScriptRoot\Compile-Launcher.ps1"
 $commonExclusions = @('.git*', '.vs*', '.vscode', 'dist', 'tests', '*.zip', '*.7z', '*.rar', 'build')
 
 # --- PREPARE ICON ---
-$iconSource = "$Root\assets\logo.png"
 $iconDest = "$Root\assets\logo.ico"
-if (Test-Path $iconSource) {
-    Write-Host "`n🎨 Generatng app icon..." -ForegroundColor Cyan
-    $convertScript = "$PSScriptRoot\Convert-Logo.ps1"
-    Start-Process pwsh -ArgumentList "-NoProfile", "-File", "`"$convertScript`"", "-InputPng", "`"$iconSource`"", "-OutputIco", "`"$iconDest`"" -Wait -NoNewWindow
+if (-not (Test-Path $iconDest)) {
+    Write-Warning "⚠️  Icon not found at $iconDest. EXEs will be built without custom icon."
 }
 
 # ═══════════════════════════════════════════════════════════════
