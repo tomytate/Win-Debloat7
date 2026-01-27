@@ -1,20 +1,18 @@
 <div align="center">
 
-<img src="assets/logo.png" alt="Win-Debloat7 Logo" width="120" height="120">
+<img src="assets/logo.png" alt="Win-Debloat7 Logo" width="140" height="140">
 
 # Win-Debloat7
+### The "Infrastructure-as-Code" Optimization Framework for Windows
 
-### The Professional Windows Optimization Framework
-
-[![GitHub Downloads](https://img.shields.io/github/downloads/tomytate/Win-Debloat7/total?style=for-the-badge&color=00D4FF)](https://github.com/tomytate/Win-Debloat7/releases)
-[![WinGet](https://img.shields.io/badge/WinGet-v1.2.0-00D4FF?style=for-the-badge&logo=windows&logoColor=white)](https://winstall.app/apps/TomyTate.WinDebloat7)
-[![Chocolatey](https://img.shields.io/chocolatey/v/win-debloat7?style=for-the-badge&logo=chocolatey&logoColor=white)](https://community.chocolatey.org/packages/win-debloat7)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?style=for-the-badge&logo=windows)](README.md)
+[![GitHub Release](https://img.shields.io/github/v/release/tomytate/Win-Debloat7?style=for-the-badge&color=00D4FF&logo=github)](https://github.com/tomytate/Win-Debloat7/releases)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20%7C%2024H2-blue?style=for-the-badge&logo=windows)](README.md)
 [![License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge&color=00FF88)](LICENSE)
+[![PowerShell](https://img.shields.io/badge/Built%20With-PowerShell%207.5-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](https://github.com/PowerShell/PowerShell)
 
-**Modern • Modular • Reversible**
+**Modern • Safe • Reversible • Transparent**
 
-[Features](#-features) • [Install](#-installation) • [Benchmarks](#-benchmarks) • [Profiles](#-profiles) • [Wiki](https://github.com/tomytate/Win-Debloat7/wiki)
+[⬇️ Download Now](https://github.com/tomytate/Win-Debloat7/releases) • [📚 Wiki](https://github.com/tomytate/Win-Debloat7/wiki) • [💬 Discord](https://discord.gg/tomytate)
 
 ---
 
@@ -24,186 +22,155 @@
 
 ---
 
-## 🎯 What is Win-Debloat7?
+## ⚡ What is Win-Debloat7?
 
-**Win-Debloat7** is a next-generation Windows optimization framework built from the ground up with **PowerShell 7.5**. Unlike legacy debloat scripts, Win-Debloat7 treats system configuration as **infrastructure-as-code** — using YAML profiles, encrypted snapshots, and real-time monitoring.
+**Win-Debloat7** is not just a script—it is a **professional grade configuration engine** designed to strip Windows 10 and 11 down to the essentials and rebuild it for performance.
 
-### Why Choose Win-Debloat7?
+Unlike legacy "black box" tools that blindly delete registry keys, Win-Debloat7 treats your system configuration as **code**. It uses audit-friendly YAML profiles, creates encrypted system snapshots before every change, and provides real-time telemetry monitoring so you can **see** what's happening.
 
-| Feature | Win-Debloat7 | Other Tools |
-|---------|:------------:|:-----------:|
-| **Real-time Telemetry Dashboard** | ✅ | ❌ |
-| **YAML-based Profiles** | ✅ Infrastructure-as-Code | ❌ GUI only |
-| **Encrypted Snapshots** | ✅ DPAPI | ⚠️ Basic/None |
-| **Hardware Auto-Detection** | ✅ | ❌ |
-| **PowerShell 7.5 Native** | ✅ CliXml / ArgumentCompleters | ⚠️ Legacy 5.1 |
-| **Enterprise Ready** | ✅ | ⚠️ |
-| **Full Rollback** | ✅ One-click restore | ⚠️ Partial |
-| **25H2 / Copilot / Recall Ready** | ✅ | ⚠️ |
+> **"It's like `terraform apply` for your personal Gaming PC."**
 
 ---
 
-## ✨ Features
+## 🔥 Deep-Dive: What Can It Debloat?
+
+Win-Debloat7 uses aggressive heuristic scanning to identify and neutralize unwanted software at the system level.
+
+### 1. Consumer Bloatware (The "Junk")
+Pre-installed sponsored applications that eat RAM and bandwidth.
+| Category | Targeted Apps (Examples) |
+| :--- | :--- |
+| **Social Media** | Facebook, Instagram, Twitter/X, TikTok, LinkedIn |
+| **Streaming** | Spotify, Netflix, Disney+, Prime Video, Pandora |
+| **Games** | Candy Crush, Bubble Witch, FarmVille, March of Empires, Solitaire Collection |
+| **Microsoft Promotions** | Get Started, Tips, Feedback Hub, Mixed Reality Portal, 3D Viewer |
+
+### 2. AI & Telemetry (The "Spyware")
+Features that track your activity or consume NPU/GPU resources unnecessarily.
+-   🚫 **Microsoft Copilot**: Completely disabled (Taskbar, Sidebar, Win+C).
+-   🚫 **Windows Recall**: AI screenshotting features disabled at the policy level.
+-   🚫 **Telemetry**: `DiagTrack` service disabled, hosts file blocked.
+-   🚫 **Advertising ID**: Reset and disabled to stop ad tracking.
+
+### 3. Core System Components (Advanced)
+*Available in "Extras" Edition only*
+-   💀 **Microsoft Edge**: Force uninstall (WebView2 preserved for compatibility).
+-   💀 **OneDrive**: Complete nuclear removal.
+-   💀 **Windows Defender**: Integrated "Defender Remover" support.
+
+---
+
+## 🛡️ Safety-First Architecture
+
+We know that "debloating" can be risky. Win-Debloat7 is built with **enterprise-grade safety rails**:
+
+-   **📸 Encrypted Snapshots**: Before *any* change is applied, we create a full system state backup.
+    -   *Technology*: Uses `ConvertTo-CliXml` with DPAPI encryption.
+    -   *Frequency*: Bypasses the Windows "1 restore point per 24h" limit.
+-   **↩️ One-Click Rollback**: Broke something? Restore your exact service config and registry state in seconds from the GUI.
+-   **💾 Non-Destructive Defaults**: The "Standard" edition will never touch critical components (like the Store or Update service) unless you explicitly ask it to.
+
+---
+
+## 🚀 Key Features
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" valign="top">
 
-### 🗑️ Intelligent Debloating
-- Removes pre-installed bloat safely
-- **Automatic snapshots** before changes
-- Exclusion lists to protect apps you need
-- Three modes: Conservative, Moderate, Aggressive
+### 🎮 Gaming Mode
+Optimizes Windows specifically for low-latency performance.
+-   **Power Plan**: Unlocks "Ultimate Performance" mode.
+-   **Thread Priority**: Sets GPU/Games to "High" priority in MMCSS.
+-   **Network**: Disables Nagle's Algorithm (TcpNoDelay).
+-   **Input**: Removes mouse acceleration curves.
 
-### 🔒 Privacy Hardening
-- Block telemetry at DNS + firewall levels
-- **GUI V2 Command Center** (5-Tab Layout)
-- Disable **Copilot**, **Recall**, **Advertising ID**
-- Multiple DNS providers (Cloudflare, Quad9, etc.)
+### 👁️ Privacy Command Center
+A visual dashboard that doesn't just "toggle" settings, but **monitors** them.
+-   Live connection counter.
+-   Real-time Telemetry Status indicator.
+-   Privacy Score (0-100) based on active audits.
 
 </td>
-<td width="50%">
+<td width="50%" valign="top">
 
-### ⚡ Performance Optimization
-- Hardware-aware profile auto-selection
-- Gaming mode with low-latency tweaks
-- Power plan management (Ultimate Performance)
-- Benchmark before/after metrics
+### 📦 Software Manager
+Reinstall the apps you actually *want* after the purge.
+-   Integrated **Winget** wrapper and **Chocolatey** support.
+-   One-click install for Essentials (Browser, Discord, Steam, 7Zip).
+-   Clean, bloat-free installers only.
 
-### 🛠️ Maintenance & Tools
-- **New Tools Tab**: One-stop utility center
-- **Driver Updates**: Winget & SDIO integration
-- **System Repair**: One-click SFC/DISM fix
-- **Network Reset**: Fix connectivity issues
-- **UI Customization**: Taskbar & Context Menu tweaks
-
-### 💾 System Snapshots
-- **DPAPI-encrypted** state backups
-- One-click rollback to any snapshot
-- Automatic backup before every change
-- **Bypasses 24h Creation Limit**
+### 🔧 System Repair Hub
+Don't just break things—fix them.
+-   **Network Reset**: Flushes DNS, resets Winsock/TCP stack.
+-   **Update Fixer**: Resets Windows Update components when stuck.
+-   **SFC/DISM**: One-click system integrity scans.
 
 </td>
 </tr>
 </table>
 
-### 📊 Unique: Real-Time Telemetry Monitor
-
-Watch blocked connections **live** — visual proof your privacy is protected.
-
-```
-╔══════════════════════════════════════════════════════════════╗
-║                 TELEMETRY MONITOR - LIVE                     ║
-╠══════════════════════════════════════════════════════════════╣
-║  Blocked: 247 connections | Saved: 12.4 MB bandwidth         ║
-║  [████████████████░░░░] Telemetry: 82% blocked               ║
-║  [██████████████████░░] Advertising: 91% blocked             ║
-╚══════════════════════════════════════════════════════════════╝
-```
-
 ---
-
-## 📈 Benchmarks
-
-Typical results on a fresh Windows 11 installation (Gaming Profile):
-
-| Metric | Stock Windows 11 | Win-Debloat7 | Improvement |
-| :--- | :--- | :--- | :--- |
-| **Background Processes** | 145 | 82 | **-43%** |
-| **RAM Usage (Idle)** | 4.2 GB | 2.8 GB | **-1.4 GB** |
-| **Running Services** | 212 | 156 | **-56 Disabled** |
-| **Telemetry Traffic** | Constant | 0 KB/s | **BLOCKED** |
-
 
 ## 📦 Installation
 
-### Option 1: Winget (Recommended)
+Win-Debloat7 is a portable application. No installation required.
+
+### Method 1: The Easy Way (Recommended)
+1.  Download the latest [**Win-Debloat7.exe**](https://github.com/tomytate/Win-Debloat7/releases).
+2.  Right-click and **Run as Administrator**.
+3.  The GUI will launch automatically.
+
+### Method 2: PowerShell (For Devs)
 ```powershell
-winget install TomyTate.WinDebloat7
+# Clone the repo
+git clone https://github.com/tomytate/Win-Debloat7.git
+cd Win-Debloat7
+
+# Run the script
+.\Win-Debloat7.ps1
 ```
 
-### Option 2: Chocolatey
-```powershell
-choco install win-debloat7
-```
-
-### Option 3: Standard Download (Recommended)
-1. Download the executable:
-   - **Recommended:** [Win-Debloat7.exe](https://github.com/tomytate/Win-Debloat7/releases) (Standard)
-   - **Advanced:** `Win-Debloat7-Extras.exe` (Includes MAS/Defender Remover)
-2. **Run the file directly.** (No installation needed)
-   - *It will automatically setup and launch the dashboard.*
-
-### Requirements
-- **Windows 10** 22H2+ or **Windows 11**
-- **PowerShell 7.5** or higher ([Download](https://github.com/PowerShell/PowerShell/releases))
-- **Administrator** privileges
-
-> 💡 **Tip**: Windows Terminal is recommended for the best experience.
+> **Note**: Requires **[PowerShell 7.5](https://github.com/PowerShell/PowerShell/releases)**. If you don't have it, the tool will prompt to install it for you.
+>
+> 🍫 **Chocolatey Support**: The official Chocolatey package is currently under review and will be available soon!
 
 ---
 
-## 🚀 Why PowerShell 7.5?
-Win-Debloat7 leverages specific features in the latest PowerShell release:
-- **`ConvertTo-CliXml`**: Enables secure, in-memory encryption of system snapshots (no more plain-text exports).
-- **Array Performance**: Uses the optimized `+=` operator (8x faster in 7.5) for cleaner code without performance penalty.
-- **WebCmdlet Retries**: Native handling of HTTP 429/retries for reliable package downloads.
+## ⚖️ Editions: Standard vs Extras
+
+We offer two flavors to suit your risk tolerance.
+
+| Feature | **Standard Edition** ✅ | **Extras Edition** ⚠️ |
+| :--- | :---: | :---: |
+| **Best For** | 99% of Users | Power Users / Sysadmins |
+| **Safety Level** | **Safe** | **Risky** |
+| **Bloat Removal** | Consumer Apps (Social, Games) | All Apps + System Apps |
+| **Privacy Tweaks** | Telemetry, Ads, Copilot | Telemetry, Ads, Copilot |
+| **Windows Activation** | ❌ | ✅ (MAS Integration) |
+| **Defender Removal** | ❌ | ✅ (Defender Remover) |
+| **Edge Removal** | ❌ | ✅ (Force Uninstall) |
+| **Antivirus Flags** | Clean | Likely (due to tools used) |
+
+**We strongly recommend start with the Standard Edition.**
 
 ---
 
-## 🚀 Quick Start
+## ⚙️ Advanced: Custom Profiles (YAML)
 
-### Interactive Mode (GUI) - Recommended
-```powershell
-.\Win-Debloat7.exe
-```
-Select **Option 2** to launch the premium GUI.
-
-### Profile/Unattended Mode (Advanced)
-For automation (CICD/SCCM), we recommend cloning the repository or downloading the source code, as the Single-File EXE is optimized for interactive use.
-
-```powershell
-# Using source code:
-.\Win-Debloat7.ps1 -ProfileFile "profiles\gaming.yaml" -Unattended
-```
-
-### Module Mode (Advanced)
-```powershell
-Import-Module .\Win-Debloat7.psd1
-
-# Use individual functions
-$config = Import-WinDebloat7Config -Path "profiles\moderate.yaml"
-Remove-WinDebloat7Bloatware -Config $config
-Set-WinDebloat7Privacy -Config $config
-```
-
----
-
-## 📋 Profiles
-
-Pre-configured optimization profiles for different use cases:
-
-| Profile | Description | Best For |
-|---------|-------------|----------|
-| **Conservative** | Minimal changes, maximum safety | Cautious users, work PCs |
-| **Moderate** | Balanced optimization | Most users ⭐ |
-| **Gaming** | Maximum performance, aggressive debloat | Gamers, power users |
-| **Essentials** | Post-debloat app installer | Fresh Windows installs |
-
-### Create Your Own Profile
+For sysadmins deploying to multiple machines, define your infrastructure in a simple YAML file:
 
 ```yaml
-# my-profile.yaml
 metadata:
-  name: "My Custom Profile"
-  author: "Your Name"
-  description: "Tailored for my setup"
+  name: "My Workstation"
+  version: "1.0"
 
 bloatware:
-  removal_mode: "Moderate"
-  exclude_list:
-    - "Microsoft.WindowsStore"
-    - "Microsoft.XboxGamingOverlay"
+  removal_mode: "Custom"
+  custom_list:
+    - "Microsoft.BingNews"
+    - "Microsoft.XboxApp"
+    - "TikTok"
 
 privacy:
   telemetry_level: "Security"
@@ -212,95 +179,28 @@ privacy:
 
 performance:
   power_plan: "Ultimate"
-  disable_background_apps: true
 ```
 
----
-
-## 🖥️ Screenshots
-
-<div align="center">
-
-| Premium GUI | Software Manager |
-|:---:|:---:|
-| ![Dashboard](assets/ss-dashboard.png) | ![Software](assets/ss-software.png) |
-
-| CLI (Standard) | CLI (Extras) |
-|:---:|:---:|
-| ![CLI Standard](assets/ss-tuistandard.png) | ![CLI Extras](assets/ss-TUIExtra.png) |
-
-</div>
-
----
-
-## 📖 Documentation
-
-- **[📚 Full Wiki](https://github.com/tomytate/Win-Debloat7/wiki)** — Complete documentation
-- **[🎥 Video Tutorial](https://youtube.com/@tomytate)** — Step-by-step walkthrough
-- **[💬 Discussions](https://github.com/tomytate/Win-Debloat7/discussions)** — Ask questions, share profiles
-- **[🐛 Report Bug](https://github.com/tomytate/Win-Debloat7/issues/new?template=bug_report.yml)**
-- **[💡 Request Feature](https://github.com/tomytate/Win-Debloat7/issues/new?template=feature_request.yml)**
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for:
-- Code contribution guidelines
-- Custom profile submissions
-- Documentation improvements
-
----
-
-## ⚖️ Standard vs Extras Edition
-
-| | **Standard** ✅ | **Extras** ⚠️ |
-|---|:---:|:---:|
-| Core optimization | ✅ | ✅ |
-| Privacy hardening | ✅ | ✅ |
-| System snapshots | ✅ | ✅ |
-| GUI + CLI | ✅ | ✅ |
-| MAS (Activation) | ❌ | ✅ |
-| Defender Remover | ❌ | ✅ |
-| Antivirus flags | None | Likely |
-| Recommended | **Yes** | Advanced only |
-
-> ⚠️ **Extras edition** includes risky third-party tools. Use at your own risk. **Standard is recommended for 99% of users.**
+Run it headlessly:
+```powershell
+.\Win-Debloat7.exe -Profile "my-config.yaml" -Unattended
+```
 
 ---
 
 ## ⚠️ Disclaimer
 
-Win-Debloat7 modifies Windows system settings. **Before using:**
-
-- ✅ Create a **system restore point**
-- ✅ **Backup** important data
-- ✅ Test on a **non-production** system first
-- ✅ Review profile settings before applying
-
-**The authors are not responsible for any damage.** Use at your own risk.
-
----
-
-## 📄 License
-
-[MIT License](LICENSE) — Free for personal and commercial use.
-
----
-
-## 🙏 Acknowledgments
-
-- **PowerShell** community for amazing modules
-- **Chris Titus Tech**, **WinUtil**, **LeDragoX** for inspiration
+**Liability**: While we have engineered this tool with safety in mind (Snapshots, Safe Defaults), modifying Windows system files always carries inherent risk.
+1.  **Always** backup your important data.
+2.  **Test** on a VM or secondary machine first.
+3.  **We are not responsible** for bricked OS installs or lost data.
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by [Tomy Tate](https://github.com/tomytate)**
-
-⭐ **Star this repo** if Win-Debloat7 helped you!
-
-[⬆ Back to Top](#win-debloat7)
+**Enjoy a faster, cleaner Windows experience.**
+<br>
+Made with ❤️ by [Tomy Tate](https://github.com/tomytate)
 
 </div>
