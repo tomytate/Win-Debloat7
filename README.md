@@ -6,7 +6,7 @@
 ### The "Infrastructure-as-Code" Optimization Framework for Windows
 
 [![GitHub Release](https://img.shields.io/github/v/release/tomytate/Win-Debloat7?style=for-the-badge&color=00D4FF&logo=github)](https://github.com/tomytate/Win-Debloat7/releases)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20%7C%2024H2-blue?style=for-the-badge&logo=windows)](README.md)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20%7C%2025H2-blue?style=for-the-badge&logo=windows)](README.md)
 [![License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge&color=00FF88)](LICENSE)
 [![PowerShell](https://img.shields.io/badge/Built%20With-PowerShell%207.5-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](https://github.com/PowerShell/PowerShell)
 
