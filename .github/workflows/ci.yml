@@ -15,7 +15,7 @@ jobs:
         os: [windows-latest]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     
     - name: Install PowerShell 7.5 (Preview)
       shell: pwsh
@@ -40,7 +40,7 @@ jobs:
     name: Lint Code
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     
     - name: Install PSScriptAnalyzer
       shell: pwsh
