@@ -14,7 +14,7 @@ Remove-Module Win-Debloat7* -ErrorAction SilentlyContinue
 
 # 2. Run Module Tests 
 Write-Host "`n[2/2] Running Module Tests..." -ForegroundColor Yellow
-$modRes = Invoke-Pester -Path "$PSScriptRoot\Modules.Tests.ps1" -PassThru -Output Minimal
+$modRes = Invoke-Pester -Path "$PSScriptRoot\Modules.Tests.ps1", "$PSScriptRoot\Software.Tests.ps1", "$PSScriptRoot\Integration.Tests.ps1" -PassThru -Output Minimal
 
 # 3. Aggregate
 $totalPassed = $coreRes.PassedCount + $modRes.PassedCount

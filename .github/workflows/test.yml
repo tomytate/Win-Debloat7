@@ -1,0 +1,23 @@
+name: Win-Debloat7 CI
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, windows-2019]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Pester Tests
+      shell: pwsh
+      run: |
+        .\tests\Run-AllTests.ps1

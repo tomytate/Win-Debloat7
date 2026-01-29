@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-01-29
+
+### 🚀 New Features
+- **Auto-Install Dependency**: The EXE launcher now detects missing PowerShell 7.5 and installs it automatically. No manual prerequisites required.
+- **Software Manager**:
+  - Added `winget upgrade --all` functionality to update all installed applications.
+  - Added **Driver Update Module** with interactive selection (Windows Update, GPU, SDIO).
+- **Interactive TUI**: The text-based menu now supports the full Driver Update workflow.
+
+### 🛡️ Improvements
+- **Robustness**: The launcher now pauses on errors instead of crashing silently.
+- **Version Sync**: Synchronized all modules to v1.2.1.
+
+## [1.2.3] - 2026-01-29
+### Fixed
+- Version consistency issues across GUI/TUI.
+- File lock issues during build process.
+
 ## [1.2.0] - 2026-01-25
 
 ### 🚀 New Features

@@ -45,6 +45,11 @@ Removes pre-installed Appx packages.
 *   **Deep Clean**: Runs `cleanmgr.exe` with all flags (777) enabled.
 *   **Component Cleanup**: Compresses the WinSxS folder using `DISM /StartComponentCleanup`.
 
+### 5. Software & Driver Manager
+*   **Winget Integration**: Install and *Update* (`--all`) applications.
+*   **Essentials**: One-click install for Chrome, Firefox, Steam, Discord, 7Zip.
+*   **Driver Updates**: Update GPU drivers (NVIDIA/AMD) or use SDIO for broad hardware support.
+
 ---
 
 ## 🛡️ Snapshots (Safety)

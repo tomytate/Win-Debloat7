@@ -7,29 +7,16 @@
     
 .NOTES
     Module: Win-Debloat7.UI.Menu
-    Version: 1.0.0
+    Version: 1.2.3
 #>
 
 #Requires -Version 7.5
 
 using namespace System.Management.Automation
 
-Import-Module "$PSScriptRoot\Colors.psm1" -Force
-Import-Module "$PSScriptRoot\..\core\Config.psm1" -Force
-Import-Module "$PSScriptRoot\..\core\State.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Bloatware\Bloatware.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Privacy\Privacy.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Performance\Performance.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Windows11\Version-Detection.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Software\Software.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Drivers\Drivers.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Network\Network.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Privacy\Tasks.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Privacy\Hosts.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Tweaks\UI.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Repair\Repair.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Features\Features.psm1" -Force
-Import-Module "$PSScriptRoot\..\modules\Security\Security.psm1" -Force
+# Modules are loaded via Win-Debloat7.psd1 when running the full framework.
+# We skip manual imports here to avoid context/scope collision.
+
 
 # Extras module (only present in Extras edition)
 $extrasModule = "$PSScriptRoot\..\modules\Extras\Extras.psm1"
@@ -330,13 +317,13 @@ function Show-NetworkPrivacyMenu {
     
     switch ($sel) {
         "1" {
-            Write-Host "`nDNS Providers:" -ForegroundColor Cyan
-            Write-Host "  [1] Cloudflare (Privacy)" -ForegroundColor White
-            Write-Host "  [2] Google" -ForegroundColor White
-            Write-Host "  [3] Quad9 (Security)" -ForegroundColor White
-            Write-Host "  [4] AdGuard (Ad-Blocking)" -ForegroundColor White
-            Write-Host "  [5] OpenDNS" -ForegroundColor White
-            Write-Host "  [6] Reset to DHCP" -ForegroundColor White
+            Write-WD7Host "`nDNS Providers:" -Color Secondary
+            Write-WD7Host "  [1] Cloudflare (Privacy)" -Color White
+            Write-WD7Host "  [2] Google" -Color White
+            Write-WD7Host "  [3] Quad9 (Security)" -Color White
+            Write-WD7Host "  [4] AdGuard (Ad-Blocking)" -Color White
+            Write-WD7Host "  [5] OpenDNS" -Color White
+            Write-WD7Host "  [6] Reset to DHCP" -Color White
             $dns = Read-Host "Select"
             switch ($dns) {
                 "1" { Set-WinDebloat7DNS -Provider Cloudflare }
@@ -366,85 +353,14 @@ function Show-NetworkPrivacyMenu {
         }
         "6" {
             $domains = Get-WinDebloat7TelemetryDomains
-            Write-Host "`nTelemetry Domains to Block ($($domains.Count)):" -ForegroundColor Cyan
-            $domains | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+            Write-WD7Host "`nTelemetry Domains to Block ($($domains.Count)):" -Color Secondary
+            $domains | ForEach-Object { Write-WD7Host "  $_" -Color Dark }
             Read-Host "`nPress Enter..."
         }
     }
 }
 
-function Invoke-DefenderRemover {
-    Write-WD7Host "`n[Defender Remover]" -Color Secondary
-    Write-Host "This will download and run the latest Defender Remover by ionuttbara." -ForegroundColor Gray
-    Write-Host "Repo: https://github.com/ionuttbara/windows-defender-remover" -ForegroundColor Gray
-    
-    $confirm = Read-Host "`nDownload and run? [Y/N]"
-    if ($confirm -notmatch '^[Yy]') { return }
-    
-    # Check valid connection
-    if (-not (Test-Connection "api.github.com" -Count 1 -Quiet)) {
-        Write-WD7Host "Error: Internet connection is required." -Color Error
-        Write-Host "Please check your network settings." -ForegroundColor Gray
-        Read-Host "Press Enter..."
-        return
-    }
-    
-    try {
-        Write-Host "Fetching latest release..." -ForegroundColor Cyan
-        $apiUrl = "https://api.github.com/repos/ionuttbara/windows-defender-remover/releases/latest"
-        $release = Invoke-RestMethod -Uri $apiUrl -ErrorAction Stop
-        
-        # Find the .exe asset
-        $asset = $release.assets | Where-Object { $_.name -like "*.exe" } | Select-Object -First 1
-        if (-not $asset) {
-            # Fallback to .bat or script if exe not found, or generic failure
-            throw "Executable asset not found in latest release."
-        }
-        
-        $dlUrl = $asset.browser_download_url
-        $destPath = "$env:TEMP\$($asset.name)"
-        
-        Write-Host "Downloading $($asset.name)..." -ForegroundColor Cyan
-        Invoke-WebRequest -Uri $dlUrl -OutFile $destPath -ErrorAction Stop
-        
-        Write-Host "Running Defender Remover..." -ForegroundColor Green
-        Start-Process -FilePath $destPath -Wait
-        
-        Write-Host "Defender Remover execution finished." -ForegroundColor Green
-    }
-    catch {
-        Write-WD7Host "Error launching Defender Remover: $($_.Exception.Message)" -Color Error
-        Write-Host "Opening GitHub page instead..." -ForegroundColor Gray
-        Start-Process "https://github.com/ionuttbara/windows-defender-remover/releases/latest"
-    }
-    Read-Host "Press Enter..."
-}
 
-function Invoke-WindowsActivation {
-    Write-WD7Host "`n[Windows Activation]" -Color Secondary
-    Write-Host "This will run the Microsoft Activation Scripts (MAS) via:" -ForegroundColor Gray
-    Write-Host "irm https://get.activated.win | iex" -ForegroundColor DarkGray
-    
-    $confirm = Read-Host "`nRun Activation Script? [Y/N]"
-    if ($confirm -notmatch '^[Yy]') { return }
-    
-    # Check valid connection
-    if (-not (Test-Connection "get.activated.win" -Count 1 -Quiet)) {
-        Write-WD7Host "Error: Internet connection is required." -Color Error
-        Write-Host "Please check your network settings." -ForegroundColor Gray
-        Read-Host "Press Enter..."
-        return
-    }
-    
-    try {
-        Write-Host "Launching MAS..." -ForegroundColor Green
-        Invoke-RestMethod https://get.activated.win | Invoke-Expression
-    }
-    catch {
-        Write-WD7Host "Error: $($_.Exception.Message)" -Color Error
-    }
-    Read-Host "Press Enter..."
-}
 
 function Invoke-WinDebloat7Benchmark {
     Show-WD7Header

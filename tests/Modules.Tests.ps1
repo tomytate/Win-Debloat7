@@ -44,3 +44,16 @@ Describe "Modules.Privacy" {
         $cmd | Should -Not -BeNullOrEmpty
     }
 }
+
+Describe "Modules.Performance" {
+    BeforeAll {
+        $src = "w:\Documents\Win-Debloat7\src"
+        Import-Module "$src\core\Logger.psm1" -ErrorAction SilentlyContinue
+        Import-Module "$src\modules\Performance\Benchmark.psm1" -ErrorAction Stop
+    }
+
+    It "Exports Measure-WinDebloat7System" {
+        $cmd = Get-Command "Measure-WinDebloat7System" -ErrorAction SilentlyContinue
+        $cmd | Should -Not -BeNullOrEmpty
+    }
+}

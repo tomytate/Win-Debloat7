@@ -7,7 +7,7 @@
     
 .NOTES
     Module: Win-Debloat7.UI.Colors
-    Version: 2.0.0 (Premium Edition)
+    Version: 1.2.3
 #>
 
 #Requires -Version 7.5
@@ -43,7 +43,7 @@ $Script:WD7Header = @"
 ║  ╚███╔███╔╝██║██║ ╚████║      ██████╔╝███████╗██████╔╝███████╗╚██████╔╝██║  ██║   ██║      ██║  ║
 ║   ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝      ╚═╝  ║
 ║                                                                                                 ║
-║                          Ultimate System Optimizer v1.2.0                                       ║
+║                          Ultimate System Optimizer v1.2.3                                       ║
 ║                       PowerShell 7.5+ | Windows 11 25H2 Ready                                   ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════╝
 "@

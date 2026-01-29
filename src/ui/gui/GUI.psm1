@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.UI.GUI
-    Version: 2.0.2 (Fixed version detection, Show Log, telemetry status)
+    Version: 1.2.3
 #>
 
 #Requires -Version 7.5
@@ -114,12 +114,13 @@ function Show-WinDebloat7GUI {
             
             # Detect Windows version based on build number
             $verName = switch ($build) {
+                { $_ -ge 26200 } { "25H2"; break }
                 { $_ -ge 26100 } { "24H2"; break }
                 { $_ -ge 22631 } { "23H2"; break }
                 { $_ -ge 22621 } { "22H2"; break }
                 { $_ -ge 22000 } { "21H2"; break }
-                { $_ -ge 19045 } { "22H2"; break }
-                { $_ -ge 19044 } { "21H2"; break }
+                { $_ -ge 19045 } { "22H2"; break } # Win10
+                { $_ -ge 19044 } { "21H2"; break } # Win10
                 default { "" }
             }
             

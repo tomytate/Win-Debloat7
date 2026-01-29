@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.Config
-    Version: 1.2.0
+    Version: 1.2.3
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -142,6 +142,30 @@ function Import-WinDebloat7Config {
         if ($Config.bloatware -and $Config.bloatware.removal_mode) {
             if ($Config.bloatware.removal_mode -notin $Script:ProfileSchema.ValidRemovalModes) {
                 $validationErrors += "Invalid removal_mode: '$($Config.bloatware.removal_mode)'. Valid: $($Script:ProfileSchema.ValidRemovalModes -join ', ')"
+            }
+            
+            # GOLD STANDARD: Enforce custom_list requirement
+            if ($Config.bloatware.removal_mode -eq 'Custom' -and (-not $Config.bloatware.custom_list)) {
+                $validationErrors += "Removal mode is 'Custom' but 'custom_list' is missing or empty."
+            }
+        }
+        
+        # 4b. Normalize Lists (Force Array) to prevent iteration errors
+        $listFields = @(
+            @{ Section = 'bloatware'; Field = 'custom_list' }
+            @{ Section = 'bloatware'; Field = 'exclude_list' }
+            @{ Section = 'software'; Field = 'install_list' }
+        )
+        
+        foreach ($item in $listFields) {
+            $sec = $item.Section
+            $fld = $item.Field
+            
+            if ($Config.$sec -and $Config.$sec.$fld) {
+                if ($Config.$sec.$fld -isnot [Array]) {
+                    # Convert single string to single-item array
+                    $Config.$sec.$fld = @($Config.$sec.$fld)
+                }
             }
         }
         

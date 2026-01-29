@@ -28,8 +28,16 @@ Tunes system responsiveness.
 
 ### **Software (`src/modules/Software`)**
 Package manager wrapper.
-- **Key Function:** `Install-WinDebloat7Essentials`
-- **Logic:** Detects `winget` or `chocolatey`. Installs common apps (Browser, 7-Zip, Notepad++) if requested.
+- **Key Functions:** `Install-WinDebloat7Essentials`, `Update-WinDebloat7Software`
+- **Logic:** Detects `winget` or `chocolatey`. Installs common apps and performs system-wide upgrades (`winget upgrade --all`).
+
+### **Drivers (`src/modules/Drivers`)**
+Manages system and GPU drivers.
+- **Key Function:** `Update-WinDebloat7Drivers`
+- **Features:**
+    - **Windows Update:** Scans for and installs official driver updates.
+    - **GPU:** Auto-detects NVIDIA/AMD and installs vendor drivers via Winget.
+    - **SDIO:** Integrates Snappy Driver Installer Origin for offline/legacy driver support.
 
 ### **Extras (`src/modules/Extras`)**
 *Available in Extras Edition only.*

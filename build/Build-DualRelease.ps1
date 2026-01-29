@@ -63,7 +63,23 @@ foreach ($variant in @("Standard", "Extras")) {
     
     # 3. Create Payload.zip
     $payloadZip = "$DistPath\payload_$variant.zip"
-    Compress-Archive -Path "$stageDir\*" -DestinationPath $payloadZip -Force
+    if (Test-Path $payloadZip) { Remove-Item $payloadZip -Force }
+
+    # DEBUG: Verify Version in Staging (GUI)
+    $stagingGUI = Join-Path $stageDir "src\ui\gui\MainWindow.xaml"
+    if (Test-Path $stagingGUI) {
+        $guiContent = Get-Content $stagingGUI -Raw
+        if ($guiContent -notmatch "v1.2.3") {
+            Write-Host "❌ FATAL: Staging Area has OLD VERSION for $variant!" -ForegroundColor Red
+            throw "Staging verification failed for $variant"
+        }
+        else {
+            Write-Host "✅ Staging Verified: GUI contains v1.2.3" -ForegroundColor Green
+        }
+    }
+
+    Write-Host "   Compressing payload..." -ForegroundColor DarkGray
+    Compress-Archive -Path "$stageDir\*" -DestinationPath $payloadZip -Force -ErrorAction Stop
     
     # 4. Compile Single-File EXE
     $launcherSrc = "$Root\src\core\LauncherEmbed.cs"
@@ -169,17 +185,6 @@ if (Test-Path $chocoInstallPath) {
     Write-Host "   Updated Chocolatey install script" -ForegroundColor Gray
 }
 
-# 3. Update Winget Manifest
-$wingetPath = Join-Path $Root "build\winget\Win-Debloat7.yaml"
-if (Test-Path $wingetPath) {
-    $content = Get-Content $wingetPath
-    $content = $content -replace "PackageVersion: .*", "PackageVersion: $Version"
-    $content = $content -replace "InstallerUrl: .*", "InstallerUrl: https://github.com/tomytate/Win-Debloat7/releases/download/v$Version/Win-Debloat7.exe"
-    if ($checksums["Standard"]) {
-        $content = $content -replace "InstallerSha256: .*", "InstallerSha256: $($checksums["Standard"])"
-    }
-    Set-Content -Path $wingetPath -Value $content
-    Write-Host "   Updated Winget manifest" -ForegroundColor Gray
-}
+
 
 Write-Host "`n🚀 Manifests Ready for Publication!" -ForegroundColor Green
