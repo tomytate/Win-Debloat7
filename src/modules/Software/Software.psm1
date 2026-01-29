@@ -205,6 +205,8 @@ $Script:EssentialsApps = @{
             @{ Name = "WizTree"; Winget = "NimbleWorks.WizTree"; Choco = "wiztree" }
             @{ Name = "Revo Uninstaller"; Winget = "RevoUninstaller.RevoUninstaller"; Choco = "revo-uninstaller" }
             @{ Name = "BleachBit"; Winget = "BleachBit.BleachBit"; Choco = "bleachbit" }
+            @{ Name = "Rufus"; Winget = "Rufus.Rufus"; Choco = "rufus" }
+            @{ Name = "balenaEtcher"; Winget = "Balena.Etcher"; Choco = "etcher" }
         )
     }
     
