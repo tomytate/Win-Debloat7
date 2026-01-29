@@ -1,5 +1,4 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path
-$sut = "$here/../../src/core/Config.psm1"
+$sut = "$PSScriptRoot/../../src/core/Config.psm1"
 Import-Module $sut -Force
 
 Describe "Config Module" {

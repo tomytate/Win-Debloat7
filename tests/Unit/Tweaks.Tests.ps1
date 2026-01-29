@@ -1,5 +1,4 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path
-$sut = "$here/../../src/modules/Tweaks/UI.psm1"
+$sut = "$PSScriptRoot/../../src/modules/Tweaks/UI.psm1"
 
 # Mock Core Dependencies
 function Write-Log { param($Message, $Level) }

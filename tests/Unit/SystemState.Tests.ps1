@@ -1,5 +1,4 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path
-$sut = "$here/../../src/core/SystemState.psm1"
+$sut = "$PSScriptRoot/../../src/core/SystemState.psm1"
 
 # Mock Get-RegistryKey since it's used internally
 function Get-RegistryKey { param($Path, $Name) return 1 }

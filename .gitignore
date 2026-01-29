@@ -21,7 +21,7 @@ Benchmark_Report.md
 *.psd1~
 *.psm1~
 *.ps1~
-Modules/
+/Modules/
 
 # OS
 Thumbs.db

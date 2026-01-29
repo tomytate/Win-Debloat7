@@ -1,0 +1,128 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.PSRepositoryItemInfo</T>
+      <T>System.Management.Automation.PSCustomObject</T>
+      <T>System.Object</T>
+    </TN>
+    <MS>
+      <S N="Name">powershell-yaml</S>
+      <S N="Version">0.4.12</S>
+      <S N="Type">Module</S>
+      <S N="Description">Powershell module for serializing and deserializing YAML</S>
+      <Obj N="Author" RefId="1">
+        <TN RefId="1">
+          <T>System.Object[]</T>
+          <T>System.Array</T>
+          <T>System.Object</T>
+        </TN>
+        <LST>
+          <S>Gabriel Adrian Samfira</S>
+          <S>Alessandro Pilotti</S>
+        </LST>
+      </Obj>
+      <S N="CompanyName">cloudbase</S>
+      <S N="Copyright">(c) 2016-2024 Cloudbase Solutions SRL. All rights reserved.</S>
+      <DT N="PublishedDate">2025-01-23T18:41:16+08:00</DT>
+      <Nil N="InstalledDate" />
+      <Nil N="UpdatedDate" />
+      <URI N="LicenseUri">https://github.com/cloudbase/powershell-yaml/blob/master/LICENSE</URI>
+      <URI N="ProjectUri">https://github.com/cloudbase/powershell-yaml</URI>
+      <Nil N="IconUri" />
+      <Obj N="Tags" RefId="2">
+        <TNRef RefId="1" />
+        <LST>
+          <S>PSModule</S>
+        </LST>
+      </Obj>
+      <Obj N="Includes" RefId="3">
+        <TN RefId="2">
+          <T>System.Collections.Hashtable</T>
+          <T>System.Object</T>
+        </TN>
+        <DCT>
+          <En>
+            <S N="Key">DscResource</S>
+            <Obj N="Value" RefId="4">
+              <TNRef RefId="1" />
+              <LST />
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">Command</S>
+            <Obj N="Value" RefId="5">
+              <TNRef RefId="1" />
+              <LST>
+                <S>ConvertTo-Yaml</S>
+                <S>ConvertFrom-Yaml</S>
+              </LST>
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">RoleCapability</S>
+            <Ref N="Value" RefId="4" />
+          </En>
+          <En>
+            <S N="Key">Workflow</S>
+            <Ref N="Value" RefId="4" />
+          </En>
+          <En>
+            <S N="Key">Function</S>
+            <Obj N="Value" RefId="6">
+              <TNRef RefId="1" />
+              <LST>
+                <S>ConvertTo-Yaml</S>
+                <S>ConvertFrom-Yaml</S>
+              </LST>
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">Cmdlet</S>
+            <Ref N="Value" RefId="4" />
+          </En>
+        </DCT>
+      </Obj>
+      <Nil N="PowerShellGetFormatVersion" />
+      <S N="ReleaseNotes"># 0.4.12_x000A__x000A_Bugfixes:_x000A_* Fix potential erroneous load of assembly by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/180_x000A__x000A_# 0.4.11_x000A__x000A_Bugfixes:_x000A_* Fix nested PSCustomObjects in hashtables by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/169_x000A_* Use decimal as first option when parsing floats by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/170. Thanks @amis92 for the suggestion!_x000A_* Fix lint errors by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/172_x000A_* Use decimals instead of double for tagged floats by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/174_x000A__x000A_Misc:_x000A_* Add aditional tests by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/171_x000A_* Update README.md by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/173_x000A__x000A_# 0.4.10_x000A__x000A_Bugfixes:_x000A_* A broken if statement mistakingly considered 0 as false and converted a 0 valued int to BigInteger (https://github.com/cloudbase/powershell-yaml/pull/165)._x000A_* Fixes JSONCompatible flag after we implemented an IDictionary and PSCustomObject type converters (https://github.com/cloudbase/powershell-yaml/pull/166)._x000A__x000A_# 0.4.9_x000A__x000A_Changes in this version:_x000A_* Revert commit 7980c7c "Fix losing case sensitive keys" (https://github.com/cloudbase/powershell-yaml/pull/159) . This change added a breaking change which was not properly documented before release, breaking some applications. This change will be re-added in a later version._x000A_* Unwrap PScustomObjects before serializing (https://github.com/cloudbase/powershell-yaml/pull/158)</S>
+      <Obj N="Dependencies" RefId="7">
+        <TNRef RefId="1" />
+        <LST />
+      </Obj>
+      <S N="RepositorySourceLocation">https://www.powershellgallery.com/api/v2</S>
+      <S N="Repository">PSGallery</S>
+      <S N="PackageManagementProvider">NuGet</S>
+      <Obj N="AdditionalMetadata" RefId="8">
+        <TN RefId="3">
+          <T>System.Management.Automation.PSCustomObject</T>
+          <T>System.Object</T>
+        </TN>
+        <MS>
+          <S N="copyright">(c) 2016-2024 Cloudbase Solutions SRL. All rights reserved.</S>
+          <S N="description">Powershell module for serializing and deserializing YAML</S>
+          <S N="requireLicenseAcceptance">False</S>
+          <S N="releaseNotes"># 0.4.12_x000A__x000A_Bugfixes:_x000A_* Fix potential erroneous load of assembly by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/180_x000A__x000A_# 0.4.11_x000A__x000A_Bugfixes:_x000A_* Fix nested PSCustomObjects in hashtables by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/169_x000A_* Use decimal as first option when parsing floats by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/170. Thanks @amis92 for the suggestion!_x000A_* Fix lint errors by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/172_x000A_* Use decimals instead of double for tagged floats by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/174_x000A__x000A_Misc:_x000A_* Add aditional tests by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/171_x000A_* Update README.md by @gabriel-samfira in https://github.com/cloudbase/powershell-yaml/pull/173_x000A__x000A_# 0.4.10_x000A__x000A_Bugfixes:_x000A_* A broken if statement mistakingly considered 0 as false and converted a 0 valued int to BigInteger (https://github.com/cloudbase/powershell-yaml/pull/165)._x000A_* Fixes JSONCompatible flag after we implemented an IDictionary and PSCustomObject type converters (https://github.com/cloudbase/powershell-yaml/pull/166)._x000A__x000A_# 0.4.9_x000A__x000A_Changes in this version:_x000A_* Revert commit 7980c7c "Fix losing case sensitive keys" (https://github.com/cloudbase/powershell-yaml/pull/159) . This change added a breaking change which was not properly documented before release, breaking some applications. This change will be re-added in a later version._x000A_* Unwrap PScustomObjects before serializing (https://github.com/cloudbase/powershell-yaml/pull/158)</S>
+          <S N="isLatestVersion">True</S>
+          <S N="isAbsoluteLatestVersion">True</S>
+          <S N="versionDownloadCount">40846557</S>
+          <S N="downloadCount">148534324</S>
+          <S N="packageSize">327106</S>
+          <S N="published">1/23/2025 6:41:16 PM +08:00</S>
+          <S N="created">1/23/2025 6:41:16 PM +08:00</S>
+          <S N="lastUpdated">1/23/2026 8:10:00 PM +08:00</S>
+          <S N="tags">PSModule PSFunction_ConvertTo-Yaml PSCommand_ConvertTo-Yaml PSFunction_ConvertFrom-Yaml PSCommand_ConvertFrom-Yaml PSIncludes_Function</S>
+          <S N="developmentDependency">False</S>
+          <S N="updated">2026-01-23T20:10:00Z</S>
+          <S N="NormalizedVersion">0.4.12</S>
+          <S N="Authors">Gabriel Adrian Samfira,Alessandro Pilotti</S>
+          <S N="IsPrerelease">false</S>
+          <S N="ItemType">Module</S>
+          <S N="FileList">powershell-yaml.nuspec|powershell-yaml.psd1|README.md|LICENSE|powershell-yaml.psm1|build.ps1|Tests\powershell-yaml.Tests.ps1|lib\net47\LICENSE.txt|lib\net47\YamlDotNet.xml|lib\net47\YamlDotNet.dll|lib\net47\PowerShellYamlSerializer.dll|lib\netstandard2.1\LICENSE.txt|lib\netstandard2.1\YamlDotNet.xml|lib\netstandard2.1\YamlDotNet.dll|lib\netstandard2.1\PowerShellYamlSerializer.dll</S>
+          <S N="GUID">6a75a662-7f53-425a-9777-ee61284407da</S>
+          <S N="PowerShellVersion">5.0</S>
+          <S N="CompanyName">Cloudbase Solutions SRL</S>
+        </MS>
+      </Obj>
+      <S N="InstalledLocation">W:\Documents\Win-Debloat7\src\modules\Vendor\powershell-yaml\0.4.12</S>
+    </MS>
+  </Obj>
+</Objs>

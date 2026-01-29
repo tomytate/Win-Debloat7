@@ -1,7 +1,6 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repair = "$here/../../src/modules/Repair/Repair.psm1"
-$features = "$here/../../src/modules/Features/Features.psm1"
-$security = "$here/../../src/modules/Security/Security.psm1"
+$repair = "$PSScriptRoot/../../src/modules/Repair/Repair.psm1"
+$features = "$PSScriptRoot/../../src/modules/Features/Features.psm1"
+$security = "$PSScriptRoot/../../src/modules/Security/Security.psm1"
 
 # Mock Logs
 function Write-Log { param($Message, $Level) }
