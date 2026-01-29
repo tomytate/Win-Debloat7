@@ -2,7 +2,8 @@
 
 <img src="assets/logo.png" alt="Win-Debloat7 Logo" width="140" height="140">
 
-# Reclaim Your Operating System
+# Win-Debloat7
+## Reclaim Your Operating System
 **The professional-grade Windows optimization toolkit.**
 Debloat, harden security, and maximize performance with a single PowerShell command.
 **Open Source & Transparent.**
