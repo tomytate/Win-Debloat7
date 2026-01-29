@@ -4,7 +4,7 @@
     # RootModule        = ''
 
     # Version number of this module.
-    ModuleVersion     = '1.2.0'
+    ModuleVersion     = '1.2.3'
 
     # ID used to uniquely identify this module
     GUID              = 'a1b2c3d4-e5f6-7890-1234-567890abcdef'
@@ -31,11 +31,10 @@
     NestedModules     = @(
         'src\core\Logger.psm1',
         'src\core\Config.psm1',
+        'src\core\Registry.psm1',
         'src\core\State.psm1',
         'src\core\SystemState.psm1',
-        'src\core\Registry.psm1',
         'src\modules\Bloatware\Bloatware.psm1',
-        'src\modules\Privacy\Privacy.psm1',
         'src\modules\Privacy\Privacy.psm1',
         'src\modules\Performance\Performance.psm1',
         'src\modules\Repair\Repair.psm1',
@@ -78,7 +77,7 @@
         'Get-WindowsVersionInfo', 'Test-Windows11Version', 'Clear-WindowsVersionCache',
         # Software
         'Test-PackageManager', 'Install-PackageManager', 'Get-WinDebloat7EssentialsList',
-        'Install-WinDebloat7Software', 'Install-WinDebloat7Essentials', 'Install-WinDebloat7ProfileSoftware',
+        'Install-WinDebloat7Software', 'Update-WinDebloat7Software', 'Install-WinDebloat7Essentials', 'Install-WinDebloat7ProfileSoftware',
         # Drivers
         'Get-WinDebloat7DriverStatus', 'Get-WinDebloat7GPUInfo', 'Update-WinDebloat7Drivers',
         # Network
@@ -93,7 +92,8 @@
         'Register-WinDebloat7Maintenance', 'Unregister-WinDebloat7Maintenance', 'Invoke-WinDebloat7Maintenance',
         # Extras (only available in Extras edition)
         # UI
-        'Show-MainMenu', 'Show-WinDebloat7GUI'
+        'Show-MainMenu', 'Show-WinDebloat7GUI',
+        'Write-WD7Host', 'Show-WD7Header', 'Show-WD7Separator', 'Show-WD7Progress', 'Show-WD7StatusBadge'
     )
 
     # Cmdlets to export from this module
@@ -119,7 +119,19 @@
             
             # Release Notes
             ReleaseNotes = @'
-## v1.2.0 (2026-01-25)
+## v1.2.3 (2026-01-29) - Platinum Release
+- NEW: PowerShell 7.5 Modernization (WebCmdlet Retry, #Requires enforcement)
+- FIX: Benchmark Module syntax correction
+- FIX: Hardened Test Suite (10/10 Verification)
+
+## v1.2.2 (2026-01-29)
+- FIX: Core Registry Export Stability
+- FIX: Module Test Isolation logic
+
+## v1.2.1 (2026-01-29)
+- NEW: Auto-Install PowerShell 7.5 Dependency logic in Launcher
+- FIX: Robustness improvements in Launcher (Wait-on-error)
+- FIX: Software Update feature added (winget upgrade --all)
 - NEW: GUI V2 "Command Center" (5-Tab Layout)
 - NEW: System Tweaks Hub (Privacy/Performance/Network)
 - NEW: Robust Windows 11 24H2 Detection

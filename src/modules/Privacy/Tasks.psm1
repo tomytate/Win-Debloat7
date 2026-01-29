@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Privacy.Tasks
-    Version: 1.0.0
+    Version: 1.2.3
     
 .LINK
     https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75

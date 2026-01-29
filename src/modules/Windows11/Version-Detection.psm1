@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Windows11.VersionDetection
-    Version: 1.2.0
+    Version: 1.2.3
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -53,17 +53,18 @@ function Get-WindowsVersionInfo {
     [CmdletBinding()]
     [OutputType([WindowsVersionInfo])]
     param(
-        [switch]$Force
+        [switch]$Force,
+        [psobject]$TestOS # For Unit Testing
     )
     
-    # PERF-001 fix: Return cached result if valid
+    # PERF-001 fix: Return cached result if valid (skip if testing)
     $now = Get-Date
-    if (-not $Force -and $Script:CachedVersionInfo -and 
+    if (-not $TestOS -and -not $Force -and $Script:CachedVersionInfo -and 
         ($now - $Script:CacheTimestamp).TotalMinutes -lt $Script:CacheLifetimeMinutes) {
         return $Script:CachedVersionInfo
     }
     
-    $os = Get-CimInstance Win32_OperatingSystem
+    $os = if ($TestOS) { $TestOS } else { Get-CimInstance Win32_OperatingSystem }
     $build = [int]$os.BuildNumber
     
     $info = [WindowsVersionInfo]::new()
@@ -81,7 +82,7 @@ function Get-WindowsVersionInfo {
     
     # Determine Friendly Name based on build number
     $info.FriendlyName = switch ($build) {
-        { $_ -ge 27000 } { "25H2 (Preview)" }
+        { $_ -ge 26200 } { "25H2" }
         { $_ -ge 26100 } { "24H2" }
         { $_ -ge 22631 } { "23H2" }
         { $_ -ge 22621 } { "22H2" }
@@ -115,10 +116,12 @@ function Test-Windows11Version {
     param(
         [Parameter(Mandatory)]
         [ValidateSet("21H2", "22H2", "23H2", "24H2", "25H2")]
-        [string]$MinimumVersion
+        [string]$MinimumVersion,
+        
+        [psobject]$TestOS # For Unit Testing
     )
     
-    $current = Get-WindowsVersionInfo
+    $current = Get-WindowsVersionInfo -TestOS $TestOS
     if (-not $current.IsWindows11) { return $false }
     
     $minBuild = switch ($MinimumVersion) {
@@ -126,7 +129,7 @@ function Test-Windows11Version {
         "22H2" { 22621 }
         "23H2" { 22631 }
         "24H2" { 26100 }
-        "25H2" { 27000 }  # Placeholder for future
+        "25H2" { 26200 }
     }
     
     return $current.BuildNumber -ge $minBuild

@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.Registry
-    Version: 1.0.0
+    Version: 1.2.3
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -229,15 +229,45 @@ function Export-RegistryKey {
         
         if ($PSCmdlet.ShouldProcess($Path, "Export Registry")) {
             # Use reg.exe for reliable export
-            $regPath = $Path -replace '^HKLM:\\', 'HKEY_LOCAL_MACHINE\' -replace '^HKCU:\\', 'HKEY_CURRENT_USER\'
-            $result = reg export $regPath $OutputPath /y 2>&1
+            # Handle standard PowerShell drive mappings
+            $hive = $null
+            $subKey = $null
             
-            if ($LASTEXITCODE -eq 0) {
+            if ($Path -match "^HKLM:\\?(.*)") {
+                $hive = "HKEY_LOCAL_MACHINE"
+                $subKey = $matches[1]
+            }
+            elseif ($Path -match "^HKCU:\\?(.*)") {
+                $hive = "HKEY_CURRENT_USER"
+                $subKey = $matches[1]
+            }
+            elseif ($Path -match "^Registry::HKEY_LOCAL_MACHINE\\?(.*)") {
+                $hive = "HKEY_LOCAL_MACHINE"
+                $subKey = $matches[1]
+            }
+            elseif ($Path -match "^Registry::HKEY_CURRENT_USER\\?(.*)") {
+                $hive = "HKEY_CURRENT_USER"
+                $subKey = $matches[1]
+            }
+            
+            if (-not $hive) {
+                Write-Log -Message "Unsupported registry hive for export: $Path. Only HKLM and HKCU are supported." -Level Error
+                return $false
+            }
+            
+            $regPath = "$hive\$subKey"
+            
+            # Quotes are critical for paths with spaces
+            $processArgs = @("export", "`"$regPath`"", "`"$OutputPath`"", "/y")
+            
+            $p = Start-Process -FilePath "reg.exe" -ArgumentList $processArgs -NoNewWindow -Wait -PassThru
+            
+            if ($p.ExitCode -eq 0) {
                 Write-Log -Message "Exported registry: $Path -> $OutputPath" -Level Success
                 return $true
             }
             else {
-                Write-Log -Message "Failed to export registry: $result" -Level Error
+                Write-Log -Message "Failed to export registry (Exit Code $($p.ExitCode))" -Level Error
                 return $false
             }
         }

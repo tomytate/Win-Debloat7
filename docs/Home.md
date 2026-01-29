@@ -13,7 +13,7 @@ Unlike other debloaters, Win-Debloat7 focuses on:
 
 ## 📚 Topics
 
-*   **[Installation Guide](Installation)** - Getting started with Winget, Chocolatey, or Manual methods.
+*   **[Installation Guide](Installation)** - Getting started with Chocolatey or Manual methods.
 *   **[Features & Modules](Features)** - Deep dive into Privacy, Performance, and Repair tools.
 *   **[Profiles Explained](Profiles)** - How to customize, create, and share your own `.yaml` configurations.
 *   **[Troubleshooting](Troubleshooting)** - Restore points, logs, and common fixes.

@@ -22,7 +22,7 @@ You are free to use, modify, and distribute it, provided you give credit to the 
 *   **Language**: PowerShell 7.5
 *   **GUI**: Windows Presentation Foundation (WPF) / XAML
 *   **Packaging**: GitHub Actions (CI/CD)
-*   **Distribution**: Winget, Chocolatey, ZIP
+*   **Distribution**: Chocolatey, ZIP
 
 ## 🌟 Acknowledgements
 Special thanks to the open-source community, specifically contributions from:

@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Performance
-    Version: 1.2.0
+    Version: 1.2.3
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75

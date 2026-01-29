@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Drivers
-    Version: 1.0.0
+    Version: 1.2.3
     
 .LINK
     https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -308,7 +308,7 @@ function Start-SnappyDriverInstaller {
             $zipPath = "$env:TEMP\sdio.zip"
             
             if ($PSCmdlet.ShouldProcess("SDIO", "Download and extract")) {
-                Invoke-WebRequest -Uri $sdioUrl -OutFile $zipPath -ErrorAction Stop
+                Invoke-WebRequest -Uri $sdioUrl -OutFile $zipPath -MaximumRetryCount 3 -RetryIntervalSec 5 -ErrorAction Stop
                 Expand-Archive -Path $zipPath -DestinationPath $sdioPath -Force
                 Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
                 

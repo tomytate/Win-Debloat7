@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Privacy
-    Version: 1.2.0
+    Version: 1.2.3
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -147,28 +147,28 @@ function Set-WinDebloat7Privacy {
     }
     
     # 5. Copilot & Recall (25H2 Readiness)
-    # 5. Copilot & Recall (25H2 Readiness)
     if ($Config.privacy.disable_copilot) {
         $currentStep++
-        Write-Progress -Activity "Applying Privacy Settings" -Status "Disabling Windows Copilot (HKCU + HKLM)" -PercentComplete (($currentStep / $totalSteps) * 100)
-        Write-Log -Message "Disabling Windows Copilot (HKCU + HKLM)" -Level Info
+        Write-Progress -Activity "Applying Privacy Settings" -Status "Disabling AI & Copilot" -PercentComplete (($currentStep / $totalSteps) * 100)
+        Write-Log -Message "Disabling AI & Copilot features" -Level Info
         
         $copilotKeys = @(
-            "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot",
-            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot"
+            @{ Path = "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot"; Name = "TurnOffWindowsCopilot"; Value = 1 }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot"; Name = "TurnOffWindowsCopilot"; Value = 1 }
+            @{ Path = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"; Name = "ShowCopilotButton"; Value = 0 }
+            # Edge AI
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"; Name = "HubsSidebarEnabled"; Value = 0 }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"; Name = "CopilotCDPPageContext"; Value = 0 }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"; Name = "ComposeInlineEnabled"; Value = 0 }
         )
         
-        foreach ($key in $copilotKeys) {
-            # Ensure key exists
-            if (-not (Test-Path $key)) {
-                New-Item -Path $key -Force -ErrorAction SilentlyContinue | Out-Null
-            }
-            if (Set-RegistryKey -Path $key -Name "TurnOffWindowsCopilot" -Value 1) {
+        foreach ($item in $copilotKeys) {
+            if (Set-RegistryKey -Path $item.Path -Name $item.Name -Value $item.Value) {
                 $successCount++
             }
             else {
                 $failCount++
-                Write-Log -Message "Failed to disable Copilot in $key" -Level Warning
+                Write-Log -Message "Failed to set AI key: $($item.Path)" -Level Warning
             }
         }
     }
@@ -176,11 +176,15 @@ function Set-WinDebloat7Privacy {
     if ($Config.privacy.disable_recall) {
         Write-Log -Message "Disabling Windows Recall (AI Analysis)" -Level Info
         
-        if (Set-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableAIDataAnalysis" -Value 1) {
-            $successCount++
-        }
-        else {
-            $failCount++
+        $aiKeys = @(
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"; Name = "DisableAIDataAnalysis"; Value = 1 }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"; Name = "AllowRecallEnablement"; Value = 0 }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"; Name = "TurnOffSavingSnapshots"; Value = 1 }
+        )
+        foreach ($item in $aiKeys) {
+            if (Set-RegistryKey -Path $item.Path -Name $item.Name -Value $item.Value) {
+                $successCount++
+            }
         }
     }
     
@@ -190,4 +194,61 @@ function Set-WinDebloat7Privacy {
     Write-Log -Message "Privacy settings applied: $successCount succeeded, $failCount failed" -Level $(if ($failCount -eq 0) { "Success" } else { "Warning" })
 }
 
-Export-ModuleMember -Function Set-WinDebloat7Privacy
+<#
+.SYNOPSIS
+    Disables Windows 11 AI features (Copilot, Recall) and Ads.
+    (Moved from Bloatware module for cohesion)
+#>
+function Disable-WinDebloat7AIandAds {
+    [CmdletBinding(SupportsShouldProcess)]
+    param()
+
+    Write-Log -Message "Disabling Windows 11 AI & Ads..." -Level Info
+    
+    if ($PSCmdlet.ShouldProcess("Windows AI", "Disable Copilot, Recall, Ads")) {
+        
+        # We leverage the logic we just centralized, or repeat specific keys?
+        # Repeating specific keys for standalone execution is safer to avoid Config dependency.
+        
+        $keys = @(
+            # Copilot
+            @{ Path = "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot"; Name = "TurnOffWindowsCopilot"; Value = 1; Type = "DWord" }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot"; Name = "TurnOffWindowsCopilot"; Value = 1; Type = "DWord" }
+            @{ Path = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"; Name = "ShowCopilotButton"; Value = 0; Type = "DWord" }
+            
+            # Recall
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"; Name = "DisableAIDataAnalysis"; Value = 1; Type = "DWord" }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"; Name = "AllowRecallEnablement"; Value = 0; Type = "DWord" }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"; Name = "TurnOffSavingSnapshots"; Value = 1; Type = "DWord" }
+            
+            # Edge AI
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"; Name = "HubsSidebarEnabled"; Value = 0; Type = "DWord" }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"; Name = "CopilotCDPPageContext"; Value = 0; Type = "DWord" }
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"; Name = "ComposeInlineEnabled"; Value = 0; Type = "DWord" }
+            
+            # Start Menu Ads
+            @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"; Name = "DisableWindowsConsumerFeatures"; Value = 1; Type = "DWord" }
+        )
+        
+        foreach ($k in $keys) {
+            Set-RegistryKey -Path $k.Path -Name $k.Name -Value $k.Value -Type $k.Type
+        }
+        
+        
+        # 5. Disable AI Services (25H2+)
+        if (Get-Service "AIFabric*" -ErrorAction SilentlyContinue) {
+            try {
+                Stop-Service -Name "AIFabric*" -Force -ErrorAction Stop
+                Set-Service -Name "AIFabric*" -StartupType Disabled -ErrorAction Stop
+                Write-Log -Message "AI Fabric Service disabled." -Level Success
+            }
+            catch {
+                Write-Log -Message "Could not disable AI Fabric: $($_.Exception.Message)" -Level Warning
+            }
+        }
+
+        Write-Log -Message "AI and Ads features disabled." -Level Success
+    }
+}
+
+Export-ModuleMember -Function Set-WinDebloat7Privacy, Disable-WinDebloat7AIandAds

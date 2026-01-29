@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>win-debloat7</id>
-    <version>1.2.0</version>
+    <version>1.2.3</version>
     <packageSourceUrl>https://github.com/tomytate/Win-Debloat7</packageSourceUrl>
     <owners>tomytate</owners>
     <title>Win-Debloat7 (Premium)</title>
@@ -30,8 +30,9 @@ Win-Debloat7 is a modern, modular, and safe Windows debloating and optimization 
 
 **Note**: This package installs the "Standard" edition.
     </description>
+    <releaseNotes>https://github.com/tomytate/Win-Debloat7/releases/tag/v1.2.3</releaseNotes>
     <dependencies>
-      <dependency id="powershell-core" version="7.4.0" />
+      <dependency id="powershell-core" version="7.5.0" />
     </dependencies>
   </metadata>
   <files>

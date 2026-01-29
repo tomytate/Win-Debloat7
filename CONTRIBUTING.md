@@ -41,8 +41,9 @@ Please be respectful and inclusive. We prioritize safety and transparency in all
 3. **Verify Safety**: Ensure no critical system components (like Bootloader) are touched.
 4. **Update Documentation**: If you change functionality, update `README.md`.
 
-## ⚠️ "Extras" Branch
-- Code related to **Defender Remover** or **Activation** goes into the `extras` branch ONLY.
-- The `main` branch must remain safe and compliant with Microsoft ToS.
+## ⚠️ "Extras" Build Variant
+- Code related to **Defender Remover** or **MAS** is located in `src/modules/Extras`.
+- The build script (`build/Build-DualRelease.ps1`) automatically handles the inclusion/exclusion of these modules.
+- Do **NOT** commit compiled EXEs or large binaries to the repository.
 
 Thank you for helping build the Gold Standard of Windows Optimization!

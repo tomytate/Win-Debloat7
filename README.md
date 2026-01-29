@@ -49,6 +49,10 @@ Pre-installed sponsored applications that eat RAM and bandwidth.
 Features that track your activity or consume NPU/GPU resources unnecessarily.
 -   🚫 **Microsoft Copilot**: Completely disabled (Taskbar, Sidebar, Win+C).
 -   🚫 **Windows Recall**: AI screenshotting features disabled at the policy level.
+<<<<<<< HEAD
+=======
+-   🚫 **AI Services**: `AIFabric` and `WindowsAI` services neutralized (25H2).
+>>>>>>> win-debloat7-1.2.0
 -   🚫 **Telemetry**: `DiagTrack` service disabled, hosts file blocked.
 -   🚫 **Advertising ID**: Reset and disabled to stop ad tracking.
 
@@ -94,10 +98,18 @@ A visual dashboard that doesn't just "toggle" settings, but **monitors** them.
 </td>
 <td width="50%" valign="top">
 
+<<<<<<< HEAD
 ### 📦 Software Manager
 Reinstall the apps you actually *want* after the purge.
 -   Integrated **Winget** wrapper and **Chocolatey** support.
 -   One-click install for Essentials (Browser, Discord, Steam, 7Zip).
+=======
+### 📦 Software & Driver Manager
+Reinstall and **Update** your essential software stack.
+-   **Winget Integration**: Install *and Update* apps (`winget upgrade --all`) with **automatic Chocolatey fallback** if Winget fails.
+-   **Driver Updates**: Update GPU (NVIDIA/AMD) and System drivers via Windows Update or SDIO.
+-   **One-Click Essentials**: Install Browser, Discord, Steam, 7Zip in seconds.
+>>>>>>> win-debloat7-1.2.0
 -   Clean, bloat-free installers only.
 
 ### 🔧 System Repair Hub
@@ -116,10 +128,17 @@ Don't just break things—fix them.
 
 Win-Debloat7 is a portable application. No installation required.
 
+<<<<<<< HEAD
 ### Method 1: The Easy Way (Recommended)
 1.  Download the latest [**Win-Debloat7.exe**](https://github.com/tomytate/Win-Debloat7/releases).
 2.  Right-click and **Run as Administrator**.
 3.  The GUI will launch automatically.
+=======
+### Method 1: The Easy Way (Self-Installing EXE)
+1.  Download the latest [**Win-Debloat7.exe**](https://github.com/tomytate/Win-Debloat7/releases).
+2.  Right-click and **Run as Administrator**.
+3.  **No Prerequisites? No Problem.** The launcher will automatically detect if you are missing PowerShell 7.5 and install it for you before launching.
+>>>>>>> win-debloat7-1.2.0
 
 ### Method 2: PowerShell (For Devs)
 ```powershell
@@ -131,9 +150,15 @@ cd Win-Debloat7
 .\Win-Debloat7.ps1
 ```
 
+<<<<<<< HEAD
 > **Note**: Requires **[PowerShell 7.5](https://github.com/PowerShell/PowerShell/releases)**. If you don't have it, the tool will prompt to install it for you.
 >
 > 🍫 **Chocolatey Support**: The official Chocolatey package is currently under review and will be available soon!
+=======
+> **Note**: For Method 2, you must have **[PowerShell 7.5](https://github.com/PowerShell/PowerShell/releases)** installed manually.
+>
+> 🍫 **Chocolatey Support**: The official Chocolatey package is available! `choco install win-debloat7`
+>>>>>>> win-debloat7-1.2.0
 
 ---
 
