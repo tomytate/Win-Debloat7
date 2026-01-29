@@ -8,9 +8,10 @@
 Debloat, harden security, and maximize performance with a single PowerShell command.
 **Open Source & Transparent.**
 
-[![GitHub Release](https://img.shields.io/github/v/release/tomytate/Win-Debloat7?style=for-the-badge&color=00D4FF)](https://github.com/tomytate/Win-Debloat7/releases)
-[![License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge)](LICENSE)
-[![PowerShell](https://img.shields.io/badge/PowerShell-7.4+-blue?style=for-the-badge&logo=powershell)](https://github.com/PowerShell/PowerShell)
+[![GitHub Release](https://img.shields.io/github/v/release/tomytate/Win-Debloat7?style=for-the-badge&color=00D4FF&logo=github)](https://github.com/tomytate/Win-Debloat7/releases)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20%7C%2025H2-blue?style=for-the-badge&logo=windows)](README.md)
+[![License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge&color=00FF88)](LICENSE)
+[![PowerShell](https://img.shields.io/badge/Built%20With-PowerShell%207.5-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](https://github.com/PowerShell/PowerShell)
 
 </div>
 
@@ -134,7 +135,7 @@ iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup-ext
 ```
 
 ### Method 2: The Easy Way (Self-Installing EXE)
-1.  Download the latest [**Win-Debloat7.exe**](https://github.com/tomytate/Win-Debloat7/releases).
+1.  Download the latest [**Win-Debloat7.exe**](https://github.com/tomytate/Win-Debloat7/releases) (Standard) or [**Win-Debloat7-Extras.exe**](https://github.com/tomytate/Win-Debloat7/releases) (Extras).
 2.  Right-click and **Run as Administrator**.
 3.  **No Prerequisites? No Problem.** The launcher will automatically detect if you are missing PowerShell 7.5 and install it for you before launching.
 
@@ -148,7 +149,7 @@ cd Win-Debloat7
 .\Win-Debloat7.ps1
 ```
 
-> **Note**: For Method 2, you must have **[PowerShell 7.5](https://github.com/PowerShell/PowerShell/releases)** installed manually.
+> **Note**: Method 1 requires PowerShell 7.5 to run the final installed script. Method 2 handles this automatically.
 >
 > 🍫 **Chocolatey Support**: The official Chocolatey package is available! `choco install win-debloat7`
 

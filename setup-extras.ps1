@@ -22,7 +22,7 @@ catch {
 }
 
 # 2. Find the Extras Edition Asset
-$Asset = $Release.assets | Where-Object { $_.name -like "*Extras*.zip" -or $_.name -like "*Extras*.exe" } | Select-Object -First 1
+$Asset = $Release.assets | Where-Object { $_.name -eq "Win-Debloat7-Extras.exe" } | Select-Object -First 1
 
 if (-not $Asset) {
     Write-Error "Could not find a valid release asset for Extras Edition."

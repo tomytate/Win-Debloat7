@@ -18,13 +18,8 @@ catch {
     Write-Error "Failed to fetch release info. Check your internet connection."
 }
 
-# 2. Find the Standard Edition Asset
-$Asset = $Release.assets | Where-Object { $_.name -like "*Standard*.zip" -or $_.name -like "*Standard*.exe" } | Select-Object -First 1
-
-if (-not $Asset) {
-    # Fallback if specific naming isn't found, grab the main zip
-    $Asset = $Release.assets | Where-Object { $_.name -eq "Win-Debloat7.zip" } | Select-Object -First 1
-}
+# 2. Find the Standard Edition Asset (Single-File EXE)
+$Asset = $Release.assets | Where-Object { $_.name -eq "Win-Debloat7.exe" } | Select-Object -First 1
 
 if (-not $Asset) {
     Write-Error "Could not find a valid release asset for Standard Edition."
