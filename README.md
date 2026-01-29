@@ -2,17 +2,16 @@
 
 <img src="assets/logo.png" alt="Win-Debloat7 Logo" width="140" height="140">
 
-# Win-Debloat7
-### The "Infrastructure-as-Code" Optimization Framework for Windows
+# Reclaim Your Operating System
+**The professional-grade Windows optimization toolkit.**
+Debloat, harden security, and maximize performance with a single PowerShell command.
+**Open Source & Transparent.**
 
-[![GitHub Release](https://img.shields.io/github/v/release/tomytate/Win-Debloat7?style=for-the-badge&color=00D4FF&logo=github)](https://github.com/tomytate/Win-Debloat7/releases)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20%7C%2025H2-blue?style=for-the-badge&logo=windows)](README.md)
-[![License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge&color=00FF88)](LICENSE)
-[![PowerShell](https://img.shields.io/badge/Built%20With-PowerShell%207.5-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](https://github.com/PowerShell/PowerShell)
+[![GitHub Release](https://img.shields.io/github/v/release/tomytate/Win-Debloat7?style=for-the-badge&color=00D4FF)](https://github.com/tomytate/Win-Debloat7/releases)
+[![License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge)](LICENSE)
+[![PowerShell](https://img.shields.io/badge/PowerShell-7.4+-blue?style=for-the-badge&logo=powershell)](https://github.com/PowerShell/PowerShell)
 
-**Modern • Safe • Reversible • Transparent**
-
-[⬇️ Download Now](https://github.com/tomytate/Win-Debloat7/releases) • [📚 Wiki](https://github.com/tomytate/Win-Debloat7/wiki) • [💬 Discord](https://discord.gg/tomytate)
+</div>
 
 ---
 
@@ -118,12 +117,19 @@ Don't just break things—fix them.
 
 Win-Debloat7 is a portable application. No installation required.
 
-### Method 1: The Easy Way (Self-Installing EXE)
+### Method 1: The Quick Start (One-Liner)
+The fastest way to get started. Open PowerShell as Administrator and run:
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup.ps1 | iex
+```
+
+### Method 2: The Easy Way (Self-Installing EXE)
 1.  Download the latest [**Win-Debloat7.exe**](https://github.com/tomytate/Win-Debloat7/releases).
 2.  Right-click and **Run as Administrator**.
 3.  **No Prerequisites? No Problem.** The launcher will automatically detect if you are missing PowerShell 7.5 and install it for you before launching.
 
-### Method 2: PowerShell (For Devs)
+### Method 3: PowerShell (For Devs)
 ```powershell
 # Clone the repo
 git clone https://github.com/tomytate/Win-Debloat7.git
