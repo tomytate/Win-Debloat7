@@ -119,10 +119,18 @@ Don't just break things—fix them.
 Win-Debloat7 is a portable application. No installation required.
 
 ### Method 1: The Quick Start (One-Liner)
-The fastest way to get started. Open PowerShell as Administrator and run:
+Open PowerShell as Administrator and choose your edition:
 
+**Option A: Standard Edition (Recommended)** 🛡️
+Safe, stable, and compliant.
 ```powershell
-iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup-standard.ps1 | iex
+```
+
+**Option B: Extras Edition** ⚠️
+Includes aggressive tools (Defender Remover) that may trigger Antivirus.
+```powershell
+iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup-extras.ps1 | iex
 ```
 
 ### Method 2: The Easy Way (Self-Installing EXE)
