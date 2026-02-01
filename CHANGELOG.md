@@ -1,6 +1,18 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [1.2.5] - 2026-01-30
+### 🚀 GUI Modernization (Cyber-Minimalist)
+- **Visual Overhaul**: Complete re-skin of the WPF GUI with "Neon" aesthetic (Dark Mode, Glow Effects, Grid Backgrounds).
+- **Core Styles**: Standardized Buttons, Cards, and Typography across the application.
+- **TUI**:
+  - **RGB Color Engine**: Upgraded TUI to support TrueColor (Cyan/Purple) on modern terminals.
+  - **Classic Art**: Restored the beloved "Old School" ASCII Banner by popular demand.
+
+### 🐛 Fixed
+- **Critical Hotfix**: Resolved a startup crash caused by a malformed Module Manifest (`.psd1`).
+- **Parity**: Aligned TUI interaction consistency with the new GUI.
 
 ## [1.2.1] - 2026-01-29
 
@@ -15,7 +27,7 @@ All notable changes to this project will be documented in this file.
 - **Robustness**: The launcher now pauses on errors instead of crashing silently.
 - **Version Sync**: Synchronized all modules to v1.2.1.
 
-## [1.2.3] - 2026-01-29
+## [1.2.5] - 2026-01-29
 ### Fixed
 - Version consistency issues across GUI/TUI.
 - File lock issues during build process.

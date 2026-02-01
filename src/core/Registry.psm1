@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Registry management utilities for Win-Debloat7
     
@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.Registry
-    Version: 1.2.3
+    Version: 1.2.5
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75

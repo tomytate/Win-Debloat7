@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Centralized logging module for Win-Debloat7
     
@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.Logger
-    Version: 1.2.3
+    Version: 1.2.5
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -17,6 +17,9 @@
 #Requires -Version 7.5
 
 using namespace System.Management.Automation
+
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'Logger outputs to console by design')]
+
 
 class LogEntry {
     [datetime]$Timestamp

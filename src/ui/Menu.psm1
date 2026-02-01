@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Interactive Menu System for Win-Debloat7
     
@@ -7,7 +7,7 @@
     
 .NOTES
     Module: Win-Debloat7.UI.Menu
-    Version: 1.2.3
+    Version: 1.2.5
 #>
 
 #Requires -Version 7.5
@@ -29,7 +29,8 @@ function Show-MainMenu {
     while ($true) {
         Show-WD7Header
         
-        Write-WD7Host "Choose an option:" -Color Info
+        Show-WD7Separator -Title "MAIN MENU" -Color Primary
+        Write-Host ""
         Write-WD7Host "  [1] Quick Debloat (Recommended)" -Color White
         Write-WD7Host "  [2] Launch Premium GUI" -Color Primary
         Write-WD7Host "  [3] Select Profile..." -Color White
@@ -45,8 +46,8 @@ function Show-MainMenu {
         
         # Show Extras options only if module is available
         if ($extrasAvailable) {
-            Write-WD7Host " "
-            Write-WD7Host "  ═══ ADVANCED (USE AT OWN RISK) ═══" -Color Warning
+            Write-Host ""
+            Show-WD7Separator -Title "ADVANCED TOOLS" -Color Warning
             Write-WD7Host "  [D] Defender Remover ⚠️" -Color Warning
             Write-WD7Host "  [A] Windows Activation ⚠️" -Color Warning
         }
@@ -54,7 +55,9 @@ function Show-MainMenu {
         Write-WD7Host "  [0] Register Weekly Maintenance" -Color Dark
         Write-WD7Host "  [Q] Quit" -Color Dark
         
-        $choice = Read-Host "`nEnter selection"
+        Write-Host ""
+        Show-WD7Separator
+        $choice = Read-Host "  Enter selection"
         
         switch ($choice) {
             "1" { Invoke-Profile "$PSScriptRoot\..\..\profiles\moderate.yaml" }
@@ -129,7 +132,7 @@ function Show-MainMenu {
 function Show-TweaksMenu {
     while ($true) {
         Show-WD7Header
-        Write-WD7Host "Tweaks & Customization" -Color Secondary
+        Show-WD7Separator -Title "TWEAKS & CUSTOMIZATION" -Color Secondary
         
         Write-WD7Host "  [1] UI Customization (Taskbar, Context Menu)" -Color White
         Write-WD7Host "  [2] Advanced Removal (OneDrive, Edge, Xbox)" -Color White
@@ -148,7 +151,7 @@ function Show-TweaksMenu {
 
 function Show-UICustomizationMenu {
     Show-WD7Header
-    Write-WD7Host "UI Customization" -Color Secondary
+    Show-WD7Separator -Title "UI CUSTOMIZATION" -Color Secondary
     
     Write-Host "  [1] Align Taskbar: Left" -ForegroundColor White
     Write-Host "  [2] Align Taskbar: Center" -ForegroundColor White
@@ -174,7 +177,7 @@ function Show-UICustomizationMenu {
 
 function Show-AdvancedRemovalMenu {
     Show-WD7Header
-    Write-WD7Host "Advanced Application Removal" -Color Warning
+    Show-WD7Separator -Title "ADVANCED REMOVAL" -Color Warning
     
     Write-Host "  [1] Uninstall OneDrive (Complete)" -ForegroundColor White
     Write-Host "  [2] Uninstall Xbox Apps & Services" -ForegroundColor White
@@ -195,7 +198,7 @@ function Show-AdvancedRemovalMenu {
 
 function Show-ProfileSelection {
     Show-WD7Header
-    Write-WD7Host "Select a Profile to Apply:" -Color Secondary
+    Show-WD7Separator -Title "SELECT PROFILE" -Color Secondary
     
     $profiles = Get-ChildItem "$PSScriptRoot\..\..\profiles\*.yaml"
     $i = 1
@@ -253,7 +256,7 @@ function Show-SystemInfo {
     Show-WD7Header
     $ver = Get-WindowsVersionInfo
     
-    Write-WD7Host "System Information" -Color Secondary
+    Show-WD7Separator -Title "SYSTEM INFORMATION" -Color Secondary
     Write-Host "  OS:       " -NoNewline; Write-WD7Host $ver.ProductName -Color White
     Write-Host "  Version:  " -NoNewline; Write-WD7Host "$($ver.DisplayVersion) ($($ver.FriendlyName))" -Color White
     Write-Host "  Build:    " -NoNewline; Write-WD7Host $ver.BuildNumber -Color White
@@ -264,7 +267,7 @@ function Show-SystemInfo {
 
 function Show-SnapshotMenu {
     Show-WD7Header
-    Write-WD7Host "Snapshot Management" -Color Secondary
+    Show-WD7Separator -Title "SNAPSHOT MANAGEMENT" -Color Secondary
     
     $snaps = Get-WinDebloat7Snapshot
     if ($snaps.Count -eq 0) {
@@ -290,7 +293,7 @@ function Show-SnapshotMenu {
 
 function Show-NetworkPrivacyMenu {
     Show-WD7Header
-    Write-WD7Host "Network & Privacy Settings" -Color Secondary
+    Show-WD7Separator -Title "NETWORK & PRIVACY" -Color Secondary
     
     # Show current status
     $netStatus = Get-WinDebloat7NetworkStatus | Select-Object -First 1
@@ -317,7 +320,8 @@ function Show-NetworkPrivacyMenu {
     
     switch ($sel) {
         "1" {
-            Write-WD7Host "`nDNS Providers:" -Color Secondary
+            Write-Host "`n"
+            Show-WD7Separator -Title "DNS PROVIDERS" -Color Secondary
             Write-WD7Host "  [1] Cloudflare (Privacy)" -Color White
             Write-WD7Host "  [2] Google" -Color White
             Write-WD7Host "  [3] Quad9 (Security)" -Color White
@@ -353,7 +357,8 @@ function Show-NetworkPrivacyMenu {
         }
         "6" {
             $domains = Get-WinDebloat7TelemetryDomains
-            Write-WD7Host "`nTelemetry Domains to Block ($($domains.Count)):" -Color Secondary
+            Write-Host "`n"
+            Show-WD7Separator -Title "TELEMETRY DOMAINS" -Color Secondary
             $domains | ForEach-Object { Write-WD7Host "  $_" -Color Dark }
             Read-Host "`nPress Enter..."
         }
@@ -364,7 +369,7 @@ function Show-NetworkPrivacyMenu {
 
 function Invoke-WinDebloat7Benchmark {
     Show-WD7Header
-    Write-WD7Host "System Benchmarking" -Color Secondary
+    Show-WD7Separator -Title "BENCHMARKING" -Color Secondary
     Write-Host "This will capture current system metrics and save a report to your Desktop." -ForegroundColor Gray
     Write-Host "For strictly accurate comparison, run this before and after optimization." -ForegroundColor Gray
     
@@ -388,7 +393,7 @@ function Invoke-WinDebloat7Benchmark {
 
 function Show-RepairMenu {
     Show-WD7Header
-    Write-WD7Host "System Repair Tools" -Color Warning
+    Show-WD7Separator -Title "SYSTEM REPAIR" -Color Warning
     
     Write-Host "  [1] Repair Windows Image (SFC + DISM)" -ForegroundColor White
     Write-Host "  [2] Reset Network Stack (IP/DNS/Winsock)" -ForegroundColor White
@@ -410,7 +415,7 @@ function Show-RepairMenu {
 
 function Show-FeaturesMenu {
     Show-WD7Header
-    Write-WD7Host "Windows Features Manager" -Color Secondary
+    Show-WD7Separator -Title "WINDOWS FEATURES" -Color Secondary
     
     Write-Host "  [1] Disable Optional Features (Fax, IIS, WorkFolders)" -ForegroundColor White
     Write-Host "  [2] Enable Optional Features (Revert)" -ForegroundColor White

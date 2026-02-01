@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Windows Features Management module for Win-Debloat7
     
@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Features
-    Version: 1.2.3
+    Version: 1.2.5
 #>
 
 #Requires -Version 7.5

@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 <#
 .SYNOPSIS
     Win-Debloat7 - The Power User's Windows Optimization Platform
@@ -29,7 +29,7 @@
     Applies the moderate profile without prompts (for automation).
     
 .NOTES
-    Version: 1.2.3
+    Version: 1.2.5
     Author: Tomy Tolledo
     License: MIT
     Requires: PowerShell 7.5+, Administrator privileges

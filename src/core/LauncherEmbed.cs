@@ -159,7 +159,7 @@ namespace WinDebloat7
                 
                 string installCmd = "Set-ExecutionPolicy Bypass -Scope Process -Force; " +
                                     "[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; " +
-                                    "iex \"& { $(irm https://aka.ms/install-powershell.ps1) } -UseMSI -Quiet\"";
+                                    "iex '& { $(irm https://aka.ms/install-powershell.ps1) } -UseMSI -Quiet'";
 
                 ProcessStartInfo psi = new ProcessStartInfo
                 {

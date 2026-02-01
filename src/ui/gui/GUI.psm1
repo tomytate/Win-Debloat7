@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     WPF GUI Controller for Win-Debloat7 (Premium Edition)
     
@@ -8,11 +8,14 @@
     
 .NOTES
     Module: Win-Debloat7.UI.GUI
-    Version: 1.2.3
+    Version: 1.2.5
 #>
 
 #Requires -Version 7.5
 #Requires -RunAsAdministrator
+
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '', Justification = 'Event parameters required by signature')]
+
 
 # Import Backend Modules
 $scriptRoot = $PSScriptRoot
@@ -79,6 +82,7 @@ function Show-WinDebloat7GUI {
             if ($nav) {
                 $nav.Add_Checked({
                         param($s, $e)
+                        $null = $s; $null = $e # Suppress unused parameter warning
                         # Hide all views
                         foreach ($vn in $views.Values) {
                             $v = $window.FindName($vn)
@@ -469,7 +473,7 @@ function Show-WinDebloat7GUI {
             $icSoftware.ItemsSource = $categoriesList
         }
         catch {
-            # Software list failed to load
+            Write-Warning "Software list failed to load: $($_.Exception.Message)"
         }
         
         # Select/Deselect All

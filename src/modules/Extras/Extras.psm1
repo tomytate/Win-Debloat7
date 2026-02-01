@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Extras module for Win-Debloat7 (Advanced Edition)
     
@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Extras
-    Version: 1.2.3
+    Version: 1.2.5
 #>
 
 #Requires -Version 7.5

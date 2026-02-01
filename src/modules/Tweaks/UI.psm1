@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     UI Customization module for Win-Debloat7
     
@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Tweaks.UI
-    Version: 1.2.3
+    Version: 1.2.5
 #>
 
 #Requires -Version 7.5

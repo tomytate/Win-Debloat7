@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Network configuration module for Win-Debloat7
     
@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Network
-    Version: 1.2.3
+    Version: 1.2.5
     
 .LINK
     https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -92,7 +92,7 @@ $Script:DNSProviders = @{
     Set-WinDebloat7DNS -Provider Cloudflare
     
 .EXAMPLE
-    Set-WinDebloat7DNS -Provider Custom -CustomPrimary "1.2.3.4" -CustomSecondary "5.6.7.8"
+    Set-WinDebloat7DNS -Provider Custom -CustomPrimary "1.2.5.4" -CustomSecondary "5.6.7.8"
 #>
 function Set-WinDebloat7DNS {
     [CmdletBinding(SupportsShouldProcess)]

@@ -1,38 +1,45 @@
 <#
 .SYNOPSIS
-    Premium color scheme and branding for Win-Debloat7 TUI
+    Premium color scheme and branding for Win-Debloat7 TUI (Cyber-Minimalist Edition)
     
 .DESCRIPTION
-    Defines the "Neon Cyber" color palette with premium aesthetics.
+    Defines the "Neon Cyber" color palette with TrueColor (RGB) support for PowerShell 7+.
     
 .NOTES
     Module: Win-Debloat7.UI.Colors
-    Version: 1.2.3
+    Version: 1.3.0
 #>
 
 #Requires -Version 7.5
 
-# Premium Color Scheme - Neon Cyber Dark
-$Script:WD7Colors = @{
-    # Primary Palette
-    Primary    = "Cyan"           # #00D4FF - Main accent
-    Secondary  = "Magenta"        # #7B2CBF - Secondary accent
+# Premium Color Scheme - Neon Cyber Palette
+$Script:WD7Theme = @{
+    # Hex Colors for Modern Terminals
+    Colors   = @{
+        Primary   = "#00D4FF" # Cyan Neon
+        Secondary = "#7B2CBF" # Purple Neon
+        Success   = "#00FF88" # Green Neon
+        Warning   = "#FFB800" # Orange Neon
+        Error     = "#FF3366" # Red/Pink Neon
+        Info      = "#A0A0B0" # Gray Blue
+        Dark      = "#606070" # Muted
+        White     = "#FFFFFF" # Pure White
+    }
     
-    # Status Colors
-    Success    = "Green"          # #00FF88 - Neon Green
-    Warning    = "Yellow"         # #FFB800 - Amber
-    Error      = "Red"            # #FF3366 - Coral Red
-    
-    # Text Colors
-    Info       = "Gray"           # #A0A0B0 - Secondary text
-    Dark       = "DarkGray"       # #606070 - Muted text
-    White      = "White"          # #FFFFFF - Primary text
-    
-    # Background (Console limitation - display only)
-    Background = "Black"          # #0D0D0D - True dark
+    # Fallback for Legacy Consoles
+    Fallback = @{
+        Primary   = "Cyan"
+        Secondary = "Magenta"
+        Success   = "Green"
+        Warning   = "Yellow"
+        Error     = "Red"
+        Info      = "Gray"
+        Dark      = "DarkGray"
+        White     = "White"
+    }
 }
 
-# Premium ASCII Art Header
+# Original Classic ASCII Header (Restored)
 $Script:WD7Header = @"
 ╔═════════════════════════════════════════════════════════════════════════════════════════════════╗
 ║                                                                                                 ║
@@ -43,7 +50,7 @@ $Script:WD7Header = @"
 ║  ╚███╔███╔╝██║██║ ╚████║      ██████╔╝███████╗██████╔╝███████╗╚██████╔╝██║  ██║   ██║      ██║  ║
 ║   ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝      ╚═╝  ║
 ║                                                                                                 ║
-║                          Ultimate System Optimizer v1.2.3                                       ║
+║                          Ultimate System Optimizer v1.2.5                                       ║
 ║                       PowerShell 7.5+ | Windows 11 25H2 Ready                                   ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════╝
 "@
@@ -54,6 +61,19 @@ $Script:WD7HeaderCompact = @"
 ║              Ultimate System Optimizer                       ║
 ╚══════════════════════════════════════════════════════════════╝
 "@
+
+function Get-WD7AnsiColor {
+    param([string]$Hex)
+    
+    if (-not $Hex -match "^#([0-9a-fA-F]{6})$") { return "" }
+    
+    $r = [Convert]::ToByte($Hex.Substring(1, 2), 16)
+    $g = [Convert]::ToByte($Hex.Substring(3, 2), 16)
+    $b = [Convert]::ToByte($Hex.Substring(5, 2), 16)
+    
+    # Return ANSI sequence
+    return "$([char]27)[38;2;$r;$g;${b}m"
+}
 
 function Write-WD7Host {
     [CmdletBinding()]
@@ -69,18 +89,37 @@ function Write-WD7Host {
         [switch]$Bold
     )
     
-    $consoleColor = $Script:WD7Colors[$Color]
+    # Check for RGB Support ($PSStyle exists in PS 7.2+)
+    $useRgb = $null -ne $PSStyle
+    $ansi = ""
+    $reset = ""
     
-    # Apply formatting
-    if ($Bold -and $Color -eq "Primary") {
-        $consoleColor = "Cyan"
-    }
-    
-    if ($NoNewline) {
-        Write-Host $Message -ForegroundColor $consoleColor -NoNewline
+    if ($useRgb) {
+        $hex = $Script:WD7Theme.Colors[$Color]
+        $ansi = Get-WD7AnsiColor -Hex $hex
+        $reset = "$([char]27)[0m"
+        
+        if ($Bold) {
+            $ansi += "$([char]27)[1m"
+        }
+        
+        # Write directly to host to strict control
+        if ($NoNewline) {
+            Write-Host "$ansi$Message$reset" -NoNewline
+        }
+        else {
+            Write-Host "$ansi$Message$reset"
+        }
     }
     else {
-        Write-Host $Message -ForegroundColor $consoleColor
+        # Fallback to ConsoleColor
+        $consoleColor = $Script:WD7Theme.Fallback[$Color]
+        if ($NoNewline) {
+            Write-Host $Message -ForegroundColor $consoleColor -NoNewline
+        }
+        else {
+            Write-Host $Message -ForegroundColor $consoleColor
+        }
     }
 }
 
@@ -93,16 +132,26 @@ function Show-WD7Header {
     Clear-Host
     
     if ($Compact) {
-        Write-Host $Script:WD7HeaderCompact -ForegroundColor Cyan
+        # Compact Art
+        $lines = $Script:WD7HeaderCompact -split "`n"
+        foreach ($line in $lines) { Write-WD7Host $line -Color Primary }
     }
     else {
-        # Full premium header with gradient effect
         $lines = $Script:WD7Header -split "`n"
-        $colors = @("DarkCyan", "Cyan", "Cyan", "Cyan", "Cyan", "Cyan", "Cyan", "Cyan", "DarkCyan", "DarkCyan", "DarkCyan", "DarkCyan")
         
-        for ($i = 0; $i -lt $lines.Count; $i++) {
-            $c = if ($i -lt $colors.Count) { $colors[$i] } else { "DarkCyan" }
-            Write-Host $lines[$i] -ForegroundColor $c
+        # Original gradient logic (approximate mapping)
+        # Top border -> Primary
+        # Logos -> Primary to Secondary gradient
+        # Bottom -> White/Info
+        
+        $i = 0
+        foreach ($line in $lines) {
+            if ($i -eq 0) { Write-WD7Host $line -Color Info } # Top Border
+            elseif ($i -lt 5) { Write-WD7Host $line -Color Primary } # Top half logo
+            elseif ($i -lt 9) { Write-WD7Host $line -Color Secondary } # Bottom half logo
+            elseif ($i -lt 11) { Write-WD7Host $line -Color White } # Text
+            else { Write-WD7Host $line -Color Info } # Bottom Border
+            $i++
         }
     }
     
@@ -113,18 +162,20 @@ function Show-WD7Separator {
     [CmdletBinding()]
     param(
         [string]$Title = "",
-        [string]$Color = "Primary"
+        [string]$Color = "Info"
     )
     
-    $consoleWidth = 60
+    $width = 99 # Match header width roughly
+    $lineChar = "─"
     
     if ([string]::IsNullOrEmpty($Title)) {
-        Write-WD7Host ("─" * $consoleWidth) -Color $Color
+        Write-WD7Host (" " * 2 + $lineChar * ($width - 4)) -Color $Color
     }
     else {
-        $padding = [math]::Max(0, ($consoleWidth - $Title.Length - 4) / 2)
-        $line = ("─" * [int]$padding) + "[ $Title ]" + ("─" * [int]$padding)
-        Write-WD7Host $line -Color $Color
+        # Centered visual separator
+        $padLen = [math]::Max(0, ($width - $Title.Length - 6) / 2)
+        $padding = $lineChar * $padLen
+        Write-WD7Host (" " * 2 + "$padding $Title $padding") -Color $Color
     }
 }
 
@@ -139,13 +190,11 @@ function Show-WD7Progress {
     $filled = [math]::Round($Width * $Percent / 100)
     $empty = $Width - $filled
     
-    $bar = "█" * $filled + "░" * $empty
-    $display = "[$bar] $Percent%"
+    # Modern progress block
+    $bar = "█" * $filled + "░" * $empty 
+    $display = "$Label [$bar] $Percent%"
     
-    if ($Label) {
-        $display = "$Label $display"
-    }
-    
+    # Clear line (CR) and write
     Write-Host "`r$display" -NoNewline -ForegroundColor Cyan
 }
 
@@ -158,14 +207,14 @@ function Show-WD7StatusBadge {
     )
     
     $icon = switch ($Status) {
-        "Success" { "●" }
-        "Warning" { "◐" }
-        "Error" { "○" }
-        "Info" { "◌" }
+        "Success" { "✔" }
+        "Warning" { "⚠" }
+        "Error" { "✖" }
+        "Info" { "ℹ" }
     }
     
     Write-WD7Host "  $icon " -Color $Status -NoNewline
     Write-WD7Host $Label -Color White
 }
 
-Export-ModuleMember -Function Write-WD7Host, Show-WD7Header, Show-WD7Separator, Show-WD7Progress, Show-WD7StatusBadge -Variable WD7Colors
+Export-ModuleMember -Function Write-WD7Host, Show-WD7Header, Show-WD7Separator, Show-WD7Progress, Show-WD7StatusBadge

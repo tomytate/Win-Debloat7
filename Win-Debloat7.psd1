@@ -1,10 +1,10 @@
-@{
+﻿@{
     # Script module or binary module file associated with this manifest.
     # Script module or binary module file associated with this manifest.
     # RootModule        = ''
 
     # Version number of this module.
-    ModuleVersion     = '1.2.3'
+    ModuleVersion     = '1.2.5'
 
     # ID used to uniquely identify this module
     GUID              = 'a1b2c3d4-e5f6-7890-1234-567890abcdef'
@@ -119,7 +119,7 @@
             
             # Release Notes
             ReleaseNotes = @'
-## v1.2.3 (2026-01-29) - Platinum Release
+## v1.2.5 (2026-01-29) - Platinum Release
 - NEW: PowerShell 7.5 Modernization (WebCmdlet Retry, #Requires enforcement)
 - FIX: Benchmark Module syntax correction
 - FIX: Hardened Test Suite (10/10 Verification)
