@@ -537,7 +537,7 @@ function Install-WinDebloat7Software {
                 
                 # --- Primary Attempt ---
                 if ($currentProv -eq "Winget") {
-                    $cmdArgs = @("install", "--id", $pkgId, "--accept-source-agreements", "--accept-package-agreements", "--disable-interactivity")
+                    $cmdArgs = @("install", "--id", $pkgId, "--source", "winget", "--accept-source-agreements", "--accept-package-agreements", "--disable-interactivity")
                     if ($Quiet) { $cmdArgs += "--silent" }
                     $p = Start-Process -FilePath "winget" -ArgumentList $cmdArgs -NoNewWindow -Wait -PassThru
                     $attemptExitCode = $p.ExitCode
@@ -571,7 +571,7 @@ function Install-WinDebloat7Software {
                     if (Test-PackageManager -Name $item.FallbackProvider) {
                         $fbExitCode = -1
                         if ($item.FallbackProvider -eq "Winget") {
-                            $cmdArgs = @("install", "--id", $item.FallbackID, "--accept-source-agreements", "--accept-package-agreements", "--disable-interactivity")
+                            $cmdArgs = @("install", "--id", $item.FallbackID, "--source", "winget", "--accept-source-agreements", "--accept-package-agreements", "--disable-interactivity")
                             if ($Quiet) { $cmdArgs += "--silent" }
                             $p = Start-Process -FilePath "winget" -ArgumentList $cmdArgs -NoNewWindow -Wait -PassThru
                             $fbExitCode = $p.ExitCode
@@ -829,7 +829,7 @@ function Update-WinDebloat7Software {
             try {
                 Write-Log -Message "Running Winget upgrade..." -Level Info
                 # Include --include-unknown to catch legacy apps if possible, but --all is standard
-                Start-Process -FilePath "winget" -ArgumentList "upgrade", "--all", "--accept-source-agreements", "--accept-package-agreements" -Wait -NoNewWindow
+                Start-Process -FilePath "winget" -ArgumentList "upgrade", "--all", "--source", "winget", "--accept-source-agreements", "--accept-package-agreements" -Wait -NoNewWindow
             }
             catch {
                 Write-Log -Message "Winget update failed: $($_.Exception.Message)" -Level Error

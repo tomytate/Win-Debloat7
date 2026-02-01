@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.6] - 2026-02-01
+### 🐛 Fixed
+- **Winget Source Error**: Forced `--source winget` on installations to bypass `msstore` certificate errors (0x8a15005e).
+- **Launcher Reliability**: Fixed quoting in PowerShell 7 auto-installer.
+
 ## [1.2.5] - 2026-01-30
 ### 🚀 GUI Modernization (Cyber-Minimalist)
 - **Visual Overhaul**: Complete re-skin of the WPF GUI with "Neon" aesthetic (Dark Mode, Glow Effects, Grid Backgrounds).
