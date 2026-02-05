@@ -119,25 +119,18 @@
             
             # Release Notes
             ReleaseNotes = @'
+## v1.2.6 (2026-02-05) - Production Polish
+- FIX: Winget Source Certificate Error (0x8a15005e) bypassed.
+- PERF: Async GUI Dashboard loading (Non-blocking Bloatware count).
+- DOCS: Added IPv6 Disablement warnings.
+- SEC: Hardened Repair Module (No Invoke-Expression).
+- AUDIT: Deep Codebase Audit passed (Core/Security/Performance).
+
 ## v1.2.5 (2026-01-29) - Platinum Release
 - NEW: PowerShell 7.5 Modernization (WebCmdlet Retry, #Requires enforcement)
 - FIX: Benchmark Module syntax correction
 - FIX: Hardened Test Suite (10/10 Verification)
-
-## v1.2.2 (2026-01-29)
-- FIX: Core Registry Export Stability
-- FIX: Module Test Isolation logic
-
-## v1.2.1 (2026-01-29)
-- NEW: Auto-Install PowerShell 7.5 Dependency logic in Launcher
-- FIX: Robustness improvements in Launcher (Wait-on-error)
-- FIX: Software Update feature added (winget upgrade --all)
-- NEW: GUI V2 "Command Center" (5-Tab Layout)
-- NEW: System Tweaks Hub (Privacy/Performance/Network)
-- NEW: Robust Windows 11 24H2 Detection
-- NEW: Smart RAM & Connection Monitoring
 '@
         }
     }
 }
-

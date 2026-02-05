@@ -19,9 +19,9 @@ Describe "Gems Master Integration" {
     
     Context "Repair Module" {
         It "Reset-WinDebloat7Network should invoke netsh commands" {
-            Mock Invoke-Expression { return $true } -ModuleName Repair
+            Mock Start-Process { return $true } -ModuleName Repair
             Reset-WinDebloat7Network -Confirm:$false
-            Assert-MockCalled Invoke-Expression -Times 5 -ModuleName Repair
+            Assert-MockCalled Start-Process -Times 5 -ModuleName Repair
         }
     }
     

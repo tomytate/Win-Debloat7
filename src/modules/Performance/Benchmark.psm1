@@ -41,6 +41,7 @@ function Compare-WinDebloat7Benchmarks {
         Compares two benchmark objects and generates a report.
     #>
     [CmdletBinding()]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory)] $Reference,
         [Parameter(Mandatory)] $Difference,

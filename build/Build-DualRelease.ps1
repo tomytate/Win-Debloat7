@@ -69,12 +69,12 @@ foreach ($variant in @("Standard", "Extras")) {
     $stagingGUI = Join-Path $stageDir "src\ui\gui\MainWindow.xaml"
     if (Test-Path $stagingGUI) {
         $guiContent = Get-Content $stagingGUI -Raw
-        if ($guiContent -notmatch "v1.2.5") {
-            Write-Host "❌ FATAL: Staging Area has OLD VERSION for $variant!" -ForegroundColor Red
+        if ($guiContent -notmatch "v$Version") {
+            Write-Host "❌ FATAL: Staging Area has OLD VERSION for $variant! Expected v$Version" -ForegroundColor Red
             throw "Staging verification failed for $variant"
         }
         else {
-            Write-Host "✅ Staging Verified: GUI contains v1.2.5" -ForegroundColor Green
+            Write-Host "✅ Staging Verified: GUI contains v$Version" -ForegroundColor Green
         }
     }
 

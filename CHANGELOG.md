@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 ### 🐛 Fixed
 - **Winget Source Error**: Forced `--source winget` on installations to bypass `msstore` certificate errors (0x8a15005e).
 - **Launcher Reliability**: Fixed quoting in PowerShell 7 auto-installer.
+- **Post-Release Polish**:
+    - **GUI Performance**: Improved Dashboard startup time by moving Bloatware counting to a background thread.
+    - **Documentation**: Added specific warnings about IPv6 disablement affecting Microsoft Store.
+    - **Security Hardening**: Replaced `Invoke-Expression` with `Start-Process` in Repair module for safer execution.
+    - **Code Quality**: Resolved all PSScriptAnalyzer linting warnings (clean `src` directory).
 
 ## [1.2.5] - 2026-01-30
 ### 🚀 GUI Modernization (Cyber-Minimalist)

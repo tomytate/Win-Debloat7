@@ -370,22 +370,22 @@ function Show-NetworkPrivacyMenu {
 function Invoke-WinDebloat7Benchmark {
     Show-WD7Header
     Show-WD7Separator -Title "BENCHMARKING" -Color Secondary
-    Write-Host "This will capture current system metrics and save a report to your Desktop." -ForegroundColor Gray
-    Write-Host "For strictly accurate comparison, run this before and after optimization." -ForegroundColor Gray
+    Write-WD7Host "This will capture current system metrics and save a report to your Desktop." -Color Gray
+    Write-WD7Host "For strictly accurate comparison, run this before and after optimization." -Color Gray
     
     $run = Read-Host "`nRun Benchmark? [Y/N]"
     if ($run -notmatch '^[Yy]') { return }
     
-    Write-Host "`nMeasuring system performance..." -ForegroundColor Cyan
+    Write-WD7Host "`nMeasuring system performance..." -Color Cyan
     $metrics = Measure-WinDebloat7System
     
-    Write-Host "`nResults:" -ForegroundColor Green
+    Write-WD7Host "`nResults:" -Color Green
     $metrics | Format-List | Out-String | Write-Host
     
     # Save simple report if standalone
     $reportPath = "$env:USERPROFILE\Desktop\Win-Debloat7_Benchmark_$(Get-Date -Format 'yyyyMMdd-HHmm').txt"
     $metrics | Out-File $reportPath
-    Write-Host "Snapshot saved to: $reportPath" -ForegroundColor Gray
+    Write-WD7Host "Snapshot saved to: $reportPath" -Color Gray
     
     Read-Host "`nPress Enter to continue..."
 }

@@ -107,7 +107,12 @@ Reinstall and **Update** your essential software stack.
 Don't just break things—fix them.
 -   **Network Reset**: Flushes DNS, resets Winsock/TCP stack.
 -   **Update Fixer**: Resets Windows Update components when stuck.
+-   **Update Fixer**: Resets Windows Update components when stuck.
 -   **SFC/DISM**: One-click system integrity scans.
+
+> [!WARNING]
+> **IPv6 Notice**: Disabling IPv6 (available in Network Tools) may break Microsoft Store downloads and Xbox Live connectivity on some ISPs. Re-enable it if you face issues.
+
 
 </td>
 </tr>

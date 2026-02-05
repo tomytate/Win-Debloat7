@@ -1,11 +1,11 @@
 ﻿<#
 .SYNOPSIS
     WPF GUI Controller for Win-Debloat7 (Premium Edition)
-    
+
 .DESCRIPTION
     Loads the XAML interface with sidebar navigation, binds event handlers,
     and bridges GUI actions to backend PowerShell modules.
-    
+
 .NOTES
     Module: Win-Debloat7.UI.GUI
     Version: 1.2.5
@@ -40,28 +40,28 @@ Import-Module "$scriptRoot\..\..\modules\Security\Security.psm1" -Force -ErrorAc
 function Show-WinDebloat7GUI {
     [CmdletBinding()]
     param()
-    
+
     Add-Type -AssemblyName PresentationFramework
     Add-Type -AssemblyName PresentationCore
     Add-Type -AssemblyName WindowsBase
-    
+
     $xamlPath = Join-Path $PSScriptRoot "MainWindow.xaml"
-    if (-not (Test-Path $xamlPath)) { 
+    if (-not (Test-Path $xamlPath)) {
         Write-Warning "MainWindow.xaml not found at $xamlPath"
-        return 
+        return
     }
-    
+
     try {
         [xml]$xaml = Get-Content $xamlPath -Raw
         $reader = (New-Object System.Xml.XmlNodeReader $xaml)
         $window = [Windows.Markup.XamlReader]::Load($reader)
-        
+
         # Helper to get controls
         $getCtrl = { param($name) $window.FindName($name) }
-        
+
         # Get controls
         $txtStatus = & $getCtrl "txtStatus"
-        
+
         # ═══════════════════════════════════════════════════════════════════════════════
         # SIDEBAR NAVIGATION
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -76,7 +76,7 @@ function Show-WinDebloat7GUI {
             'navTools'        = 'viewTools'
             'navSettings'     = 'viewSettings'
         }
-        
+
         foreach ($navName in $views.Keys) {
             $nav = & $getCtrl $navName
             if ($nav) {
@@ -95,11 +95,11 @@ function Show-WinDebloat7GUI {
                     })
             }
         }
-        
+
         # ═══════════════════════════════════════════════════════════════════════════════
         # POPULATE DASHBOARD - Fixed version detection and counting
         # ═══════════════════════════════════════════════════════════════════════════════
-        
+
         # Helper to force UI update (fixes freezing feeling) and run safely
         $updateGui = {
             [System.Windows.Threading.DispatcherFrame]$frame = [System.Windows.Threading.DispatcherFrame]::new()
@@ -115,7 +115,7 @@ function Show-WinDebloat7GUI {
             # OS Info - Robust Version Detection
             $os = Get-CimInstance Win32_OperatingSystem
             $build = [int]$os.BuildNumber
-            
+
             # Detect Windows version based on build number
             $verName = switch ($build) {
                 { $_ -ge 26200 } { "25H2"; break }
@@ -127,19 +127,22 @@ function Show-WinDebloat7GUI {
                 { $_ -ge 19044 } { "21H2"; break } # Win10
                 default { "" }
             }
-            
+
             $osNameStr = $os.Caption -replace "Microsoft\s+", ""
             if ($build -ge 22000 -and $osNameStr -notmatch "11") { $osNameStr = "Windows 11" } # Force 11 labels if CIM is stale
-            
+
             (& $getCtrl "txtOSName").Text = $osNameStr
             (& $getCtrl "txtOSVersion").Text = "Build $build $verName"
-            
+
             # RAM Display (Updated format)
             $connStats = (Get-NetTCPConnection -State Established -ErrorAction SilentlyContinue).Count
             $ram = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
             (& $getCtrl "txtRAM").Text = "$ram GB | $connStats Active Conns"
-            
-            # Bloatware count - Expanded Patterns
+
+            # Bloatware count - Async Implementation (Optimization)
+            # Get-AppxPackage is slow, so we load a placeholder and update it in the background
+            (& $getCtrl "txtBloatwareCount").Text = "..."
+
             $bloatwarePatterns = @(
                 '*3DBuilder*', '*BingNews*', '*BingWeather*', '*Clipchamp*', '*Disney*',
                 '*Duolingo*', '*Facebook*', '*Flipboard*', '*Spotify*', '*Twitter*',
@@ -148,16 +151,51 @@ function Show-WinDebloat7GUI {
                 '*Zune*', '*MixedReality*', '*Copilot*', '*LinkedIn*', '*Cortana*',
                 '*FeedbackHub*', '*GetHelp*', '*Maps*', '*Messaging*', '*YourPhone*'
             )
-            $apps = Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-            $bloatCount = 0
-            foreach ($pattern in $bloatwarePatterns) {
-                $bloatCount += ($apps | Where-Object { $_.Name -like $pattern }).Count
+
+            # Start background runspace
+            $rs = [runspacefactory]::CreateRunspace()
+            $rs.Open()
+            $psStr = {
+                param($patterns)
+                try {
+                    Import-Module Appx -ErrorAction SilentlyContinue
+                    $apps = Get-AppxPackage -AllUsers -ErrorAction Stop
+                    $count = 0
+                    foreach ($p in $patterns) {
+                        $count += ($apps | Where-Object { $_.Name -like $p }).Count
+                    }
+                    return $count
+                }
+                catch {
+                    return -1 # Error indicator
+                }
             }
-            (& $getCtrl "txtBloatwareCount").Text = $bloatCount.ToString()
-            
+            $ps = [powershell]::Create().AddScript($psStr).AddArgument($bloatwarePatterns)
+            $ps.Runspace = $rs
+            $handle = $ps.BeginInvoke()
+
+            # Non-blocking check for completion using the Dispatcher
+            $checkTimer = [System.Windows.Threading.DispatcherTimer]::new()
+            $checkTimer.Interval = [TimeSpan]::FromMilliseconds(100)
+            $checkTimer.Add_Tick({
+                    if ($handle.IsCompleted) {
+                        $checkTimer.Stop()
+                        try {
+                            $count = $ps.EndInvoke($handle)
+                            $ps.Dispose()
+                            $rs.Dispose()
+                            (& $getCtrl "txtBloatwareCount").Text = $count.ToString()
+                        }
+                        catch {
+                            (& $getCtrl "txtBloatwareCount").Text = "?"
+                        }
+                    }
+                })
+            $checkTimer.Start()
+
             # Privacy score calculation
             $sysState = Get-WinDebloat7SystemState
-            
+
             $privacyScore = 100
             if ($sysState.Telemetry) { $privacyScore -= 25 }
             if ($sysState.Copilot) { $privacyScore -= 15 }
@@ -165,27 +203,27 @@ function Show-WinDebloat7GUI {
             if ($sysState.ActivityHistory) { $privacyScore -= 10 }
             if ($sysState.Location) { $privacyScore -= 10 }
             if ($sysState.AdvertisingId) { $privacyScore -= 10 } # Assuming exists
-            
+
             $privacyScore = [Math]::Max(0, [Math]::Min(100, $privacyScore))
 
             # Update score text
             (& $getCtrl "txtPrivacyScore").Text = "$privacyScore"
-            
+
             # Update status indicators (Safe / Warning)
             (& $getCtrl "txtTelemetryStatus").Text = if ($sysState.Telemetry) { "Enabled" } else { "Disabled" }
             (& $getCtrl "indicatorTelemetry").Fill = if ($sysState.Telemetry) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-            
+
             (& $getCtrl "txtCopilotStatus").Text = if ($sysState.Copilot) { "Enabled" } else { "Disabled" }
             (& $getCtrl "indicatorCopilot").Fill = if ($sysState.Copilot) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-            
+
             (& $getCtrl "txtRecallStatus").Text = if ($sysState.Recall) { "Enabled" } else { "Disabled" }
             (& $getCtrl "indicatorRecall").Fill = if ($sysState.Recall) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-            
+
         }
         catch {
             Write-Warning "Dashboard Population Error: $($_.Exception.Message)"
         }
-        
+
         # 3.1 Real-time Monitoring Timer
         $timer = [System.Windows.Threading.DispatcherTimer]::new()
         $timer.Interval = [TimeSpan]::FromSeconds(5)
@@ -193,36 +231,39 @@ function Show-WinDebloat7GUI {
                 try {
                     # Update Connections & Privacy Score (Background Check)
                     $sysState = Get-WinDebloat7SystemState
-                
+
                     # Update RAM & Connections (Using Format requested)
                     $ram = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
                     $conn = (Get-NetTCPConnection -State Established -ErrorAction SilentlyContinue).Count
                     (& $getCtrl "txtRAM").Text = "$ram GB | $conn Active Conns"
-                
+
                     # Re-calculate score/status
                     $pScore = 100
                     if ($sysState.Telemetry) { $pScore -= 25 }
                     if ($sysState.Copilot) { $pScore -= 15 }
                     if ($sysState.Recall) { $pScore -= 15 }
-                    
+
                     (& $getCtrl "txtPrivacyScore").Text = "$pScore"
-                
+
                     (& $getCtrl "txtTelemetryStatus").Text = if ($sysState.Telemetry) { "Enabled" } else { "Disabled" }
                     (& $getCtrl "indicatorTelemetry").Fill = if ($sysState.Telemetry) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-                    
+
                     (& $getCtrl "txtCopilotStatus").Text = if ($sysState.Copilot) { "Enabled" } else { "Disabled" }
                     (& $getCtrl "indicatorCopilot").Fill = if ($sysState.Copilot) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-                    
+
                     (& $getCtrl "txtRecallStatus").Text = if ($sysState.Recall) { "Enabled" } else { "Disabled" }
                     (& $getCtrl "indicatorRecall").Fill = if ($sysState.Recall) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
                 }
-                catch { }
+                catch {
+                    # Suppress UI update errors during closing/heavy load
+                    Write-Verbose "UI update suppressed: $($_.Exception.Message)"
+                }
             })
         $timer.Start()
-        
+
         # Stop timer on close
         $window.Add_Closed({ $timer.Stop() })
-        
+
         # ═══════════════════════════════════════════════════════════════════════════════
         # DASHBOARD BUTTONS
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -233,11 +274,11 @@ function Show-WinDebloat7GUI {
                 try {
                     # 1. Safety Snapshot
                     New-WinDebloat7Snapshot -Name "Auto-QuickOptimize" -Description "Created before Quick Optimize"
-                    
+
                     # 2. Apply Profile
                     $txtStatus.Text = "Applying Optimization Profile..."
                     & $updateGui
-                    
+
                     $profilePath = Join-Path $scriptRoot "..\..\..\profiles\moderate.yaml"
                     if (Test-Path $profilePath) {
                         $config = Import-WinDebloat7Config -Path $profilePath -SkipDependencyCheck
@@ -254,7 +295,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-        
+
         (& $getCtrl "btnRemoveBloatware").Add_Click({
                 $txtStatus.Text = "Removing Bloatware..."
                 & $updateGui
@@ -271,11 +312,11 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-        
+
         (& $getCtrl "btnInstallEssentials").Add_Click({
                 (& $getCtrl "navSoftware").IsChecked = $true
             })
-        
+
         # ═══════════════════════════════════════════════════════════════════════════════
         # TWEAKS BUTTONS - GENERAL & PRIVACY
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -302,7 +343,7 @@ function Show-WinDebloat7GUI {
                     $disableLocation = -not (& $getCtrl "chkLocation").IsChecked
                     $disableCopilot = -not (& $getCtrl "chkCopilot").IsChecked
                     $disableRecall = -not (& $getCtrl "chkRecall").IsChecked
-                    
+
                     $config = [pscustomobject]@{
                         privacy = [pscustomobject]@{
                             disable_activity_history  = $disableActivity
@@ -321,7 +362,7 @@ function Show-WinDebloat7GUI {
                     else {
                         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Name "GlobalUserDisabled" -Value 1 -Force -ErrorAction SilentlyContinue
                     }
-                    
+
                     # 6. Automatic Updates
                     if ((& $getCtrl "chkWindowsUpdate").IsChecked) {
                         # Enabled
@@ -344,7 +385,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-        
+
         # ═══════════════════════════════════════════════════════════════════════════════
         # PERFORMANCE BUTTONS
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -365,7 +406,7 @@ function Show-WinDebloat7GUI {
                             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\*" -Name "TcpAckFrequency" -Value 1 -Force -ErrorAction SilentlyContinue
                             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\*" -Name "TCPNoDelay" -Value 1 -Force -ErrorAction SilentlyContinue
                         }
-                        
+
                         if ((& $getCtrl "chkGamingInput").IsChecked) {
                             # Disable Mouse Acceleration
                             # This usually requires SPI_SETMOUSE but registry key is often enough for restart
@@ -373,14 +414,14 @@ function Show-WinDebloat7GUI {
                             Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold1" -Value "0" -Force -ErrorAction SilentlyContinue
                             Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold2" -Value "0" -Force -ErrorAction SilentlyContinue
                         }
-                        
+
                         if ((& $getCtrl "chkGamingMMCSS").IsChecked) {
                             # System Responsiveness & Priority
                             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness" -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
                             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "GPU Priority" -Value 8 -Type DWord -Force -ErrorAction SilentlyContinue
                             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "Priority" -Value 6 -Type DWord -Force -ErrorAction SilentlyContinue
                         }
-                    
+
                         if ((& $getCtrl "chkUltimatePlan").IsChecked) {
                             # Duplicate Ultimate Plan attempt
                             cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61" | Out-Null
@@ -415,7 +456,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-        
+
         (& $getCtrl "btnDisableTasks").Add_Click({
                 $txtStatus.Text = "Disabling Tasks (Safe)..."
                 & $updateGui
@@ -431,7 +472,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-        
+
         (& $getCtrl "btnAggressiveTasks").Add_Click({
                 $txtStatus.Text = "Disabling Tasks (Aggressive)..."
                 & $updateGui
@@ -447,7 +488,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-        
+
         # ═══════════════════════════════════════════════════════════════════════════════
         # SOFTWARE TAB
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -455,19 +496,19 @@ function Show-WinDebloat7GUI {
             $icSoftware = & $getCtrl "icSoftwareCategories"
             $essentials = Get-WinDebloat7EssentialsList
             $categoriesList = [System.Collections.ArrayList]@()
-            
+
             foreach ($catKey in $essentials.Keys) {
                 $appsList = [System.Collections.ArrayList]@()
                 foreach ($appDef in $essentials[$catKey].Apps) {
                     $appsList.Add([pscustomobject]@{
                             Name       = $appDef.Name
                             PackageId  = $appDef.Winget
-                            IsSelected = $false 
+                            IsSelected = $false
                         }) | Out-Null
                 }
                 $categoriesList.Add([pscustomobject]@{
                         CategoryName = $essentials[$catKey].DisplayName
-                        Apps         = $appsList 
+                        Apps         = $appsList
                     }) | Out-Null
             }
             $icSoftware.ItemsSource = $categoriesList
@@ -475,7 +516,7 @@ function Show-WinDebloat7GUI {
         catch {
             Write-Warning "Software list failed to load: $($_.Exception.Message)"
         }
-        
+
         # Select/Deselect All
         $btnSelectAll = $window.FindName("btnSelectAllApps")
         if ($btnSelectAll) {
@@ -488,7 +529,7 @@ function Show-WinDebloat7GUI {
                     $icSoftware.ItemsSource = $categoriesList
                 })
         }
-        
+
         $btnDeselectAll = $window.FindName("btnDeselectAllApps")
         if ($btnDeselectAll) {
             $btnDeselectAll.Add_Click({
@@ -508,12 +549,12 @@ function Show-WinDebloat7GUI {
                         if ($app.IsSelected) { $selectedApps.Add($app.PackageId) }
                     }
                 }
-            
+
                 if ($selectedApps.Count -eq 0) {
                     $txtStatus.Text = "No apps selected."
                     return
                 }
-            
+
                 $txtStatus.Text = "Installing $($selectedApps.Count) apps..."
                 & $updateGui
                 [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
@@ -528,7 +569,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-        
+
         # ═══════════════════════════════════════════════════════════════════════════════
         # NETWORK TAB
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -543,13 +584,13 @@ function Show-WinDebloat7GUI {
                     5 { "OpenDNS" }
                     default { "Reset" }
                 }
-            
+
                 $txtStatus.Text = "Applying DNS: $provider..."
                 & $updateGui
                 [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     Set-WinDebloat7DNS -Provider $provider
-                
+
                     $chkIPv6 = $window.FindName("chkDisableIPv6")
                     if ($chkIPv6.IsChecked) {
                         Disable-WinDebloat7IPv6 -Confirm:$false
@@ -563,7 +604,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-        
+
         # ═══════════════════════════════════════════════════════════════════════════════
         # SNAPSHOTS TAB
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -574,7 +615,7 @@ function Show-WinDebloat7GUI {
                 try {
                     New-WinDebloat7Snapshot -Name "GUI-Snapshot" -Description "Created via GUI"
                     $txtStatus.Text = "Snapshot Created!"
-                
+
                     # Refresh list
                     $lstSnapshots = $window.FindName("lstSnapshots")
                     $snaps = Get-WinDebloat7Snapshot
@@ -590,7 +631,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-            
+
         $btnRestore = $window.FindName("btnRestoreSnapshot")
         if ($btnRestore) {
             $btnRestore.Add_Click({
@@ -619,11 +660,11 @@ function Show-WinDebloat7GUI {
                     }
                 })
         }
-        
+
         # ═══════════════════════════════════════════════════════════════════════════════
         # TOOLS TAB
         # ═══════════════════════════════════════════════════════════════════════════════
-        
+
         # 1. Interface Tweaks
         (& $getCtrl "btnApplyUITweaks").Add_Click({
                 $txtStatus.Text = "Applying UI Tweaks..."
@@ -633,22 +674,22 @@ function Show-WinDebloat7GUI {
                     # Taskbar
                     $align = if ((& $getCtrl "radTaskbarLeft").IsChecked) { "Left" } else { "Center" }
                     Set-WinDebloat7TaskbarAlignment -Alignment $align -Confirm:$false
-                    
+
                     # Context Menu
                     $ctx = if ((& $getCtrl "radCtxClassic").IsChecked) { "Classic" } else { "Modern" }
                     Set-WinDebloat7ContextMenu -Style $ctx -Confirm:$false
-                    
+
                     # Explorer
                     $hideGallery = (& $getCtrl "chkHideGallery").IsChecked
                     $hideHome = (& $getCtrl "chkHideHome").IsChecked
                     Set-WinDebloat7Explorer -HideGallery:$hideGallery -HideHome:$hideHome -Confirm:$false
-                    
+
                     $txtStatus.Text = "UI Tweaks Applied! Restart Explorer to see changes."
                 }
                 catch { $txtStatus.Text = "Error: $($_.Exception.Message)" }
                 finally { [System.Windows.Input.Mouse]::OverrideCursor = $null }
             })
-            
+
         # 2. Maintenance Tools
         (& $getCtrl "btnUpdateDrivers").Add_Click({
                 $txtStatus.Text = "Running System Repair (SFC + DISM)..."
@@ -665,7 +706,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-            
+
         (& $getCtrl "btnRepairSystem").Add_Click({
                 $txtStatus.Text = "Running System Repair (SFC). Please wait..."
                 & $updateGui
@@ -677,7 +718,7 @@ function Show-WinDebloat7GUI {
                 catch { $txtStatus.Text = "Error: $($_.Exception.Message)" }
                 finally { [System.Windows.Input.Mouse]::OverrideCursor = $null }
             })
-            
+
         (& $getCtrl "btnResetNetwork").Add_Click({
                 $txtStatus.Text = "Resetting Network Stack..."
                 & $updateGui
@@ -693,7 +734,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-            
+
         (& $getCtrl "btnWinUpdateReset").Add_Click({
                 $txtStatus.Text = "Resetting Update Components..."
                 & $updateGui
@@ -709,7 +750,7 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
-            
+
         # 3. Analysis (Benchmark)
         (& $getCtrl "btnRunBenchmark").Add_Click({
                 $txtStatus.Text = "Running System Benchmark..."
@@ -717,13 +758,13 @@ function Show-WinDebloat7GUI {
                 [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     $metrics = Measure-WinDebloat7System
-                    
+
                     # Save report to desktop
                     $reportPath = "$env:USERPROFILE\Desktop\Win-Debloat7_Benchmark_$(Get-Date -Format 'yyyyMMdd-HHmm').txt"
                     $metrics | Out-File $reportPath
-                    
+
                     $txtStatus.Text = "Benchmark Saved to Desktop!"
-                    
+
                     # Optionally show simpler alert/dialog in future
                     Start-Process "notepad.exe" $reportPath
                 }
@@ -736,13 +777,13 @@ function Show-WinDebloat7GUI {
         # ═══════════════════════════════════════════════════════════════════════════════
         (& $getCtrl "btnViewLogs").Add_Click({
                 $logPath = "$env:ProgramData\Win-Debloat7\Logs"
-            
+
                 # Create logs directory if it doesn't exist
                 if (-not (Test-Path $logPath)) {
                     New-Item -Path $logPath -ItemType Directory -Force | Out-Null
                     $txtStatus.Text = "Log directory created: $logPath"
                 }
-            
+
                 # Try to open the folder
                 try {
                     Start-Process "explorer.exe" -ArgumentList $logPath
@@ -752,16 +793,16 @@ function Show-WinDebloat7GUI {
                     $txtStatus.Text = "Error opening logs: $($_.Exception.Message)"
                 }
             })
-            
+
         # Hook up status bar show log button too
         $btnShowLog = $window.FindName("btnShowLog")
         if ($btnShowLog) {
             $btnShowLog.Add_Click({
-                    $logPath = "$env:ProgramData\Win-Debloat7\Logs" 
+                    $logPath = "$env:ProgramData\Win-Debloat7\Logs"
                     if (Test-Path $logPath) { Start-Process "explorer.exe" -ArgumentList $logPath }
                 })
         }
-        
+
         (& $getCtrl "btnCheckUpdates").Add_Click({
                 $txtStatus.Text = "Checking for updates..."
                 try {
@@ -772,7 +813,7 @@ function Show-WinDebloat7GUI {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
                 }
             })
-        
+
         # Show window
         $window.ShowDialog() | Out-Null
     }

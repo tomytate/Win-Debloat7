@@ -77,13 +77,16 @@ function Reset-WinDebloat7Network {
         
         foreach ($cmd in $commands) {
             Write-Log -Message "Executing: $cmd" -Level Info
-            Invoke-Expression $cmd | Out-Null
+            # SEC-003 Fix: Replaced Invoke-Expression with Start-Process
+            $parts = $cmd -split ' ', 2
+            $exe = $parts[0]
+            $procArgs = if ($parts.Count -gt 1) { $parts[1] } else { "" }
+            Start-Process -FilePath $exe -ArgumentList $procArgs -NoNewWindow -Wait
         }
         
         Write-Log -Message "Network reset complete. You may need to restart." -Level Success
     }
 }
-
 #endregion
 
 #region Update Reset

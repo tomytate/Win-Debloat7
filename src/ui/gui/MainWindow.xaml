@@ -294,7 +294,7 @@
                 <!-- Footer -->
                 <Border Grid.Row="2" Background="#151525" Padding="16" CornerRadius="12" Margin="12,0,12,16">
                     <StackPanel>
-                        <TextBlock Text="v1.2.5 | PowerShell 7.5+" FontSize="11" 
+                        <TextBlock Text="v1.2.6 | PowerShell 7.5+" FontSize="11" 
                                    Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                         <TextBlock Text="Windows 11 25H2 Ready" FontSize="10" 
                                    Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
@@ -720,7 +720,7 @@
                                 <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20"/>
                                 
                                 <TextBlock Text="About" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
-                                <TextBlock Text="Win-Debloat7 v1.2.5" FontSize="14" Foreground="White" Margin="0,4"/>
+                                <TextBlock Text="Win-Debloat7 v1.2.6" FontSize="14" Foreground="White" Margin="0,4"/>
                                 <TextBlock Text="Created by Tomy Tolledo" FontSize="13" 
                                            Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4"/>
                                 <TextBlock Text="PowerShell 7.5+ | Windows 11 25H2 Ready" FontSize="12" 

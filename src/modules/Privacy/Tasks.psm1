@@ -137,6 +137,7 @@ function Get-WinDebloat7TelemetryTasks {
         }
         catch {
             # Task doesn't exist - skip
+            Write-Verbose "Task not found during scan: $($taskDef.Name)"
         }
     }
     

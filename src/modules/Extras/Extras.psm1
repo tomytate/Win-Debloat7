@@ -64,11 +64,13 @@ function Invoke-WinDebloat7DefenderRemover {
     Runs Microsoft Activation Scripts (MAS).
 #>
 function Invoke-WinDebloat7Activation {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingInvokeExpression', '')]
     [CmdletBinding()]
     param()
 
     Write-Log -Message "Launching Microsoft Activation Scripts (MAS)..." -Level Info
     
+
     if (-not (Test-Connection "get.activated.win" -Count 1 -Quiet)) {
         Write-Log -Message "Internet connection required for MAS." -Level Error
         return
