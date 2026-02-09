@@ -24,42 +24,77 @@ Import-Module "$PSScriptRoot\..\..\core\Logger.psm1" -Force
 #region DNS Providers
 
 $Script:DNSProviders = @{
-    Cloudflare = @{
+    Cloudflare             = @{
         Name          = "Cloudflare (Privacy-Focused)"
         IPv4Primary   = "1.1.1.1"
         IPv4Secondary = "1.0.0.1"
         IPv6Primary   = "2606:4700:4700::1111"
         IPv6Secondary = "2606:4700:4700::1001"
     }
-    Google     = @{
+    Cloudflare_Malware     = @{
+        Name          = "Cloudflare (Malware Blocking)"
+        IPv4Primary   = "1.1.1.2"
+        IPv4Secondary = "1.0.0.2"
+        IPv6Primary   = "2606:4700:4700::1112"
+        IPv6Secondary = "2606:4700:4700::1002"
+    }
+    Cloudflare_Family      = @{
+        Name          = "Cloudflare (Family Safe)"
+        IPv4Primary   = "1.1.1.3"
+        IPv4Secondary = "1.0.0.3"
+        IPv6Primary   = "2606:4700:4700::1113"
+        IPv6Secondary = "2606:4700:4700::1003"
+    }
+    Google                 = @{
         Name          = "Google Public DNS"
         IPv4Primary   = "8.8.8.8"
         IPv4Secondary = "8.8.4.4"
         IPv6Primary   = "2001:4860:4860::8888"
         IPv6Secondary = "2001:4860:4860::8844"
     }
-    Quad9      = @{
+    Quad9                  = @{
         Name          = "Quad9 (Security-Focused)"
         IPv4Primary   = "9.9.9.9"
         IPv4Secondary = "149.112.112.112"
         IPv6Primary   = "2620:fe::fe"
         IPv6Secondary = "2620:fe::9"
     }
-    AdGuard    = @{
+    AdGuard                = @{
         Name          = "AdGuard DNS (Ad-Blocking)"
         IPv4Primary   = "94.140.14.14"
         IPv4Secondary = "94.140.15.15"
         IPv6Primary   = "2a10:50c0::ad1:ff"
         IPv6Secondary = "2a10:50c0::ad2:ff"
     }
-    OpenDNS    = @{
+    AdGuard_Family         = @{
+        Name          = "AdGuard DNS (Family Safe)"
+        IPv4Primary   = "94.140.14.15"
+        IPv4Secondary = "94.140.15.16"
+        IPv6Primary   = "2a10:50c0::bad1:ff"
+        IPv6Secondary = "2a10:50c0::bad2:ff"
+    }
+    OpenDNS                = @{
         Name          = "OpenDNS (Cisco)"
         IPv4Primary   = "208.67.222.222"
         IPv4Secondary = "208.67.220.220"
         IPv6Primary   = "2620:119:35::35"
         IPv6Secondary = "2620:119:53::53"
     }
-    NextDNS    = @{
+    CleanBrowsing_Security = @{
+        Name          = "CleanBrowsing (Security)"
+        IPv4Primary   = "185.228.168.9"
+        IPv4Secondary = "185.228.169.9"
+        IPv6Primary   = "2a0d:2a00:1::2"
+        IPv6Secondary = "2a0d:2a00:2::2"
+    }
+    CleanBrowsing_Family   = @{
+        Name          = "CleanBrowsing (Family)"
+        IPv4Primary   = "185.228.168.168"
+        IPv4Secondary = "185.228.169.168"
+        IPv6Primary   = "2a0d:2a00:1::"
+        IPv6Secondary = "2a0d:2a00:2::"
+    }
+    NextDNS                = @{
         Name          = "NextDNS (Customizable)"
         IPv4Primary   = "45.90.28.0"
         IPv4Secondary = "45.90.30.0"
@@ -99,7 +134,7 @@ function Set-WinDebloat7DNS {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet("Cloudflare", "Google", "Quad9", "AdGuard", "OpenDNS", "NextDNS", "Custom", "Reset")]
+        [ValidateSet("Cloudflare", "Cloudflare_Malware", "Cloudflare_Family", "Google", "Quad9", "AdGuard", "AdGuard_Family", "OpenDNS", "CleanBrowsing_Security", "CleanBrowsing_Family", "NextDNS", "Custom", "Reset")]
         [string]$Provider,
         
         [string]$CustomPrimary,

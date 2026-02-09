@@ -41,6 +41,7 @@
 #Requires -Version 7.5
 #Requires -RunAsAdministrator
 
+
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [ValidateScript({ Test-Path $_ -PathType Leaf })]
@@ -54,6 +55,8 @@ param(
             }
         })]
     [string]$ProfileFile,
+
+    [string]$ConfigUrl,
     
     [switch]$Unattended,
     
@@ -61,6 +64,11 @@ param(
     
     [switch]$Gui
 )
+
+# Configure strict error handling
+$ErrorActionPreference = 'Stop'
+$PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
+Set-StrictMode -Version Latest
 
 $scriptPath = Split-Path $MyInvocation.MyCommand.Path -Parent
 

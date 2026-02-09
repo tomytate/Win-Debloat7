@@ -76,12 +76,23 @@ function Invoke-WinDebloat7Activation {
         return
     }
 
+    $scriptPath = "$env:TEMP\mas_activation_$(New-Guid).ps1"
+    
     try {
-        Write-Host "Invoking MAS (irm https://get.activated.win | iex)..." -ForegroundColor Green
-        Invoke-RestMethod https://get.activated.win | Invoke-Expression
+        Write-Host "Downloading MAS script..." -ForegroundColor Green
+        Invoke-RestMethod -Uri "https://get.activated.win" -OutFile $scriptPath -ErrorAction Stop
+        
+        Write-Host "Executing MAS..." -ForegroundColor Green
+        & $scriptPath
+        
+        Write-Log -Message "MAS execution completed." -Level Success
     }
     catch {
         Write-Log -Message "Error running MAS: $($_.Exception.Message)" -Level Error
+        throw
+    }
+    finally {
+        if (Test-Path $scriptPath) { Remove-Item $scriptPath -Force -ErrorAction SilentlyContinue }
     }
 }
 

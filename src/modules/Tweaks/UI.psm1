@@ -129,7 +129,7 @@ function Set-WinDebloat7Explorer {
         if ($PSCmdlet.ShouldProcess("Explorer", "Hide Gallery")) {
             if (Test-Path $galleryKey) {
                 # We can't easily delete HKLM keys without trustedinstaller usually, but let's try or set property
-                # Actually, Win11Debloat deletes this key. 
+                # Legacy key handling. 
                 # Alternative: Set System.IsPinnedToNameSpaceTree to 0 in HKCR CLSID if possible.
                 # For safety/portability, we'll try to detach via CLSID user override if possible, or HKLM delete.
                 

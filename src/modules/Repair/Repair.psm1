@@ -22,33 +22,71 @@ Import-Module "$PSScriptRoot\..\..\core\Logger.psm1" -Force
 
 <#
 .SYNOPSIS
-    Runs SFC and DISM repair commands.
+    Runs comprehensive system repair (enhanced 4-step sequence).
+    
+.DESCRIPTION
+    Source: Win-Debloat7 Internal.
+    Sequence: ChkDsk (performance mode) → SFC → DISM RestoreHealth → SFC (using repaired image).
 #>
 function Repair-WinDebloat7System {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param()
 
-    Write-Log -Message "Starting System Repair..." -Level Info
+    Write-Log -Message "Starting Enhanced System Repair (4-Step Sequence)..." -Level Info
     
-    if ($PSCmdlet.ShouldProcess("Windows Image", "Repair (SFC + DISM)")) {
+    if ($PSCmdlet.ShouldProcess("Windows System", "Full Repair (ChkDsk + SFC + DISM + SFC)")) {
         
-        # 1. DISM Check
-        Write-Log -Message "Running DISM CheckHealth..." -Level Info
-        $dismCheck = Start-Process -FilePath "dism.exe" -ArgumentList "/Online", "/Cleanup-Image", "/CheckHealth" -Wait -PassThru -NoNewWindow
-        
-        if ($dismCheck.ExitCode -eq 0) {
-            Write-Log -Message "Running DISM RestoreHealth (This may take time)..." -Level Info
-            Start-Process -FilePath "dism.exe" -ArgumentList "/Online", "/Cleanup-Image", "/RestoreHealth" -Wait -NoNewWindow
+        # Step 1: ChkDsk (Performance Mode)
+        Write-Log -Message "[1/4] Running ChkDsk (scan mode)..." -Level Info
+        try {
+            $chkdsk = Start-Process -FilePath "chkdsk.exe" -ArgumentList "C:", "/scan", "/perf" -Wait -PassThru -NoNewWindow
+            if ($chkdsk.ExitCode -eq 0) {
+                Write-Log -Message "ChkDsk completed successfully." -Level Success
+            }
+            else {
+                Write-Log -Message "ChkDsk returned exit code: $($chkdsk.ExitCode)" -Level Warning
+            }
         }
-        else {
-            Write-Log -Message "DISM CheckHealth failed or found no corruption." -Level Warning
+        catch {
+            Write-Log -Message "ChkDsk failed: $($_.Exception.Message)" -Level Warning
         }
 
-        # 2. SFC Scan
-        Write-Log -Message "Running System File Checker (SFC)..." -Level Info
-        Start-Process -FilePath "sfc.exe" -ArgumentList "/scannow" -Wait -NoNewWindow
+        # Step 2: SFC First Pass
+        Write-Log -Message "[2/4] Running SFC (first pass)..." -Level Info
+        try {
+            Start-Process -FilePath "sfc.exe" -ArgumentList "/scannow" -Wait -NoNewWindow
+            Write-Log -Message "SFC first pass completed." -Level Success
+        }
+        catch {
+            Write-Log -Message "SFC first pass failed: $($_.Exception.Message)" -Level Warning
+        }
+
+        # Step 3: DISM RestoreHealth
+        Write-Log -Message "[3/4] Running DISM RestoreHealth (this may take 10-30 minutes)..." -Level Info
+        try {
+            $dism = Start-Process -FilePath "dism.exe" -ArgumentList "/Online", "/Cleanup-Image", "/RestoreHealth" -Wait -PassThru -NoNewWindow
+            if ($dism.ExitCode -eq 0) {
+                Write-Log -Message "DISM RestoreHealth completed successfully." -Level Success
+            }
+            else {
+                Write-Log -Message "DISM RestoreHealth returned exit code: $($dism.ExitCode)" -Level Warning
+            }
+        }
+        catch {
+            Write-Log -Message "DISM failed: $($_.Exception.Message)" -Level Error
+        }
+
+        # Step 4: SFC Second Pass (uses repaired component store)
+        Write-Log -Message "[4/4] Running SFC (second pass with repaired image)..." -Level Info
+        try {
+            Start-Process -FilePath "sfc.exe" -ArgumentList "/scannow" -Wait -NoNewWindow
+            Write-Log -Message "SFC second pass completed." -Level Success
+        }
+        catch {
+            Write-Log -Message "SFC second pass failed: $($_.Exception.Message)" -Level Warning
+        }
         
-        Write-Log -Message "System repair process complete." -Level Success
+        Write-Log -Message "Enhanced system repair complete." -Level Success
     }
 }
 

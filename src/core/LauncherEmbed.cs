@@ -75,8 +75,8 @@ namespace WinDebloat7
                     "Write-Host '🚀 Initializing Win-Debloat7...' -ForegroundColor Cyan; " +
                     "Expand-Archive -LiteralPath '{0}' -DestinationPath '{1}' -Force; " +
                     "Set-Location '{1}'; " +
-                    "& './Win-Debloat7.ps1';", 
-                    zipPath, tempPath
+                    "& './Win-Debloat7.ps1' {2}", 
+                    zipPath, tempPath, args.Length > 0 ? String.Join(" ", args) : ""
                 );
 
                 ProcessStartInfo startInfo = new ProcessStartInfo();

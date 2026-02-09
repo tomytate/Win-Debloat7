@@ -7,7 +7,7 @@
     
 .NOTES
     Module: Win-Debloat7.UI.Menu
-    Version: 1.2.5
+    Version: 1.3.0
 #>
 
 #Requires -Version 7.5
@@ -43,6 +43,7 @@ function Show-MainMenu {
         Write-WD7Host "  [X] Tweaks & Customization" -Color Secondary
         Write-WD7Host "  [R] System Repair Tools" -Color Warning
         Write-WD7Host "  [F] Windows Features Manager" -Color White
+        Write-WD7Host "  [T] Third Party Tools" -Color White
         
         # Show Extras options only if module is available
         if ($extrasAvailable) {
@@ -84,6 +85,8 @@ function Show-MainMenu {
             "r" { Show-RepairMenu }
             "F" { Show-FeaturesMenu }
             "f" { Show-FeaturesMenu }
+            "T" { Show-IntegrationsMenu }
+            "t" { Show-IntegrationsMenu }
             "D" {  
                 if ($extrasAvailable) {
                     Invoke-WinDebloat7DefenderRemover
@@ -427,6 +430,24 @@ function Show-FeaturesMenu {
         "1" { Set-WinDebloat7OptionalFeatures }
         "2" { Set-WinDebloat7OptionalFeatures -Enable }
         "3" { Remove-WinDebloat7Capabilities }
+    }
+    if ($sel) { Read-Host "Press Enter..." }
+}
+
+function Show-IntegrationsMenu {
+    Show-WD7Header
+    Show-WD7Separator -Title "THIRD PARTY TOOLS" -Color Phone
+    
+    Write-Host "  [1] O&O ShutUp10++ (Privacy)" -ForegroundColor White
+    Write-Host "  [2] Malwarebytes AdwCleaner (Cleaning)" -ForegroundColor White
+    Write-Host "  [3] Snappy Driver Installer Origin (Drivers)" -ForegroundColor White
+    
+    $sel = Read-Host "`nSelect tool to launch (or Enter to cancel)"
+    
+    switch ($sel) {
+        "1" { Invoke-WinDebloat7ShutUp10 }
+        "2" { Invoke-WinDebloat7AdwCleaner }
+        "3" { Update-WinDebloat7SDIO }
     }
     if ($sel) { Read-Host "Press Enter..." }
 }

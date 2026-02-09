@@ -33,13 +33,35 @@ $Script:BloatwareApps = @(
     "Microsoft.WindowsMaps", "Microsoft.WindowsSoundRecorder", "Microsoft.XboxApp", "Microsoft.YourPhone",
     "Microsoft.ZuneMusic", "Microsoft.ZuneVideo", "Microsoft.Teams", "Microsoft.MSTeams",
     
-    # 25H2 / Newer Bloat
+    # 25H2 / AI Bloat
     "Microsoft.Copilot", "MicrosoftWindows.Client.CoPilot", "MicrosoftWindows.Client.WebExperience", 
     "Microsoft.OutlookForWindows", "Microsoft.Windows.DevHome", "Clipchamp.Clipchamp",
+    "Microsoft.Windows.Ai.Copilot.Provider", "Microsoft.ScreenSketch", "Microsoft.Whiteboard",
+    "Microsoft.GamingApp", "Microsoft.XboxGameOverlay", "Microsoft.XboxGamingOverlay",
+    "Microsoft.XboxIdentityProvider", "Microsoft.XboxSpeechToTextOverlay",
     
-    # Third Party
+    # Third Party / Streaming
     "Disney", "SpotifyAB.SpotifyMusic", "PandoraMedia", "AmazonVideo.PrimeVideo", "Netflix",
-    "Facebook", "Instagram", "Twitter", "TikTok", "CandyCrush", "BubbleWitch", "FarmVille"
+    "Facebook", "Instagram", "Twitter", "TikTok", "CandyCrush", "BubbleWitch", "FarmVille",
+    "BytedancePte.Ltd.TikTok", "DolbyLaboratories.DolbyAccess", "Duolingo-LearnLanguagesforFree",
+    "EclipseManager", "ActiproSoftwareLLC", "AdobeSystemsIncorporated.AdobePhotoshopExpress",
+    
+    # HP OEM Bloat
+    "AD2F1837.HPJumpStarts", "AD2F1837.HPPCHardwareDiagnosticsWindows", "AD2F1837.HPPowerManager",
+    "AD2F1837.HPPrivacySettings", "AD2F1837.HPSupportAssistant", "AD2F1837.HPSystemInformation",
+    "AD2F1837.HPQuickDrop", "AD2F1837.HPWorkWell", "AD2F1837.HPDesktopSupportUtilities",
+    "AD2F1837.myHP", "AD2F1837.HPEasyClean", "AD2F1837.HPAudioCenter",
+    
+    # Dell OEM Bloat
+    "DellInc.DellSupportAssistforPCs", "DellInc.DellPowerManager", "DellInc.DellDigitalDelivery",
+    "DellInc.DellCustomerConnect", "DellInc.DellCommandUpdate", "DellInc.DellDigitalLifestyle",
+    "DellInc.PartnerPromo", "DellInc.DellOptimizer", "DellInc.DellUpdate",
+    
+    # Lenovo OEM Bloat
+    "E046963F.LenovoCompanion", "E046963F.LenovoSettings", "LenovoCorporation.LenovoID",
+    
+    # Acer OEM Bloat
+    "AcerIncorporated.AcerCare", "AcerIncorporated.AcerQuickAccess"
 )
 #endregion
 
@@ -126,7 +148,7 @@ function Remove-WinDebloat7Bloatware {
         $Script:BloatwareApps
     }
     
-    $total = $targetApps.Count
+    $total = $currentPackages.Count + $provisionedPackages.Count
     $current = 0
     
     # Build regex pattern for matching (PERF-003 fix: Pre-build pattern)
@@ -136,58 +158,58 @@ function Remove-WinDebloat7Bloatware {
     else { $null }
     
     # Process List
-    foreach ($targetApp in $targetApps) {
+    # Optimized Matching (O(N) instead of O(N*M))
+    $targetsRegex = ($targetApps | ForEach-Object { [regex]::Escape($_) }) -join '|'
+    if (-not $targetsRegex) { return }
+
+    # Iterate packages once
+    foreach ($pkg in $currentPackages) {
         $current++
-        $percentComplete = [math]::Round(($current / $total) * 100)
-        Write-Progress -Activity "Removing Bloatware" -Status "Processing $targetApp" -PercentComplete $percentComplete
-        
-        # Check Exclusions
-        if ($excludePattern -and $targetApp -match $excludePattern) {
-            Write-Log -Message "Skipping preserved app: $targetApp" -Level Info
-            $skippedCount++
-            continue
-        }
-        
-        # Alternative: Check array membership for exact matches
-        if ($excludeList -contains $targetApp) {
-            Write-Log -Message "Skipping preserved app: $targetApp" -Level Info
-            $skippedCount++
-            continue
-        }
-        
-        # Check if installed (In-Memory Filter)
-        $matchesInstalled = $currentPackages | Where-Object { $_.Name -like "*$targetApp*" }
-        $matchesProvisioned = $provisionedPackages | Where-Object { $_.DisplayName -like "*$targetApp*" }
-        
-        if ($matchesInstalled -or $matchesProvisioned) {
-            if ($PSCmdlet.ShouldProcess($targetApp, "Remove")) {
-                Write-Log -Message "Removing: $targetApp" -Level Info
-                
-                # Remove Installed Package (SEC-003 fix: Proper error handling)
-                if ($matchesInstalled) {
-                    try {
-                        $matchesInstalled | Remove-AppxPackage -AllUsers -ErrorAction Stop
-                    }
-                    catch {
-                        Write-Log -Message "Failed to remove installed package '$targetApp': $($_.Exception.Message)" -Level Warning
-                        $failCount++
-                        continue
-                    }
+        if ($current % 50 -eq 0) { Write-Progress -Activity "Removing Bloatware" -Status "Scanning $($pkg.Name)" -PercentComplete ([math]::Round(($current / $total) * 100)) }
+
+        if ($pkg.Name -match $targetsRegex) {
+            # Double check exclusion pattern
+            if ($excludePattern -and $pkg.Name -match $excludePattern) {
+                $skippedCount++
+                continue
+            }
+            
+            if ($PSCmdlet.ShouldProcess($pkg.Name, "Remove Bloatware")) {
+                try {
+                    Write-Log -Message "Removing: $($pkg.Name)" -Level Info
+                    $pkg | Remove-AppxPackage -AllUsers -ErrorAction Stop
+                    $successCount++
                 }
-                    
-                # Remove Provisioned Package
-                if ($matchesProvisioned) {
-                    try {
-                        $matchesProvisioned | Remove-AppxProvisionedPackage -Online -AllUsers -ErrorAction Stop
-                    }
-                    catch {
-                        # Non-fatal for provisioned - may already be removed
-                        Write-Log -Message "Could not remove provisioned '$targetApp': $($_.Exception.Message)" -Level Debug
-                    }
+                catch {
+                    Write-Log -Message "Failed to remove '$($pkg.Name)': $($_.Exception.Message)" -Level Warning
+                    $failCount++
                 }
-                    
-                Write-Log -Message "Removed: $targetApp" -Level Success
-                $successCount++
+            }
+        }
+    }
+    
+    # Iterate provisioned once
+    foreach ($pkg in $provisionedPackages) {
+        $current++
+        if ($current % 50 -eq 0) { 
+            Write-Progress -Activity "Removing Bloatware" -Status "Checking $($pkg.DisplayName)" -PercentComplete ([math]::Round(($current / $total) * 100))
+        }
+        if ($pkg.DisplayName -match $targetsRegex) {
+            if ($excludePattern -and $pkg.DisplayName -match $excludePattern) {
+                continue
+            }
+            
+            if ($PSCmdlet.ShouldProcess($pkg.DisplayName, "Deprovision Bloatware")) {
+                try {
+                    $pkg | Remove-AppxProvisionedPackage -Online -AllUsers -ErrorAction Stop
+                    # successCount tracked above (usually we count per app, this might duplicate count if both present? 
+                    # Original code counted per TARGET APP.
+                    # This counts per PACKAGE.
+                    # Acceptable difference for performance.
+                }
+                catch {
+                    Write-Log -Message "Failed deprovision: $($_.Exception.Message)" -Level Debug
+                }
             }
         }
     }
@@ -195,7 +217,7 @@ function Remove-WinDebloat7Bloatware {
     Write-Progress -Activity "Removing Bloatware" -Completed
     
     # Summary
-    Write-Log -Message "Bloatware removal complete: $successCount removed, $skippedCount preserved, $failCount failed" -Level $(if ($failCount -eq 0) { "Success" } else { "Warning" })
+    Write-Log -Message "Bloatware removal complete: $successCount removed, $skippedCount preserved, $failCount failed" -Level ($failCount -eq 0 ? "Success" : "Warning")
 }
 
 #region Advanced Removal

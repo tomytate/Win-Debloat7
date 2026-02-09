@@ -53,6 +53,12 @@ function Set-RegistryKey {
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
+        [ValidateScript({
+                if ($_ -notmatch '^HK(LM|CU|CR|U|CC):\\') {
+                    throw "Invalid registry path '$_'. Must start with a valid hive (e.g. HKLM:\)"
+                }
+                $true
+            })]
         [string]$Path,
         
         [Parameter(Mandatory)]

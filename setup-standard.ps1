@@ -36,7 +36,30 @@ New-Item -ItemType Directory -Path $TempDir | Out-Null
 Write-Host " -> Downloading Standard Edition..." -ForegroundColor Yellow
 Invoke-WebRequest -Uri $DownloadUrl -OutFile $ZipPath
 
-# 4. Verify (Optional: Add Hash Check Here in Future)
+# 4. Verify SHA256 Checksum
+try {
+    Write-Host " -> Verifying Integrity..." -NoNewline
+    $SumsAsset = $Release.assets | Where-Object { $_.name -eq "SHA256SUMS.txt" } | Select-Object -First 1
+    
+    if ($SumsAsset) {
+        $SumsContent = (Invoke-RestMethod -Uri $SumsAsset.browser_download_url).Trim()
+        $FileHash = (Get-FileHash -Path $ZipPath -Algorithm SHA256).Hash
+        
+        if ($SumsContent -match "$FileHash\s+$($Asset.name)") {
+            Write-Host " [VALID]" -ForegroundColor Green
+        }
+        else {
+            Write-Host " [INVALID]" -ForegroundColor Red
+            Write-Error "Hash mismatch! The file may be corrupted or tampered with."
+        }
+    }
+    else {
+        Write-Host " [SKIPPED] (Checksum file not found)" -ForegroundColor DarkGray
+    }
+}
+catch {
+    Write-Host " [WARNING] (Verification check failed)" -ForegroundColor Yellow
+}
 
 # 5. Extract or Run
 if ($ZipPath.EndsWith(".exe")) {

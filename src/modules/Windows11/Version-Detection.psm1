@@ -47,7 +47,7 @@ $Script:CacheLifetimeMinutes = 5
     
 .EXAMPLE
     $ver = Get-WindowsVersionInfo
-    Write-Host "Running $($ver.FriendlyName)"
+    Write-Host "Running on $($ver.FriendlyName)"
 #>
 function Get-WindowsVersionInfo {
     [CmdletBinding()]

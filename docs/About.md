@@ -26,6 +26,5 @@ You are free to use, modify, and distribute it, provided you give credit to the 
 
 ## 🌟 Acknowledgements
 Special thanks to the open-source community, specifically contributions from:
-*   *Chris Titus Tech* (Inspiration for WinUtil)
 *   *LeDragoX* (Optimization research)
 *   *Massgravel* (MAS integration ideas)

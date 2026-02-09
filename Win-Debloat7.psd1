@@ -4,7 +4,7 @@
     # RootModule        = ''
 
     # Version number of this module.
-    ModuleVersion     = '1.2.6'
+    ModuleVersion     = '1.3.0'
 
     # ID used to uniquely identify this module
     GUID              = 'a1b2c3d4-e5f6-7890-1234-567890abcdef'
@@ -34,6 +34,7 @@
         'src\core\Registry.psm1',
         'src\core\State.psm1',
         'src\core\SystemState.psm1',
+        'src\core\Sysprep.psm1',
         'src\modules\Bloatware\Bloatware.psm1',
         'src\modules\Privacy\Privacy.psm1',
         'src\modules\Performance\Performance.psm1',
@@ -42,6 +43,8 @@
         'src\modules\Security\Security.psm1',
         'src\modules\Performance\Gaming.psm1',
         'src\modules\Performance\Benchmark.psm1',
+        'src\modules\Performance\Tweaks.psm1',
+        'src\modules\Performance\Services.psm1',
         'src\modules\Maintenance\Maintenance.psm1',
         'src\modules\Windows11\Version-Detection.psm1',
         'src\modules\Software\Software.psm1',
@@ -49,6 +52,7 @@
         'src\modules\Network\Network.psm1',
         'src\modules\Privacy\Tasks.psm1',
         'src\modules\Privacy\Hosts.psm1',
+        'src\modules\Integrations\Integrations.psm1',
         # Extras module excluded related to standard release
         'src\ui\Colors.psm1',
         'src\ui\Menu.psm1',
@@ -62,6 +66,7 @@
         'Import-WinDebloat7Config', 'Test-WinDebloat7Config',
         'New-WinDebloat7Snapshot', 'Restore-WinDebloat7Snapshot', 'Get-WinDebloat7Snapshot',
         'Set-RegistryKey', 'Get-RegistryKey', 'Test-RegistryKey', 'Export-RegistryKey',
+        'Test-WinDebloat7Sysprep', 'Mount-WinDebloat7DefaultHive', 'Dismount-WinDebloat7DefaultHive',
         # Modules
         'Get-WinDebloat7BloatwareList', 'Remove-WinDebloat7Bloatware', 'Uninstall-WinDebloat7OneDrive', 'Uninstall-WinDebloat7Edge', 'Uninstall-WinDebloat7Xbox', 'Disable-WinDebloat7AIandAds',
         'Set-WinDebloat7Privacy',
@@ -88,6 +93,16 @@
         # Hosts Blocking
         'Backup-HostsFile', 'Add-WinDebloat7HostsBlock', 'Remove-WinDebloat7HostsBlock',
         'Get-WinDebloat7HostsStatus', 'Get-WinDebloat7TelemetryDomains',
+        # Integrations
+        'Invoke-WinDebloat7ShutUp10', 'Invoke-WinDebloat7AdwCleaner', 'Update-WinDebloat7SDIO',
+        # Tweaks (GEMS Integration)
+        'Disable-WinDebloat7AIRecall', 'Disable-WinDebloat7Copilot', 'Disable-WinDebloat7ClickToDo',
+        'Disable-WinDebloat7NotepadAI', 'Disable-WinDebloat7PaintAI', 'Disable-WinDebloat7EdgeAI',
+        'Disable-WinDebloat7DesktopSpotlight', 'Disable-WinDebloat7Settings365Ads',
+        'Enable-WinDebloat7UltimatePower', 'Disable-WinDebloat7UltimatePower',
+        'Invoke-WinDebloat7SysprepDefaults', 'Set-WinDebloat7RegistryValue',
+        # Services (GEMS Integration)
+        'Set-WinDebloat7Services', 'Get-WinDebloat7ServicePresets', 'Get-WinDebloat7ServiceStatus',
         # Maintenance
         'Register-WinDebloat7Maintenance', 'Unregister-WinDebloat7Maintenance', 'Invoke-WinDebloat7Maintenance',
         # Extras (only available in Extras edition)

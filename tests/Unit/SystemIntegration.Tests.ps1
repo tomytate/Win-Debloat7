@@ -15,7 +15,7 @@ if (-not (Get-Command Get-WindowsOptionalFeature -ErrorAction SilentlyContinue))
 if (-not (Get-Command Disable-WindowsOptionalFeature -ErrorAction SilentlyContinue)) { function global:Disable-WindowsOptionalFeature { } }
 if (-not (Get-Command Enable-WindowsOptionalFeature -ErrorAction SilentlyContinue)) { function global:Enable-WindowsOptionalFeature { } }
 
-Describe "Gems Master Integration" {
+Describe "System Integration Tests" {
     
     Context "Repair Module" {
         It "Reset-WinDebloat7Network should invoke netsh commands" {

@@ -1,0 +1,141 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "Win-Debloat7 Service Optimization Database",
+    "version": "1.0.0",
+    "services": {
+        "DiagTrack": {
+            "DisplayName": "Connected User Experiences and Telemetry",
+            "StartupType": "Disabled",
+            "Category": "Telemetry",
+            "Description": "Microsoft telemetry service - safe to disable for privacy"
+        },
+        "dmwappushservice": {
+            "DisplayName": "WAP Push Message Routing Service",
+            "StartupType": "Disabled",
+            "Category": "Telemetry",
+            "Description": "WAP push messages for telemetry"
+        },
+        "WSearch": {
+            "DisplayName": "Windows Search",
+            "StartupType": "AutomaticDelayedStart",
+            "Category": "Performance",
+            "Description": "Delayed start reduces boot time, service starts when needed"
+        },
+        "SysMain": {
+            "DisplayName": "Superfetch",
+            "StartupType": "Automatic",
+            "Category": "Performance",
+            "Description": "Keep enabled for HDD, optional disable for SSD"
+        },
+        "RemoteRegistry": {
+            "DisplayName": "Remote Registry",
+            "StartupType": "Disabled",
+            "Category": "Security",
+            "Description": "Remote registry access - security risk"
+        },
+        "RemoteAccess": {
+            "DisplayName": "Routing and Remote Access",
+            "StartupType": "Disabled",
+            "Category": "Security",
+            "Description": "VPN/Routing services - disable if not needed"
+        },
+        "MapsBroker": {
+            "DisplayName": "Downloaded Maps Manager",
+            "StartupType": "Manual",
+            "Category": "Performance",
+            "Description": "Only needed if using offline Windows Maps"
+        },
+        "lfsvc": {
+            "DisplayName": "Geolocation Service",
+            "StartupType": "Manual",
+            "Category": "Privacy",
+            "Description": "Location tracking - set to manual for privacy"
+        },
+        "PcaSvc": {
+            "DisplayName": "Program Compatibility Assistant",
+            "StartupType": "Manual",
+            "Category": "Performance",
+            "Description": "Only needed for legacy app compatibility"
+        },
+        "WerSvc": {
+            "DisplayName": "Windows Error Reporting",
+            "StartupType": "Manual",
+            "Category": "Telemetry",
+            "Description": "Error reports to Microsoft"
+        },
+        "RetailDemo": {
+            "DisplayName": "Retail Demo Service",
+            "StartupType": "Disabled",
+            "Category": "Bloat",
+            "Description": "Only for store display PCs"
+        },
+        "wisvc": {
+            "DisplayName": "Windows Insider Service",
+            "StartupType": "Manual",
+            "Category": "Telemetry",
+            "Description": "Only needed if in Windows Insider program"
+        },
+        "WbioSrvc": {
+            "DisplayName": "Windows Biometric Service",
+            "StartupType": "Manual",
+            "Category": "Performance",
+            "Description": "Only needed if using fingerprint/face login"
+        },
+        "PhoneSvc": {
+            "DisplayName": "Phone Service",
+            "StartupType": "Manual",
+            "Category": "Bloat",
+            "Description": "Phone Link integration"
+        },
+        "TabletInputService": {
+            "DisplayName": "Touch Keyboard and Handwriting",
+            "StartupType": "Manual",
+            "Category": "Performance",
+            "Description": "Only needed for touchscreen devices"
+        },
+        "XblAuthManager": {
+            "DisplayName": "Xbox Live Auth Manager",
+            "StartupType": "Manual",
+            "Category": "Gaming",
+            "Description": "Xbox Live authentication"
+        },
+        "XblGameSave": {
+            "DisplayName": "Xbox Live Game Save",
+            "StartupType": "Manual",
+            "Category": "Gaming",
+            "Description": "Xbox Live cloud saves"
+        },
+        "XboxNetApiSvc": {
+            "DisplayName": "Xbox Live Networking",
+            "StartupType": "Manual",
+            "Category": "Gaming",
+            "Description": "Xbox Live networking"
+        }
+    },
+    "presets": {
+        "Privacy": [
+            "DiagTrack",
+            "dmwappushservice",
+            "lfsvc",
+            "WerSvc",
+            "wisvc"
+        ],
+        "Performance": [
+            "WSearch",
+            "MapsBroker",
+            "PcaSvc",
+            "TabletInputService",
+            "WbioSrvc"
+        ],
+        "Security": [
+            "RemoteRegistry",
+            "RemoteAccess"
+        ],
+        "Minimal": [
+            "DiagTrack",
+            "dmwappushservice",
+            "RemoteRegistry",
+            "RetailDemo"
+        ]
+    }
+}

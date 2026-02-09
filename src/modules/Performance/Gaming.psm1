@@ -55,8 +55,12 @@ function Set-WinDebloat7Gaming {
     )
     
     Write-Log -Message "Applying Gaming Optimizations..." -Level Info
+    
+    if (-not $PSCmdlet.ShouldProcess("System", "Apply Gaming Optimizations")) {
+        return
+    }
+    
     $successCount = 0
-    $failCount = 0
     
     # 1. Network Optimizations (Nagle's Fix)
     if ($EnableNetworkOptimization) {

@@ -1,7 +1,7 @@
 $packageName = 'win-debloat7'
-$version     = '1.2.6'
+$version     = '1.3.0'
 $url = "https://github.com/tomytate/Win-Debloat7/releases/download/v$version/Win-Debloat7.exe"
-$checksum    = "5A884AE57A2C55E0B4684AAF2B69B14A3B913485ADFFBF22D21C163EDEBDFD93" 
+$checksum    = "1EE471F5F500A0F9D8918AC56C52460B6F48D7DF2064C1D46224345C1B3DFAE7" 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $exePath = Join-Path $toolsDir "Win-Debloat7.exe"
 

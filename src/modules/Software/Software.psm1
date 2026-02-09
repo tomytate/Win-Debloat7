@@ -134,7 +134,10 @@ function Install-PackageManager {
                     
                     # Modern PS 7.5+ Installation (Resilient)
                     $chocoScript = Invoke-WebRequest -Uri 'https://community.chocolatey.org/install.ps1' -MaximumRetryCount 3 -RetryIntervalSec 5 -UseBasicParsing -ErrorAction Stop
-                    Invoke-Expression $chocoScript.Content
+                    $scriptPath = "$env:TEMP\choco_install_$(New-Guid).ps1"
+                    $chocoScript.Content | Set-Content -Path $scriptPath -Force
+                    & $scriptPath
+                    Remove-Item $scriptPath -Force -ErrorAction SilentlyContinue
                     
                     Write-Log -Message "Chocolatey installed successfully." -Level Success
                     return $true

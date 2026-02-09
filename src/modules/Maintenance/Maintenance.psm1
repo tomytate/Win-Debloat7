@@ -98,7 +98,7 @@ function Invoke-WinDebloat7Maintenance {
     Write-Log -Message "Starting Scheduled Maintenance (Deep Clean)..." -Level Info
     
     # 1. Deep Disk Cleanup (cleanmgr /SAGERUN:777)
-    # GEMS Integration: Pre-select all cleanup options in Registry
+    # Pre-select all cleanup options in Registry
     Write-Log -Message "Configuring Deep Cleanup settings..." -Level Info
     
     $cleanmgrKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches"

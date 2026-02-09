@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     WPF GUI Controller for Win-Debloat7 (Premium Edition)
 
@@ -181,10 +181,12 @@ function Show-WinDebloat7GUI {
                     if ($handle.IsCompleted) {
                         $checkTimer.Stop()
                         try {
-                            $count = $ps.EndInvoke($handle)
+                            $results = $ps.EndInvoke($handle)
                             $ps.Dispose()
                             $rs.Dispose()
-                            (& $getCtrl "txtBloatwareCount").Text = $count.ToString()
+                            
+                            $finalCount = if ($results) { $results[-1] } else { 0 }
+                            (& $getCtrl "txtBloatwareCount").Text = "$finalCount"
                         }
                         catch {
                             (& $getCtrl "txtBloatwareCount").Text = "?"
