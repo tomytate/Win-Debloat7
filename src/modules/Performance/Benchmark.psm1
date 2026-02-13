@@ -1,10 +1,10 @@
-﻿<#
+<#
 .SYNOPSIS
     Captures current system performance metrics.
     
 .NOTES
     Module: Win-Debloat7.Modules.Performance.Benchmark
-    Version: 1.2.5
+    Version: 1.3.0
 #>
 #Requires -Version 7.5
 

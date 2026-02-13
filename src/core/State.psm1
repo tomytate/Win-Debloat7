@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     State management and snapshot module for Win-Debloat7
     
@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.State
-    Version: 1.2.5
+    Version: 1.3.0
     
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
@@ -30,7 +30,7 @@ class SystemSnapshot {
     [string]$Description
     [hashtable]$Registry
     [array]$Services
-    [string]$Version = "1.2.5"
+    [string]$Version = "1.3.0"
 }
 
 # Cache for version info (PERF-001 fix)

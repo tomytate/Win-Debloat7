@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     System State Inspection Module
     
@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.SystemState
-    Version: 1.2.5
+    Version: 1.3.0
 #>
 
 #Requires -Version 7.5

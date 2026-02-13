@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Network configuration module for Win-Debloat7
     
@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Network
-    Version: 1.2.5
+    Version: 1.3.0
     
 .LINK
     https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75

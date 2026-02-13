@@ -53,6 +53,7 @@
         'src\modules\Privacy\Tasks.psm1',
         'src\modules\Privacy\Hosts.psm1',
         'src\modules\Integrations\Integrations.psm1',
+        'src\modules\Tweaks\UI.psm1',
         # Extras module excluded related to standard release
         'src\ui\Colors.psm1',
         'src\ui\Menu.psm1',
@@ -106,6 +107,8 @@
         # Maintenance
         'Register-WinDebloat7Maintenance', 'Unregister-WinDebloat7Maintenance', 'Invoke-WinDebloat7Maintenance',
         # Extras (only available in Extras edition)
+        # UI Tweaks
+        'Set-WinDebloat7TaskbarAlignment', 'Set-WinDebloat7ContextMenu', 'Set-WinDebloat7Explorer', 'Set-WinDebloat7StartMenu',
         # UI
         'Show-MainMenu', 'Show-WinDebloat7GUI',
         'Write-WD7Host', 'Show-WD7Header', 'Show-WD7Separator', 'Show-WD7Progress', 'Show-WD7StatusBadge'
