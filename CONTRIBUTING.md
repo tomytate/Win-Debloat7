@@ -3,7 +3,6 @@
 Thank you for your interest in contributing to **Win-Debloat7**! We welcome improvements, bug fixes, and new features.
 
 ## 🤝 Code of Conduct
-## 🤝 Code of Conduct
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
 
 ## 🛠️ Development Setup
@@ -11,6 +10,7 @@ Please note that this project is released with a [Contributor Code of Conduct](C
    - Windows 10/11
    - PowerShell 7.5+
    - VS Code (Recommended) with PowerShell extension
+   - Pester 5+ (`Install-Module Pester -Force`)
 
 2. **Clone the repo**:
    ```powershell
@@ -20,27 +20,63 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 
 3. **Run Locally**:
    ```powershell
+   # TUI Mode
    ./Win-Debloat7.ps1 -NoGui
+
+   # GUI Mode
+   ./Win-Debloat7.ps1
    ```
 
 ## 🧪 Testing
-- We use **Pester 5** for unit testing.
-- Run tests before submitting a PR:
+- We use **Pester 5** for unit and integration testing.
+- Run the full test suite before submitting a PR:
   ```powershell
+  # Compliance suite (35 tests)
+  Invoke-Pester -Path tests/Overall.Tests.ps1 -Output Detailed
+
+  # Unit tests
   Invoke-Pester -Path tests/Unit -Output Detailed
+  ```
+- Run **PSScriptAnalyzer** for linting:
+  ```powershell
+  Invoke-ScriptAnalyzer -Path src -Recurse -Severity Error,Warning
   ```
 
 ## 📦 Project Structure
-- `src/core`: Core logic (Logging, Config, State)
-- `src/modules`: Individual features (Bloatware, Privacy, Performance)
-- `src/ui`: GUI and Menu systems
-- `profiles`: YAML configuration files
+```
+Win-Debloat7/
+├── src/
+│   ├── core/           # Logger, Config (YAML), Registry, State, Sysprep
+│   ├── modules/
+│   │   ├── Bloatware/  # App removal engine
+│   │   ├── Privacy/    # Telemetry, Hosts blocking, Scheduled Tasks
+│   │   ├── Performance/# Power plans, Gaming, Services, Benchmarking, Tweaks
+│   │   ├── Network/    # DNS, IPv6, Network diagnostics
+│   │   ├── Software/   # Winget/Choco package manager
+│   │   ├── Drivers/    # GPU & system driver updates
+│   │   ├── Repair/     # SFC, DISM, Network reset
+│   │   ├── Features/   # Optional Windows features
+│   │   ├── Security/   # SMBv1, PUA protection
+│   │   ├── Maintenance/# Scheduled cleanup tasks
+│   │   ├── Integrations/# ShutUp10++, AdwCleaner, SDIO
+│   │   ├── Extras/     # Defender Remover, MAS (Extras edition only)
+│   │   ├── Tweaks/     # AI disablement, UI customization
+│   │   └── Windows11/  # Version detection, 25H2 compatibility
+│   └── ui/             # TUI (Menu.psm1, Colors.psm1) + GUI (WPF)
+├── config/             # services.json, dns.json
+├── profiles/           # YAML configuration presets
+├── build/              # Build scripts, Chocolatey packaging
+├── tests/              # Pester test suites
+└── docs/               # Wiki documentation
+```
 
 ## 📝 Pull Request Guidelines
 1. **One feature per PR**: Keep changes focused.
 2. **Descriptive Title**: e.g., "Add Firefox Telemetry Blocking".
 3. **Verify Safety**: Ensure no critical system components (like Bootloader) are touched.
-4. **Update Documentation**: If you change functionality, update `README.md`.
+4. **Update Documentation**: If you change functionality, update relevant docs.
+5. **Run Tests**: All Pester tests must pass before merging.
+6. **Follow Naming**: Functions must use the `Verb-WinDebloat7Noun` naming convention.
 
 ## ⚠️ "Extras" Build Variant
 - Code related to **Defender Remover** or **MAS** is located in `src/modules/Extras`.

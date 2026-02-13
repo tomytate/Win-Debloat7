@@ -2,12 +2,12 @@
 
 ## Supported Versions
 
-Only the latest major version is actively supported.
+Only the latest major version is actively supported with security updates.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.2.x   | :white_check_mark: |
-| 1.1.x   | :x:                |
+| 1.3.x   | :white_check_mark: |
+| 1.2.x   | :x:                |
 | < 1.0   | :x:                |
 
 ## 🚨 Antivirus & False Positives
@@ -20,11 +20,11 @@ Only the latest major version is actively supported.
 If you encounter a virus warning:
 1.  Verify you are using the **Standard Edition** if you want a clean experience.
 2.  Verify the SHA256 Checksum against the one published in the Release Notes.
-3.  If the **Standard Edition** triggers a warning, please report it immediately as a False Positive.
+3.  If the **Standard Edition** triggers a warning, please [report it immediately](https://github.com/tomytate/Win-Debloat7/issues) as a False Positive.
 
 ## Reporting a Vulnerability
 
-We take the security of **Win-Debloat7** seriously. If you discover a security vulnerability in the distinct codebase (e.g., in the PowerShell logic, GUI, or API handling):
+We take the security of **Win-Debloat7** seriously. If you discover a security vulnerability in the codebase (e.g., in the PowerShell logic, GUI, or API handling):
 
 1.  **Do NOT open a public issue.**
 2.  Use the [GitHub Security Advisory](https://github.com/tomytate/Win-Debloat7/security/advisories/new) feature to report it privately.
@@ -33,10 +33,12 @@ We take the security of **Win-Debloat7** seriously. If you discover a security v
 ## Supply Chain Security
 
 *   Releases are built via **GitHub Actions** (CI/CD) to ensure code integrity.
-*   We use **SHA256 checksums** for all release artifacts. Always verify these before running.
+*   We use **SHA256 checksums** for all release artifacts. Always verify before running.
+*   All PowerShell code passes **PSScriptAnalyzer** static analysis with zero errors.
 
 ## Safe Usage
 
 *   Always download releases from the official [GitHub Releases](https://github.com/tomytate/Win-Debloat7/releases) page.
 *   Avoid downloading from third-party sites.
-*   Use "Standard" edition for Enterprise/Production environments.
+*   Use the **Standard Edition** for Enterprise/Production environments.
+*   Run `Invoke-Pester` on the test suite to verify code integrity after cloning.

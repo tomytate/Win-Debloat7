@@ -4,7 +4,7 @@ Win-Debloat7 is designed to run on **Windows 10 (22H2+)** or **Windows 11**.
 
 ## Prerequisites
 
-1.  **PowerShell 7.5+**: The script uses features newly introduced in PowerShell 7.5.
+1.  **PowerShell 7.5+**: The script uses features exclusive to PowerShell 7.5.
     *   **Auto-Installed**: If you use `Win-Debloat7.exe`, it will automatically install this for you.
     *   **Manual**: Only required if running the `.ps1` script directly. [Download Here](https://github.com/PowerShell/PowerShell/releases)
 
@@ -12,7 +12,23 @@ Win-Debloat7 is designed to run on **Windows 10 (22H2+)** or **Windows 11**.
 
 ---
 
+## ⚡ Method 1: Instant Deploy (Recommended)
 
+Open PowerShell **as Administrator** and paste one command:
+
+### Standard Edition 🛡️
+Safe, stable, and compliant. No compiled binaries.
+```powershell
+iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup-standard.ps1 | iex
+```
+
+### Extras Edition ⚠️
+Includes **Defender Remover** + **MAS**. Will trigger Antivirus warnings.
+```powershell
+iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup-extras.ps1 | iex
+```
+
+---
 
 ## 🍫 Method 2: Chocolatey
 
@@ -32,8 +48,26 @@ For portable usage (USB drives) or offline systems.
 2.  Download the **Single-File Executable**:
     *   **Standard**: `Win-Debloat7.exe` (Recommended)
     *   **Extras**: `Win-Debloat7-Extras.exe`
-3.  **Run the file.** No extraction needed.
+3.  **Right-click → Run as Administrator.** No extraction needed.
+4.  The launcher will auto-install PowerShell 7.5 if missing.
 
-### ⚠️ Extras Edition
-For advanced users needing **Defender Remover** or **MAS** (Activation).  
-*Note: This will likely trigger your Antivirus. You must add an exclusion.*
+---
+
+## 🛠️ Method 4: From Source (Developers)
+
+```powershell
+git clone https://github.com/tomytate/Win-Debloat7.git
+cd Win-Debloat7
+./Win-Debloat7.ps1
+```
+
+### Verify Integrity
+```powershell
+# Run compliance tests
+Invoke-Pester -Path tests/Overall.Tests.ps1 -Output Detailed
+```
+
+---
+
+## ⚠️ Extras Edition Notice
+The Extras edition contains **Defender Remover** and **MAS** (Activation Scripts), which are flagged by antivirus software as "HackTool" or "PUP". This is **expected behavior**. Use the Standard Edition if you do not need these tools.
