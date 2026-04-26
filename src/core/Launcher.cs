@@ -4,6 +4,11 @@ using System.IO;
 
 namespace WinDebloat7
 {
+    /// <summary>
+    /// Note: This executable wrapper is deliberately left unsigned to remain a free, open-source project.
+    /// Because of this, Windows 11 Smart App Control (SAC) and Microsoft Defender SmartScreen will
+    /// likely block this file. Users must explicitly allow it or disable SAC, or run the .ps1 directly.
+    /// </summary>
     class Launcher
     {
         static void Main(string[] args)
@@ -26,8 +31,6 @@ namespace WinDebloat7
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = "pwsh.exe";
                 startInfo.Arguments = string.Format("-NoProfile -ExecutionPolicy Bypass -File \"{0}\"", scriptPath);
-                startInfo.UseShellExecute = false; // Required for environment variables if needed, but true allows PATH lookup easier? actually false is better if we rely on PATH.
-                // Wait, UseShellExecute = true allows using system PATH to find 'pwsh'.
                 startInfo.UseShellExecute = true; 
 
                 // If user double clicks, we want a console window. 
@@ -43,7 +46,7 @@ namespace WinDebloat7
                     // pwsh not found
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("PowerShell 7 (pwsh) was not found in your PATH.");
-                    Console.WriteLine("Win-Debloat7 requires PowerShell 7.5+.");
+                    Console.WriteLine("Win-Debloat7 requires PowerShell 7.6+.");
                     Console.WriteLine();
                     Console.WriteLine("Press any key to open the download page...");
                     Console.ReadKey();

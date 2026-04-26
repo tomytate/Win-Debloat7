@@ -11,7 +11,7 @@
     Version: 1.3.0
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 #Requires -RunAsAdministrator
 
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '', Justification = 'Event parameters required by signature')]
@@ -31,7 +31,7 @@ Import-Module "$scriptRoot\..\..\modules\Tweaks\UI.psm1" -Force -ErrorAction Sil
 Import-Module "$scriptRoot\..\..\modules\Software\Software.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Network\Network.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Privacy\Tasks.psm1" -Force -ErrorAction SilentlyContinue
-Import-Module "$scriptRoot\..\..\modules\Privacy\Hosts.psm1" -Force -ErrorAction SilentlyContinue
+Import-Module "$scriptRoot\..\..\modules\Privacy\Firewall.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Windows11\Version-Detection.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Repair\Repair.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Features\Features.psm1" -Force -ErrorAction SilentlyContinue
@@ -228,14 +228,13 @@ function Show-WinDebloat7GUI {
 
         # 3.1 Real-time Monitoring Timer
         $timer = [System.Windows.Threading.DispatcherTimer]::new()
-        $timer.Interval = [TimeSpan]::FromSeconds(5)
+        $timer.Interval = [TimeSpan]::FromSeconds(15)
         $timer.Add_Tick({
                 try {
                     # Update Connections & Privacy Score (Background Check)
                     $sysState = Get-WinDebloat7SystemState
 
-                    # Update RAM & Connections (Using Format requested)
-                    $ram = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
+                    # Update RAM & Connections (Using cached RAM format)
                     $conn = (Get-NetTCPConnection -State Established -ErrorAction SilentlyContinue).Count
                     (& $getCtrl "txtRAM").Text = "$ram GB | $conn Active Conns"
 
@@ -244,6 +243,10 @@ function Show-WinDebloat7GUI {
                     if ($sysState.Telemetry) { $pScore -= 25 }
                     if ($sysState.Copilot) { $pScore -= 15 }
                     if ($sysState.Recall) { $pScore -= 15 }
+                    if ($sysState.ActivityHistory) { $pScore -= 10 }
+                    if ($sysState.Location) { $pScore -= 10 }
+                    if ($sysState.AdvertisingId) { $pScore -= 10 }
+                    $pScore = [Math]::Max(0, [Math]::Min(100, $pScore))
 
                     (& $getCtrl "txtPrivacyScore").Text = "$pScore"
 
@@ -334,7 +337,7 @@ function Show-WinDebloat7GUI {
                     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value $themeVal -Force -ErrorAction SilentlyContinue
 
                     # 2. Hibernate
-                    if ((& $getCtrl "chkHibernate").IsChecked) { powercfg /h on } else { powercfg /h off }
+                    if ((& $getCtrl "chkHibernate").IsChecked) { Start-Process -FilePath "powercfg.exe" -ArgumentList "/h", "on" -Wait -NoNewWindow } else { Start-Process -FilePath "powercfg.exe" -ArgumentList "/h", "off" -Wait -NoNewWindow }
 
                     # 3. Clipboard History
                     $clipVal = if ((& $getCtrl "chkClipboardHistory").IsChecked) { 1 } else { 0 }
@@ -399,9 +402,18 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                     try {
                         # Power Plan
-                        if ((& $getCtrl "radHighPerf").IsChecked) { cmd /c "powercfg /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c" }
-                        elseif ((& $getCtrl "radUltimate").IsChecked) { cmd /c "powercfg /s e9a42b02-d5df-448d-aa00-03f14749eb61" }
-                        else { cmd /c "powercfg /s 381b4222-f694-41f0-9685-ff5bb260df2e" } # Balanced
+                        if ((& $getCtrl "radHighPerf").IsChecked) {
+                            Start-Process -FilePath "powercfg.exe" -ArgumentList "/s", "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c" -Wait -NoNewWindow
+                            Write-Log -Message "Set power plan to High Performance" -Level Info
+                        }
+                        elseif ((& $getCtrl "radUltimate").IsChecked) {
+                            Start-Process -FilePath "powercfg.exe" -ArgumentList "/s", "e9a42b02-d5df-448d-aa00-03f14749eb61" -Wait -NoNewWindow
+                            Write-Log -Message "Set power plan to Ultimate Performance" -Level Info
+                        }
+                        else {
+                            Start-Process -FilePath "powercfg.exe" -ArgumentList "/s", "381b4222-f694-41f0-9685-ff5bb260df2e" -Wait -NoNewWindow
+                            Write-Log -Message "Set power plan to Balanced" -Level Info
+                        }
 
                         # Gaming Tweaks
                         if ((& $getCtrl "chkGamingNetwork").IsChecked) {
@@ -426,7 +438,8 @@ function Show-WinDebloat7GUI {
 
                         if ((& $getCtrl "chkUltimatePlan").IsChecked) {
                             # Duplicate Ultimate Plan attempt
-                            cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61" | Out-Null
+                            Start-Process -FilePath "powercfg.exe" -ArgumentList "/duplicatescheme", "e9a42b02-d5df-448d-aa00-03f14749eb61" -Wait -NoNewWindow
+                            Write-Log -Message "Duplicated Ultimate Performance power scheme" -Level Info
                         }
 
                         $txtStatus.Text = "Performance Optimized!"
@@ -448,7 +461,7 @@ function Show-WinDebloat7GUI {
                 & $updateGui
                 [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
-                    Add-WinDebloat7HostsBlock -Confirm:$false
+                    Add-WinDebloat7FirewallBlock -Confirm:$false
                     $txtStatus.Text = "Telemetry Blocked!"
                 }
                 catch {
@@ -544,7 +557,6 @@ function Show-WinDebloat7GUI {
         }
 
         (& $getCtrl "btnInstallSoftware").Add_Click({
-                $icSoftware = $window.FindName("icSoftwareCategories")
                 $selectedApps = [System.Collections.Generic.List[string]]::new()
                 foreach ($cat in $icSoftware.ItemsSource) {
                     foreach ($app in $cat.Apps) {
@@ -694,18 +706,14 @@ function Show-WinDebloat7GUI {
 
         # 2. Maintenance Tools
         (& $getCtrl "btnUpdateDrivers").Add_Click({
-                $txtStatus.Text = "Running System Repair (SFC + DISM)..."
+                $txtStatus.Text = "Launching Driver Update Center..."
                 & $updateGui
-                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
-                    Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile -Command Repair-WinDebloat7System -Confirm:$false" -Verb RunAs -Wait
-                    $txtStatus.Text = "System Repair Initiated!"
+                    Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-Command", "Update-WinDebloat7Drivers -Method Interactive" -Verb RunAs
+                    $txtStatus.Text = "Driver Update Center Launched!"
                 }
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
-                }
-                finally {
-                    [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
 

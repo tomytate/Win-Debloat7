@@ -14,7 +14,7 @@
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 #Requires -RunAsAdministrator
 
 using namespace System.Management.Automation
@@ -79,13 +79,13 @@ function Set-WinDebloat7Performance {
             "HighPerformance" {
                 $guid = $Script:PowerPlanGUIDs.HighPerformance
                 if ($PSCmdlet.ShouldProcess("Power Plan", "Set to High Performance")) {
-                    $result = powercfg -SetActive $guid 2>&1
-                    if ($LASTEXITCODE -eq 0) {
+                    $proc = Start-Process -FilePath "powercfg.exe" -ArgumentList "-SetActive", "$guid" -Wait -NoNewWindow -PassThru
+                    if ($proc.ExitCode -eq 0) {
                         Write-Log -Message "Power Plan set to High Performance" -Level Success
                         $successCount++
                     }
                     else {
-                        Write-Log -Message "Failed to set power plan: $result" -Level Error
+                        Write-Log -Message "Failed to set power plan: $($proc.ExitCode)" -Level Error
                         $failCount++
                     }
                 }
@@ -96,15 +96,15 @@ function Set-WinDebloat7Performance {
                     # Duplicate Ultimate Performance scheme if not exists
                     $existingPlans = powercfg -list 2>&1
                     if ($existingPlans -notmatch $guid) {
-                        powercfg -DuplicateScheme $guid 2>&1 | Out-Null
+                        Start-Process -FilePath "powercfg.exe" -ArgumentList "-DuplicateScheme", "$guid" -Wait -NoNewWindow
                     }
-                    $result = powercfg -SetActive $guid 2>&1
-                    if ($LASTEXITCODE -eq 0) {
+                    $proc = Start-Process -FilePath "powercfg.exe" -ArgumentList "-SetActive", "$guid" -Wait -NoNewWindow -PassThru
+                    if ($proc.ExitCode -eq 0) {
                         Write-Log -Message "Power Plan set to Ultimate Performance" -Level Success
                         $successCount++
                     }
                     else {
-                        Write-Log -Message "Failed to set power plan: $result" -Level Error
+                        Write-Log -Message "Failed to set power plan: $($proc.ExitCode)" -Level Error
                         $failCount++
                     }
                 }
@@ -112,7 +112,7 @@ function Set-WinDebloat7Performance {
             "Balanced" {
                 $guid = $Script:PowerPlanGUIDs.Balanced
                 if ($PSCmdlet.ShouldProcess("Power Plan", "Set to Balanced")) {
-                    powercfg -SetActive $guid 2>&1 | Out-Null
+                    Start-Process -FilePath "powercfg.exe" -ArgumentList "-SetActive", "$guid" -Wait -NoNewWindow
                     Write-Log -Message "Power Plan set to Balanced" -Level Success
                     $successCount++
                 }

@@ -14,7 +14,7 @@
     https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 #Requires -RunAsAdministrator
 
 using namespace System.Management.Automation

@@ -13,7 +13,7 @@ Identifies and removes pre-installed Appx packages.
 ### **Privacy** (`src/modules/Privacy`)
 Hardens system privacy via Registry, Group Policy, and Hosts blocking.
 - **Key Functions:** `Set-WinDebloat7Privacy`, `Disable-WinDebloat7TelemetryTasks`
-- **Hosts Blocking:** `Add-WinDebloat7HostsBlock`, `Get-WinDebloat7TelemetryDomains`
+- **Firewall Blocking:** `Add-WinDebloat7FirewallBlock`, `Get-WinDebloat7TelemetryDomains`
 - **Features:** Disables DiagTrack, blocks telemetry domains, disables Copilot/Recall.
 
 ### **Performance** (`src/modules/Performance`)

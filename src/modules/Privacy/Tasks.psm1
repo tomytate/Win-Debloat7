@@ -14,7 +14,7 @@
     https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 #Requires -RunAsAdministrator
 
 using namespace System.Management.Automation
@@ -52,6 +52,12 @@ $Script:TelemetryTasks = @{
         
         # Cloud Experience
         @{ Path = "\Microsoft\Windows\CloudExperienceHost"; Name = "CreateObjectTask" }
+        
+        # Windows 11 25H2 AI / Copilot+ Features
+        @{ Path = "\Microsoft\Windows\WindowsAI"; Name = "ClickToDo" }
+        @{ Path = "\Microsoft\Windows\WindowsAI"; Name = "RecallSnapshot" }
+        @{ Path = "\Microsoft\Windows\AISystem"; Name = "AIAnalyzer" }
+        @{ Path = "\Microsoft\Windows\NarrativeFlows"; Name = "UserJourneyTracker" }
     )
     
     # Aggressive - may impact some features

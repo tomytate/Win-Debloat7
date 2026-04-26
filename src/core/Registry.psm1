@@ -14,7 +14,7 @@
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 
 using namespace System.Management.Automation
 using namespace System.Security.AccessControl
@@ -83,18 +83,8 @@ function Set-RegistryKey {
         }
         
         # Validate we have write access (SEC-002 fix)
-        $acl = Get-Acl -Path $Path -ErrorAction Stop
-        $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
-        $hasWriteAccess = $false
-        
-        foreach ($accessRule in $acl.Access) {
-            if ($accessRule.IdentityReference.Value -match "Administrators|SYSTEM|$($currentUser.Name)") {
-                if ($accessRule.RegistryRights -band [System.Security.AccessControl.RegistryRights]::SetValue) {
-                    $hasWriteAccess = $true
-                    break
-                }
-            }
-        }
+        $principal = [System.Security.Principal.WindowsPrincipal]::new([System.Security.Principal.WindowsIdentity]::GetCurrent())
+        $hasWriteAccess = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
         
         if (-not $hasWriteAccess) {
             Write-Log -Message "Insufficient permissions to modify: $Path" -Level Warning

@@ -1,115 +1,343 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "description": "Win-Debloat7 Service Optimization Database",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "services": {
         "DiagTrack": {
             "DisplayName": "Connected User Experiences and Telemetry",
             "StartupType": "Disabled",
             "Category": "Telemetry",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Microsoft telemetry service - safe to disable for privacy"
         },
         "dmwappushservice": {
             "DisplayName": "WAP Push Message Routing Service",
             "StartupType": "Disabled",
             "Category": "Telemetry",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "WAP push messages for telemetry"
         },
         "WSearch": {
             "DisplayName": "Windows Search",
             "StartupType": "AutomaticDelayedStart",
             "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
             "Description": "Delayed start reduces boot time, service starts when needed"
         },
         "SysMain": {
             "DisplayName": "Superfetch",
             "StartupType": "Automatic",
             "Category": "Performance",
+            "StorageType": "HDD",
+            "RiskLevel": "High",
             "Description": "Keep enabled for HDD, optional disable for SSD"
         },
         "RemoteRegistry": {
             "DisplayName": "Remote Registry",
             "StartupType": "Disabled",
             "Category": "Security",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Remote registry access - security risk"
         },
         "RemoteAccess": {
             "DisplayName": "Routing and Remote Access",
             "StartupType": "Disabled",
             "Category": "Security",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "VPN/Routing services - disable if not needed"
         },
         "MapsBroker": {
             "DisplayName": "Downloaded Maps Manager",
             "StartupType": "Manual",
             "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Only needed if using offline Windows Maps"
         },
         "lfsvc": {
             "DisplayName": "Geolocation Service",
             "StartupType": "Manual",
             "Category": "Privacy",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
             "Description": "Location tracking - set to manual for privacy"
         },
         "PcaSvc": {
             "DisplayName": "Program Compatibility Assistant",
             "StartupType": "Manual",
             "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
             "Description": "Only needed for legacy app compatibility"
         },
         "WerSvc": {
             "DisplayName": "Windows Error Reporting",
             "StartupType": "Manual",
             "Category": "Telemetry",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
             "Description": "Error reports to Microsoft"
         },
         "RetailDemo": {
             "DisplayName": "Retail Demo Service",
             "StartupType": "Disabled",
             "Category": "Bloat",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Only for store display PCs"
         },
         "wisvc": {
             "DisplayName": "Windows Insider Service",
             "StartupType": "Manual",
             "Category": "Telemetry",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Only needed if in Windows Insider program"
         },
         "WbioSrvc": {
             "DisplayName": "Windows Biometric Service",
             "StartupType": "Manual",
             "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Only needed if using fingerprint/face login"
         },
         "PhoneSvc": {
             "DisplayName": "Phone Service",
             "StartupType": "Manual",
             "Category": "Bloat",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Phone Link integration"
         },
         "TabletInputService": {
             "DisplayName": "Touch Keyboard and Handwriting",
             "StartupType": "Manual",
             "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Only needed for touchscreen devices"
         },
         "XblAuthManager": {
             "DisplayName": "Xbox Live Auth Manager",
             "StartupType": "Manual",
             "Category": "Gaming",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Xbox Live authentication"
         },
         "XblGameSave": {
             "DisplayName": "Xbox Live Game Save",
             "StartupType": "Manual",
             "Category": "Gaming",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Xbox Live cloud saves"
         },
         "XboxNetApiSvc": {
             "DisplayName": "Xbox Live Networking",
             "StartupType": "Manual",
             "Category": "Gaming",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
             "Description": "Xbox Live networking"
+        },
+        "Fax": {
+            "DisplayName": "Fax",
+            "StartupType": "Disabled",
+            "Category": "Bloat",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Obsolete Fax service"
+        },
+        "CertPropSvc": {
+            "DisplayName": "Certificate Propagation",
+            "StartupType": "Manual",
+            "Category": "Bloat",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
+            "Description": "Smart card certificate propagation"
+        },
+        "AIFabricUserSvc": {
+            "DisplayName": "AI Fabric User Service",
+            "StartupType": "Disabled",
+            "Category": "Privacy",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Windows 11 AI Telemetry"
+        },
+        "NarrativeFlows": {
+            "DisplayName": "Narrative Flows",
+            "StartupType": "Disabled",
+            "Category": "Privacy",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Telemetry relating to user journey tracking"
+        },
+        "Spooler": {
+            "DisplayName": "Print Spooler",
+            "StartupType": "Manual",
+            "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "High",
+            "Description": "Disable ONLY if you never use physical or PDF printers"
+        },
+        "WpcMonSvc": {
+            "DisplayName": "Parental Controls",
+            "StartupType": "Disabled",
+            "Category": "Bloat",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Windows Parental Controls"
+        },
+        "SensorDataService": {
+            "DisplayName": "Sensor Data Service",
+            "StartupType": "Manual",
+            "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Disable if not on a tablet"
+        },
+        "SensorService": {
+            "DisplayName": "Sensor Service",
+            "StartupType": "Manual",
+            "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Sensors for auto-brightness, rotation"
+        },
+        "SEMgrSvc": {
+            "DisplayName": "Payments and NFC/SE Manager",
+            "StartupType": "Disabled",
+            "Category": "Bloat",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "NFC payments management"
+        },
+        "icssvc": {
+            "DisplayName": "Windows Mobile Hotspot Service",
+            "StartupType": "Manual",
+            "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
+            "Description": "Only needed to share internet connection"
+        },
+        "WMPNetworkSvc": {
+            "DisplayName": "Windows Media Player Network Sharing Service",
+            "StartupType": "Disabled",
+            "Category": "Bloat",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Shares WMP libraries over network"
+        },
+        "XboxGipSvc": {
+            "DisplayName": "Xbox Accessory Management Service",
+            "StartupType": "Manual",
+            "Category": "Gaming",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
+            "Description": "Only needed for Xbox controllers on PC"
+        },
+        "SharedAccess": {
+            "DisplayName": "Internet Connection Sharing (ICS)",
+            "StartupType": "Disabled",
+            "Category": "Security",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
+            "Description": "Security risk if unused"
+        },
+        "NetTcpPortSharing": {
+            "DisplayName": "Net.Tcp Port Sharing Service",
+            "StartupType": "Disabled",
+            "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
+            "Description": "WCF port sharing"
+        },
+        "lltdsvc": {
+            "DisplayName": "Link-Layer Topology Discovery Mapper",
+            "StartupType": "Manual",
+            "Category": "Performance",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Network mapping on older networks"
+        },
+        "SSDPSRV": {
+            "DisplayName": "SSDP Discovery",
+            "StartupType": "Manual",
+            "Category": "Security",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
+            "Description": "UPnP device discovery"
+        },
+        "upnphost": {
+            "DisplayName": "UPnP Device Host",
+            "StartupType": "Manual",
+            "Category": "Security",
+            "StorageType": "Any",
+            "RiskLevel": "Medium",
+            "Description": "Universal Plug and Play host"
+        },
+        "AJRouter": {
+            "DisplayName": "AllJoyn Router Service",
+            "StartupType": "Disabled",
+            "Category": "Bloat",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Routing for AllJoyn IoT devices"
+        },
+        "AssignedAccessManagerSvc": {
+            "DisplayName": "Assigned Access Manager Service",
+            "StartupType": "Disabled",
+            "Category": "Bloat",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Kiosk mode support"
+        },
+        "diagnosticshub.standardcollector.service": {
+            "DisplayName": "Microsoft (R) Diagnostics Hub Standard Collector Service",
+            "StartupType": "Manual",
+            "Category": "Telemetry",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "VS Diagnostics Hub"
+        },
+        "DiagSvc": {
+            "DisplayName": "Diagnostic Execution Service",
+            "StartupType": "Manual",
+            "Category": "Telemetry",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Executes diagnostic actions for troubleshooting"
+        },
+        "DusmSvc": {
+            "DisplayName": "Data Usage",
+            "StartupType": "Automatic",
+            "Category": "Telemetry",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Tracks network data usage (metered connections)"
+        },
+        "WdiServiceHost": {
+            "DisplayName": "Diagnostic Service Host",
+            "StartupType": "Manual",
+            "Category": "Telemetry",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Diagnostic service host"
+        },
+        "WdiSystemHost": {
+            "DisplayName": "Diagnostic System Host",
+            "StartupType": "Manual",
+            "Category": "Telemetry",
+            "StorageType": "Any",
+            "RiskLevel": "Low",
+            "Description": "Diagnostic system host"
         }
     },
     "presets": {
@@ -118,24 +346,51 @@
             "dmwappushservice",
             "lfsvc",
             "WerSvc",
-            "wisvc"
+            "wisvc",
+            "AIFabricUserSvc",
+            "NarrativeFlows",
+            "diagnosticshub.standardcollector.service",
+            "DiagSvc",
+            "WdiServiceHost",
+            "WdiSystemHost"
         ],
         "Performance": [
             "WSearch",
             "MapsBroker",
             "PcaSvc",
             "TabletInputService",
-            "WbioSrvc"
+            "WbioSrvc",
+            "SensorDataService",
+            "SensorService",
+            "icssvc",
+            "lltdsvc",
+            "NetTcpPortSharing"
         ],
         "Security": [
             "RemoteRegistry",
-            "RemoteAccess"
+            "RemoteAccess",
+            "SharedAccess",
+            "SSDPSRV",
+            "upnphost"
         ],
         "Minimal": [
             "DiagTrack",
             "dmwappushservice",
             "RemoteRegistry",
-            "RetailDemo"
+            "RetailDemo",
+            "Fax",
+            "WpcMonSvc",
+            "SEMgrSvc",
+            "WMPNetworkSvc",
+            "AJRouter",
+            "AssignedAccessManagerSvc",
+            "CertPropSvc"
+        ],
+        "Gaming": [
+            "XblAuthManager",
+            "XblGameSave",
+            "XboxNetApiSvc",
+            "XboxGipSvc"
         ]
     }
 }

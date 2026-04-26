@@ -1,4 +1,4 @@
-﻿@{
+@{
     # Script module or binary module file associated with this manifest.
     # Script module or binary module file associated with this manifest.
     # RootModule        = ''
@@ -10,19 +10,19 @@
     GUID              = 'a1b2c3d4-e5f6-7890-1234-567890abcdef'
 
     # Author of this module
-    Author            = 'Tomy Tolledo'
+    Author            = 'tomytate'
 
     # Company or vendor of this module
     CompanyName       = 'Open Source'
 
     # Copyright statement for this module
-    Copyright         = '(c) 2026 Tomy Tolledo. All rights reserved.'
+    Copyright         = '(c) 2026 tomytate. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'Power User Windows Optimization Framework (PowerShell 7.5+)'
+    Description       = 'Power User Windows Optimization Framework (PowerShell 7.6+)'
 
     # Minimum version of the Windows PowerShell engine required by this module
-    PowerShellVersion = '7.5'
+    PowerShellVersion = '7.6'
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules   = @()
@@ -51,7 +51,7 @@
         'src\modules\Drivers\Drivers.psm1',
         'src\modules\Network\Network.psm1',
         'src\modules\Privacy\Tasks.psm1',
-        'src\modules\Privacy\Hosts.psm1',
+        'src\modules\Privacy\Firewall.psm1',
         'src\modules\Integrations\Integrations.psm1',
         'src\modules\Tweaks\UI.psm1',
         # Extras module excluded related to standard release
@@ -92,8 +92,8 @@
         # Privacy Tasks
         'Get-WinDebloat7TelemetryTasks', 'Disable-WinDebloat7TelemetryTasks', 'Enable-WinDebloat7TelemetryTasks',
         # Hosts Blocking
-        'Backup-HostsFile', 'Add-WinDebloat7HostsBlock', 'Remove-WinDebloat7HostsBlock',
-        'Get-WinDebloat7HostsStatus', 'Get-WinDebloat7TelemetryDomains',
+        'Add-WinDebloat7FirewallBlock', 'Remove-WinDebloat7FirewallBlock',
+        'Get-WinDebloat7FirewallStatus', 'Get-WinDebloat7TelemetryDomains',
         # Integrations
         'Invoke-WinDebloat7ShutUp10', 'Invoke-WinDebloat7AdwCleaner', 'Update-WinDebloat7SDIO',
         # Tweaks (GEMS Integration)
@@ -127,7 +127,7 @@
     PrivateData       = @{
         PSData = @{
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags         = @('Optimization', 'Debloat', 'Windows11', 'PowerShell7.5', 'Privacy', 'Performance')
+            Tags         = @('Optimization', 'Debloat', 'Windows11', 'PowerShell7.6', 'Privacy', 'Performance')
             
             # Project URI
             ProjectUri   = 'https://github.com/tomytate/Win-Debloat7'
@@ -144,7 +144,7 @@
 - SEC: Hardened Repair Module (No Invoke-Expression).
 - AUDIT: Deep Codebase Audit passed (Core/Security/Performance).
 
-## v1.2.5 (2026-01-29) - Platinum Release
+## v1.2.5 (2026-01-30) - Platinum Release
 - NEW: PowerShell 7.5 Modernization (WebCmdlet Retry, #Requires enforcement)
 - FIX: Benchmark Module syntax correction
 - FIX: Hardened Test Suite (10/10 Verification)

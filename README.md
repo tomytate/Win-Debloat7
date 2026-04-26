@@ -7,13 +7,13 @@
 ### The Ultimate Windows 10 & 11 Debloater, Optimizer, and Privacy Hardener
 
 **Remove bloatware. Disable telemetry. Maximize performance. One command.**
-Open source. Transparent. Reversible. Built on PowerShell 7.5+.
+Open source. Transparent. Reversible. Built on PowerShell 7.6+.
 
 [![GitHub Release](https://img.shields.io/github/v/release/tomytate/Win-Debloat7?style=for-the-badge&color=00D9FF&label=Latest)](https://github.com/tomytate/Win-Debloat7/releases)
 [![Total Downloads](https://img.shields.io/github/downloads/tomytate/Win-Debloat7/total?style=for-the-badge&color=00D9FF&label=Downloads)](https://github.com/tomytate/Win-Debloat7/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/tomytate/Win-Debloat7?style=for-the-badge&color=00D9FF)](https://github.com/tomytate/Win-Debloat7/stargazers)
 [![MIT License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge&color=00D9FF)](LICENSE)
-[![PowerShell 7.5+](https://img.shields.io/badge/PowerShell-7.5+-00D9FF?style=for-the-badge&logo=powershell)](https://github.com/PowerShell/PowerShell/releases)
+[![PowerShell 7.6+](https://img.shields.io/badge/PowerShell-7.6+-00D9FF?style=for-the-badge&logo=powershell)](https://github.com/PowerShell/PowerShell/releases)
 [![Pester Tests](https://img.shields.io/badge/Tests-35%2F35_Passed-00FF88?style=for-the-badge)](tests/)
 
 **[⚡ Quick Install](#-quick-install) · [📖 Features](#-features-overview) · [🏗️ Profiles](docs/Profiles.md) · [📚 Wiki](docs/Home.md) · [🐛 Report Bug](https://github.com/tomytate/Win-Debloat7/issues)**
@@ -62,7 +62,7 @@ Unlike legacy debloat scripts that blindly delete registry keys, Win-Debloat7 tr
 | **Modules** | 28 registered |
 | **Functions** | 92 exported |
 | **Bloatware Patterns** | 80+ apps detected |
-| **DNS Providers** | 12+ (including family/malware variants) |
+| **DNS Providers** | 10 (including family/malware variants) |
 | **Service Presets** | 4 intelligent profiles |
 | **Test Coverage** | 35/35 Pester tests passed |
 | **PSScriptAnalyzer** | 0 errors |
@@ -93,7 +93,7 @@ iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup-ext
    - **Win-Debloat7.exe** (Standard)
    - **Win-Debloat7-Extras.exe** (Extras)
 2. Right-click → **Run as Administrator**.
-3. The launcher auto-installs PowerShell 7.5 if missing.
+3. The launcher auto-installs PowerShell 7.6 if missing.
 </details>
 
 <details>
@@ -112,7 +112,7 @@ cd Win-Debloat7
 </pre>
 </details>
 
-**Requirements:** Windows 10 (22H2+) or Windows 11 · PowerShell 7.5+ · Administrator privileges
+**Requirements:** Windows 10 (22H2+) or Windows 11 · PowerShell 7.6+ · Administrator privileges
 
 ---
 
@@ -126,7 +126,7 @@ Win-Debloat7 ships with **92 functions** across **28 modules**, organized into 9
 | 🔒 **Privacy Hardening** | Disable telemetry, block tracking domains | `Set-WinDebloat7Privacy` |
 | 🤖 **AI Disablement** | Neutralize Copilot, Recall, Click-to-Do | `Disable-WinDebloat7AIRecall` |
 | ⚡ **Performance Tuning** | Ultimate power plan, service presets | `Set-WinDebloat7Performance` |
-| 🌐 **Network & DNS** | 12+ DNS providers, IPv6 toggle | `Set-WinDebloat7DNS` |
+| 🌐 **Network & DNS** | 10 DNS providers, IPv6 toggle | `Set-WinDebloat7DNS` |
 | 🎮 **Gaming Mode** | Nagle's algorithm, Game DVR, GPU priority | `Set-WinDebloat7Gaming` |
 | 🖥️ **UI Customization** | Taskbar, context menu, Start Menu tweaks | `Set-WinDebloat7TaskbarAlignment` |
 | 🔧 **System Repair** | 4-step industrial repair sequence | `Repair-WinDebloat7System` |
@@ -201,7 +201,8 @@ Completely neutralizes Microsoft's AI integration features added in Windows 11 2
 | **Minimal** | Bare essentials only | Combined Privacy + Performance |
 
 ### Gaming Tweaks
-- Disable **Nagle's Algorithm** (SystemResponsiveness = 0)
+- Disable **Nagle's Algorithm** (TCPNoDelay = 1)
+- Optimize **MMCSS Scheduling** (SystemResponsiveness = 0)
 - Disable **Game DVR / Game Bar** background recording
 - GPU task **priority elevation**
 - **Network latency** optimization
@@ -310,7 +311,7 @@ We know debloating can be risky. Win-Debloat7 is built with **enterprise-grade s
 | **GUI + TUI** | ✅ Both | ✅ GUI | ✅ GUI | ❌ CLI only |
 | **Sysprep / OEM** | ✅ | ❌ | ❌ | ❌ |
 | **Unattended Deploy** | ✅ | ⚠️ Limited | ❌ | ⚠️ Limited |
-| **DNS Management** | ✅ 12+ providers | ❌ | ❌ | ❌ |
+| **DNS Management** | ✅ 10 providers | ❌ | ❌ | ❌ |
 
 ---
 

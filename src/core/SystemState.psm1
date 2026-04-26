@@ -11,7 +11,7 @@
     Version: 1.3.0
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 #Requires -RunAsAdministrator
 
 using namespace System.Management.Automation
@@ -37,6 +37,7 @@ function Get-WinDebloat7SystemState {
         Copilot           = ((Get-RegistryKey "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" "TurnOffWindowsCopilot") -ne 1) -and ((Get-RegistryKey "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" "TurnOffWindowsCopilot") -ne 1)
         Recall            = ((Get-RegistryKey "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" "DisableAIDataAnalysis") -ne 1) -or 
         ((Get-Service "AIFabric*" -ErrorAction SilentlyContinue).Status -eq 'Running')
+        AdvertisingId     = (Get-RegistryKey "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo" "Enabled") -ne 0
         
         # Performance / Gaming
         GameMode          = (Get-RegistryKey "HKCU:\Software\Microsoft\GameBar" "AllowAutoGameMode") -ne 0

@@ -11,7 +11,7 @@
     Version: 1.3.0
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 #Requires -RunAsAdministrator
 
 using namespace System.Management.Automation
@@ -28,12 +28,21 @@ function Invoke-WinDebloat7DefenderRemover {
 
     Write-Log -Message "Launching Defender Remover..." -Level Info
     
+    Write-Warning "AV INTERVENTION REQUIRED: Defender Remover is an aggressive tool that will be flagged by Windows Defender."
+    Write-Warning "You MUST pause Real-time Protection AND Tamper Protection before proceeding."
+    $proceed = Read-Host "Have you paused Tamper Protection? Type 'YES' to continue"
+    if ($proceed -ne 'YES') {
+        Write-Log -Message "Defender Remover execution aborted by user." -Level Warning
+        return
+    }
+
     # Check connectivity
     if (-not (Test-Connection "api.github.com" -Count 1 -Quiet)) {
         Write-Log -Message "Internet connection required for Defender Remover." -Level Error
         return
     }
 
+    $destPath = $null
     try {
         Write-Host "Fetching latest release from GitHub..." -ForegroundColor Cyan
         $apiUrl = "https://api.github.com/repos/ionuttbara/windows-defender-remover/releases/latest"
@@ -43,7 +52,9 @@ function Invoke-WinDebloat7DefenderRemover {
         if (-not $asset) { throw "Executable asset not found." }
         
         $dlUrl = $asset.browser_download_url
-        $destPath = "$env:TEMP\$($asset.name)"
+        $tempBase = [System.IO.Path]::GetTempFileName()
+        $destPath = "$tempBase.exe"
+        Remove-Item $tempBase -ErrorAction SilentlyContinue # Remove the 0-byte file created by GetTempFileName
         
         Write-Host "Downloading $($asset.name)..." -ForegroundColor Cyan
         Invoke-WebRequest -Uri $dlUrl -OutFile $destPath -MaximumRetryCount 3 -RetryIntervalSec 5 -ErrorAction Stop
@@ -56,6 +67,11 @@ function Invoke-WinDebloat7DefenderRemover {
     catch {
         Write-Log -Message "Error launching Defender Remover: $($_.Exception.Message)" -Level Error
         Start-Process "https://github.com/ionuttbara/windows-defender-remover/releases/latest"
+    }
+    finally {
+        if ($destPath -and (Test-Path $destPath)) {
+            Remove-Item $destPath -Force -ErrorAction SilentlyContinue
+        }
     }
 }
 
@@ -70,13 +86,22 @@ function Invoke-WinDebloat7Activation {
 
     Write-Log -Message "Launching Microsoft Activation Scripts (MAS)..." -Level Info
     
+    Write-Warning "AV INTERVENTION REQUIRED: MAS is considered a 'HackTool' by Windows Defender."
+    Write-Warning "You MUST pause Real-time Protection before proceeding."
+    $proceed = Read-Host "Have you paused Real-time Protection? Type 'YES' to continue"
+    if ($proceed -ne 'YES') {
+        Write-Log -Message "MAS execution aborted by user." -Level Warning
+        return
+    }
 
     if (-not (Test-Connection "get.activated.win" -Count 1 -Quiet)) {
         Write-Log -Message "Internet connection required for MAS." -Level Error
         return
     }
 
-    $scriptPath = "$env:TEMP\mas_activation_$(New-Guid).ps1"
+    $tempBase = [System.IO.Path]::GetTempFileName()
+    $scriptPath = "$tempBase.ps1"
+    Remove-Item $tempBase -ErrorAction SilentlyContinue
     
     try {
         Write-Host "Downloading MAS script..." -ForegroundColor Green

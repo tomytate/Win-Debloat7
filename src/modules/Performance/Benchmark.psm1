@@ -6,7 +6,7 @@
     Module: Win-Debloat7.Modules.Performance.Benchmark
     Version: 1.3.0
 #>
-#Requires -Version 7.5
+#Requires -Version 7.6
 
 function Measure-WinDebloat7System {
     <#

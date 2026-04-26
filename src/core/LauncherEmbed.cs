@@ -2,10 +2,14 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Net;
 
 namespace WinDebloat7
 {
+    /// <summary>
+    /// Note: To comply with Windows 11 25H2 Smart App Control (SAC), the compiled output of this
+    /// launcher MUST be digitally signed with a valid CA or Microsoft Trusted Signing certificate.
+    /// Unsigned binaries will be blocked by default.
+    /// </summary>
     class Launcher
     {
         static void Main(string[] args)
@@ -16,7 +20,7 @@ namespace WinDebloat7
                 if (!IsPwshInstalled())
                 {
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("⚡ PowerShell 7.5+ not found.");
+                    Console.WriteLine("⚡ PowerShell 7.6+ not found.");
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("🚀 Downloading and Installing PowerShell 7 (Auto)...");
                     Console.ResetColor();
@@ -154,17 +158,16 @@ namespace WinDebloat7
         {
             try
             {
-                // Installing via Winget or MSI script
-                Console.WriteLine("Downloading installer from Microsoft...");
+                // Install via Winget (available on Windows 10 1709+ / Windows 11)
+                Console.WriteLine("Installing PowerShell 7.6 via Winget...");
                 
-                string installCmd = "Set-ExecutionPolicy Bypass -Scope Process -Force; " +
-                                    "[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; " +
-                                    "iex '& { $(irm https://aka.ms/install-powershell.ps1) } -UseMSI -Quiet'";
+                string installCmd = "winget install --id Microsoft.PowerShell --version 7.6.1 --source winget " +
+                                    "--accept-source-agreements --accept-package-agreements --silent";
 
                 ProcessStartInfo psi = new ProcessStartInfo
                 {
-                    FileName = "powershell.exe",
-                    Arguments = "-NoProfile -ExecutionPolicy Bypass -Command \"" + installCmd + "\"",
+                    FileName = "cmd.exe",
+                    Arguments = "/c " + installCmd,
                     UseShellExecute = false,
                     CreateNoWindow = false
                 };

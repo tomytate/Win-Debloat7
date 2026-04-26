@@ -14,7 +14,7 @@
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 
 using namespace System.Management.Automation
 using namespace System.Collections.Generic
@@ -96,11 +96,15 @@ function New-WinDebloat7Snapshot {
         Write-Log -Message "Restore point creation failed (Non-critical): $($_.Exception.Message)" -Level Warning
     }
 
-    # 1. Capture Services (PERF-002 fix: Filter to relevant services)
-    $relevantServicePatterns = @(
-        'DiagTrack', 'Telemetry', 'BITS', 'wuauserv', 'UsoSvc',
-        'Xbox*', 'Copilot', 'Connected*', 'dmwappushservice'
-    )
+    # 1. Capture Services (PERF-002 fix: Filter to dynamically loaded services)
+    $servicesJsonPath = Join-Path $PSScriptRoot "..\..\..\config\services.json"
+    $relevantServicePatterns = @('BITS', 'wuauserv', 'UsoSvc', 'Xbox*', 'Copilot', 'Connected*')
+    if (Test-Path $servicesJsonPath) {
+        try {
+            $servicesDb = Get-Content $servicesJsonPath -Raw | ConvertFrom-Json
+            $relevantServicePatterns += $servicesDb.services.psobject.properties.Name
+        } catch { }
+    }
     
     $serviceFilter = { 
         $svc = $_.Name

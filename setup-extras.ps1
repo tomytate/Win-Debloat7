@@ -1,4 +1,3 @@
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $ErrorActionPreference = 'Stop'
 
 Write-Host "⚠️  Win-Debloat7 Installer (EXTRAS EDITION)" -ForegroundColor Yellow

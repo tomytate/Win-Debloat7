@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -31,7 +31,7 @@ All notable changes to this project will be documented in this file.
 - Resolved `Version-Detection` logging inconsistencies.
 - Validated `Win-Debloat7.psd1` manifest integrity.
 
-## [1.2.6] - 2026-02-01
+## [1.2.6] - 2026-02-05
 ### 🐛 Fixed
 - **Winget Source Error**: Forced `--source winget` on installations to bypass `msstore` certificate errors (0x8a15005e).
 - **Launcher Reliability**: Fixed quoting in PowerShell 7 auto-installer.
@@ -52,6 +52,8 @@ All notable changes to this project will be documented in this file.
 ### 🐛 Fixed
 - **Critical Hotfix**: Resolved a startup crash caused by a malformed Module Manifest (`.psd1`).
 - **Parity**: Aligned TUI interaction consistency with the new GUI.
+- **Version consistency**: Resolved version consistency issues across GUI/TUI.
+- **File lock**: Resolved file lock issues during build process.
 
 ## [1.2.1] - 2026-01-29
 
@@ -66,10 +68,6 @@ All notable changes to this project will be documented in this file.
 - **Robustness**: The launcher now pauses on errors instead of crashing silently.
 - **Version Sync**: Synchronized all modules to v1.2.1.
 
-## [1.2.5] - 2026-01-29
-### Fixed
-- Version consistency issues across GUI/TUI.
-- File lock issues during build process.
 
 ## [1.2.0] - 2026-01-25
 

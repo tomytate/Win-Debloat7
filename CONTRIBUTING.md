@@ -8,7 +8,7 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 ## 🛠️ Development Setup
 1. **Prerequisites**:
    - Windows 10/11
-   - PowerShell 7.5+
+   - PowerShell 7.6+
    - VS Code (Recommended) with PowerShell extension
    - Pester 5+ (`Install-Module Pester -Force`)
 
@@ -20,11 +20,11 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 
 3. **Run Locally**:
    ```powershell
-   # TUI Mode
-   ./Win-Debloat7.ps1 -NoGui
+   # TUI Mode (default)
+   ./Win-Debloat7.ps1
 
    # GUI Mode
-   ./Win-Debloat7.ps1
+   ./Win-Debloat7.ps1 -Gui
    ```
 
 ## 🧪 Testing

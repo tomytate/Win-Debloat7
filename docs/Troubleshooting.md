@@ -6,13 +6,22 @@
 *   **Cause**: You tried to stop a protected Windows service.
 *   **Fix**: This is normal behavior. Win-Debloat7 handles this error gracefully in logs. Rebooting usually forces the service into the disabled state if registry keys were set.
 
-### "PowerShell 7.5 required"
+### "PowerShell 7.6 required"
 *   **Cause**: You are running in the legacy Windows PowerShell 5.1 (blue icon).
 *   **Fix**: Install PowerShell 7 (black icon) from the [Microsoft Store](https://apps.microsoft.com/detail/9mz1sn7389xv) or [GitHub](https://github.com/PowerShell/PowerShell/releases).
 
+### "Windows protected your PC" or Smart App Control Block
+*   **Cause**: Win-Debloat7 is intentionally left unsigned (no code-signing certificate) to remain a free, open-source project. Windows 11 25H2 Smart App Control or Microsoft Defender SmartScreen will block unsigned executables downloaded from the internet.
+*   **Fix**: 
+    1.  Click **More info** -> **Run anyway** on the blue SmartScreen prompt.
+    2.  If Smart App Control is strictly blocking it: Go to **Settings > Privacy & security > Windows Security > App & browser control > Smart App Control settings** and set it to **Off**.
+    3.  Alternatively, you can run the tool via PowerShell directly instead of using the `.exe`:
+        * Right-click the downloaded `.zip` -> **Properties** -> Check **Unblock** -> Apply.
+        * Extract the folder, open PowerShell as Administrator in that folder, and run `.\Win-Debloat7.ps1`.
+
 ### "Extras ZIP flagged as virus"
 *   **Cause**: The Extras edition contains **Defender Remover** and **MAS**, which are "HackTools".
-*   **Fix**: Pause Real-time protection to run the tool. **Use the Standard Edition if you do not strictly need these tools.**
+*   **Fix**: Pause Real-time protection / Tamper Protection to run the tool. **Use the Standard Edition if you do not strictly need these tools.**
 
 ### Microsoft Store / Xbox not working after debloat
 *   **Cause**: The Store framework or Xbox services were removed during Aggressive bloatware removal.
@@ -23,7 +32,7 @@
 
 ### Bloatware count shows "?" in the GUI
 *   **Cause**: The background runspace failed to enumerate Appx packages (usually a permissions issue).
-*   **Fix**: Ensure you are running as Administrator. If the issue persists, run the TUI mode (`-NoGui`) as a workaround.
+*   **Fix**: Ensure you are running as Administrator. If the issue persists, run the default TUI mode (`.\\Win-Debloat7.ps1` without `-Gui`) as a workaround.
 
 ### IPv6 toggle causes Store issues
 *   **Cause**: Microsoft Store requires IPv6 for some CDN endpoints.

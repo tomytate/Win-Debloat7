@@ -11,7 +11,7 @@
     Version: 1.3.0
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 
 using namespace System.Management.Automation
 

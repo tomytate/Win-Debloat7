@@ -4,7 +4,7 @@ Win-Debloat7 is designed to run on **Windows 10 (22H2+)** or **Windows 11**.
 
 ## Prerequisites
 
-1.  **PowerShell 7.5+**: The script uses features exclusive to PowerShell 7.5.
+1.  **PowerShell 7.6+**: The script uses features exclusive to PowerShell 7.6.
     *   **Auto-Installed**: If you use `Win-Debloat7.exe`, it will automatically install this for you.
     *   **Manual**: Only required if running the `.ps1` script directly. [Download Here](https://github.com/PowerShell/PowerShell/releases)
 
@@ -49,7 +49,7 @@ For portable usage (USB drives) or offline systems.
     *   **Standard**: `Win-Debloat7.exe` (Recommended)
     *   **Extras**: `Win-Debloat7-Extras.exe`
 3.  **Right-click → Run as Administrator.** No extraction needed.
-4.  The launcher will auto-install PowerShell 7.5 if missing.
+4.  The launcher will auto-install PowerShell 7.6 if missing.
 
 ---
 

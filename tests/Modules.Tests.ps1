@@ -1,7 +1,7 @@
 
 Describe "Modules.Windows11.VersionDetection" {
     BeforeAll {
-        $src = "w:\Documents\Win-Debloat7\src"
+        $src = Join-Path $PSScriptRoot "..\src"
         Import-Module "$src\core\Logger.psm1" -ErrorAction SilentlyContinue
         Import-Module "$src\core\Registry.psm1" -ErrorAction SilentlyContinue
         Import-Module "$src\modules\Windows11\Version-Detection.psm1" -ErrorAction Stop
@@ -20,7 +20,7 @@ Describe "Modules.Windows11.VersionDetection" {
 
 Describe "Modules.Bloatware" {
     BeforeAll {
-        $src = "w:\Documents\Win-Debloat7\src"
+        $src = Join-Path $PSScriptRoot "..\src"
         Import-Module "$src\core\Logger.psm1" -ErrorAction SilentlyContinue
         Import-Module "$src\core\Config.psm1" -ErrorAction SilentlyContinue
         Import-Module "$src\modules\Bloatware\Bloatware.psm1" -ErrorAction Stop
@@ -34,7 +34,7 @@ Describe "Modules.Bloatware" {
 
 Describe "Modules.Privacy" {
     BeforeAll {
-        $src = "w:\Documents\Win-Debloat7\src"
+        $src = Join-Path $PSScriptRoot "..\src"
         Import-Module "$src\core\Logger.psm1" -ErrorAction SilentlyContinue
         Import-Module "$src\modules\Privacy\Privacy.psm1" -ErrorAction Stop
     }
@@ -47,7 +47,7 @@ Describe "Modules.Privacy" {
 
 Describe "Modules.Performance" {
     BeforeAll {
-        $src = "w:\Documents\Win-Debloat7\src"
+        $src = Join-Path $PSScriptRoot "..\src"
         Import-Module "$src\core\Logger.psm1" -ErrorAction SilentlyContinue
         Import-Module "$src\modules\Performance\Benchmark.psm1" -ErrorAction Stop
     }

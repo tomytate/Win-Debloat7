@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Interactive Menu System for Win-Debloat7
     
@@ -10,7 +10,7 @@
     Version: 1.3.0
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 
 using namespace System.Management.Automation
 
@@ -300,20 +300,20 @@ function Show-NetworkPrivacyMenu {
     
     # Show current status
     $netStatus = Get-WinDebloat7NetworkStatus | Select-Object -First 1
-    $hostsStatus = Get-WinDebloat7HostsStatus
+    $hostsStatus = Get-WinDebloat7FirewallStatus
     $tasks = Get-WinDebloat7TelemetryTasks -Mode All
     $enabledTasks = ($tasks | Where-Object { $_.Enabled }).Count
     
     Write-Host "`nCurrent Status:" -ForegroundColor Cyan
     Write-Host "  DNS Provider: $($netStatus.DNSProvider)" -ForegroundColor Gray
     Write-Host "  IPv6 Enabled: $($netStatus.IPv6Enabled)" -ForegroundColor Gray
-    Write-Host "  Hosts Blocking: $(if ($hostsStatus.TelemetryBlocked) { 'Active' } else { 'Inactive' })" -ForegroundColor Gray
+    Write-Host "  Firewall Blocking: $(if ($hostsStatus.TelemetryBlocked) { 'Active' } else { 'Inactive' })" -ForegroundColor Gray
     Write-Host "  Telemetry Tasks: $enabledTasks enabled" -ForegroundColor Gray
     
     Write-Host "`nOptions:" -ForegroundColor Cyan
     Write-WD7Host "  [1] Change DNS Server" -Color White
     Write-WD7Host "  [2] Disable IPv6" -Color White
-    Write-WD7Host "  [3] Block Telemetry Domains (Hosts)" -Color White
+    Write-WD7Host "  [3] Block Telemetry Domains (Firewall)" -Color White
     Write-WD7Host "  [4] Disable Telemetry Tasks (Safe)" -Color White
     Write-WD7Host "  [5] Disable Telemetry Tasks (Aggressive)" -Color White
     Write-WD7Host "  [6] View Blocked Domains" -Color White
@@ -347,7 +347,7 @@ function Show-NetworkPrivacyMenu {
             Read-Host "Press Enter..."
         }
         "3" { 
-            Add-WinDebloat7HostsBlock
+            Add-WinDebloat7FirewallBlock
             Read-Host "Press Enter..."
         }
         "4" { 

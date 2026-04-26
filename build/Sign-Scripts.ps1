@@ -1,4 +1,4 @@
-#Requires -Version 7.5
+#Requires -Version 7.6
 
 param(
     [string]$CertificatePath,

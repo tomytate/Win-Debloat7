@@ -5,7 +5,7 @@ Win-Debloat7 is modular. You can run the entire suite using a Profile, or use in
 ## 🖥️ Dual Interface
 
 ### GUI (Graphical)
-Launch with `.\Win-Debloat7.ps1` → Option 2 (or no `-NoGui` flag).
+Launch with `.\Win-Debloat7.ps1 -Gui`.
 - **Dashboard**: Live system metrics (RAM, connections, bloatware count, privacy score).
 - **System Tweaks**: One-click toggles for Privacy, Performance, and AI features.
 - **Software Manager**: Install essentials, update all apps, manage drivers.
@@ -13,7 +13,7 @@ Launch with `.\Win-Debloat7.ps1` → Option 2 (or no `-NoGui` flag).
 - **Settings**: Dark/Light theme, clipboard history toggle.
 
 ### TUI (Terminal)
-Launch with `.\Win-Debloat7.ps1 -NoGui`.
+Launch with `.\Win-Debloat7.ps1` (default — no flags needed).
 - Full-featured interactive menu with 9 numbered options.
 - TrueColor terminal rendering (Cyan/Purple neon theme).
 - Supports all the same operations as the GUI.

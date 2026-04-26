@@ -263,10 +263,10 @@ function Enable-WinDebloat7UltimatePower {
         }
 
         # Rename the plan
-        powercfg /changename $guid "Win-Debloat7 Ultimate" "Ultimate Performance plan" | Out-Null
+        Start-Process -FilePath "powercfg.exe" -ArgumentList "/changename", "$guid", "`"Win-Debloat7 Ultimate`"", "`"Ultimate Performance plan`"" -Wait -NoNewWindow
 
         # Set as active
-        powercfg /setactive $guid | Out-Null
+        Start-Process -FilePath "powercfg.exe" -ArgumentList "/setactive", "$guid" -Wait -NoNewWindow
 
         Write-Log -Message "Ultimate Performance plan installed and activated" -Level Success
     }
@@ -291,10 +291,10 @@ function Disable-WinDebloat7UltimatePower {
             
             # Revert to Balanced
             $balancedGUID = "381b4222-f694-41f0-9685-ff5bb260df2e"
-            powercfg -setactive $balancedGUID | Out-Null
+            Start-Process -FilePath "powercfg.exe" -ArgumentList "/setactive", "$balancedGUID" -Wait -NoNewWindow
             
             # Delete Ultimate plan
-            powercfg -delete $ultimatePlanGUID | Out-Null
+            Start-Process -FilePath "powercfg.exe" -ArgumentList "/delete", "$ultimatePlanGUID" -Wait -NoNewWindow
             
             Write-Log -Message "Ultimate Performance plan uninstalled, Balanced active" -Level Success
         }

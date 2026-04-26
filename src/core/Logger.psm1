@@ -14,7 +14,7 @@
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 
 using namespace System.Management.Automation
 
@@ -145,7 +145,7 @@ function Write-Log {
         }
         
         try {
-            "$timestamp [$Level] $Message" | Out-File -FilePath $Script:LogFile -Append -Encoding utf8
+            "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff') [$Level] $Message" | Out-File -FilePath $Script:LogFile -Append -Encoding utf8
         }
         catch {
             # Silent fail for log writes - don't disrupt main operation

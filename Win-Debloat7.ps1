@@ -30,15 +30,15 @@
     
 .NOTES
     Version: 1.3.0
-    Author: Tomy Tolledo
+    Author: tomytate
     License: MIT
-    Requires: PowerShell 7.5+, Administrator privileges
+    Requires: PowerShell 7.6+, Administrator privileges
     
 .LINK
     https://github.com/tomytate/Win-Debloat7
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 #Requires -RunAsAdministrator
 
 
@@ -67,7 +67,6 @@ param(
 
 # Configure strict error handling
 $ErrorActionPreference = 'Stop'
-$PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
 Set-StrictMode -Version Latest
 
 $scriptPath = Split-Path $MyInvocation.MyCommand.Path -Parent
@@ -119,7 +118,7 @@ catch {
     Write-Host "Troubleshooting:" -ForegroundColor Yellow
     Write-Host "  1. Ensure you extracted ALL files from the ZIP" -ForegroundColor Gray
     Write-Host "  2. Run from the Win-Debloat7 directory" -ForegroundColor Gray
-    Write-Host "  3. Verify PowerShell 7.5+ is installed" -ForegroundColor Gray
+    Write-Host "  3. Verify PowerShell 7.6+ is installed" -ForegroundColor Gray
     Write-Host "  4. Run: Get-Module -ListAvailable | Where Name -like '*yaml*'" -ForegroundColor Gray
     exit 1
 }

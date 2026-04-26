@@ -14,7 +14,7 @@
     https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75
 #>
 
-#Requires -Version 7.5
+#Requires -Version 7.6
 
 using namespace System.Management.Automation
 using namespace System.Collections.Generic
@@ -397,7 +397,7 @@ function Install-WinDebloat7Software {
 
         [Parameter(ParameterSetName = "ByObject", Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [scriptblock[]]$Apps, # Using scriptblock[] as strict type for hashtables can be finicky, checking types inside
+        [hashtable[]]$Apps,
         
         [ValidateSet("Winget", "Chocolatey", "Auto")]
         [string]$PackageManager = "Auto",
