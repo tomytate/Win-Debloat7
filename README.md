@@ -60,9 +60,9 @@ Unlike legacy debloat scripts that blindly delete registry keys, Win-Debloat7 tr
 | Metric | Value |
 |--------|-------|
 | **Modules** | 28 registered |
-| **Functions** | 92 exported |
+| **Functions** | 91 exported (Standard) |
 | **Bloatware Patterns** | 80+ apps detected |
-| **DNS Providers** | 10 (including family/malware variants) |
+| **DNS Providers** | 10 (including family/security variants) |
 | **Service Presets** | 4 intelligent profiles |
 | **Test Coverage** | 35/35 Pester tests passed |
 | **PSScriptAnalyzer** | 0 errors |
@@ -118,7 +118,7 @@ cd Win-Debloat7
 
 ## 📖 Features Overview
 
-Win-Debloat7 ships with **92 functions** across **28 modules**, organized into 9 feature areas:
+Win-Debloat7 ships with **91 functions** across **28 modules**, organized into 9 feature areas:
 
 | Feature | Description | Key Functions |
 |---------|-------------|---------------|
@@ -141,7 +141,7 @@ Removes pre-installed Appx packages using **O(N) regex matching** (50x faster th
 ### What Gets Removed
 
 | Category | Examples |
-|----------|----------|
+|----------|---------|
 | **Social Media** | Facebook, Instagram, Twitter/X, TikTok, LinkedIn |
 | **Streaming** | Spotify, Netflix, Disney+, Prime Video, Pandora |
 | **Casual Games** | Candy Crush, Bubble Witch, FarmVille, March of Empires |
@@ -211,7 +211,7 @@ Completely neutralizes Microsoft's AI integration features added in Windows 11 2
 
 ## 🌐 Network & DNS Configuration
 
-Set your DNS provider in one command. Database in `config/dns.json`.
+Set your DNS provider in one command. Full database stored in `config/dns.json`.
 
 | Provider | Primary | Secondary | Type |
 |----------|---------|-----------|------|
@@ -219,14 +219,19 @@ Set your DNS provider in one command. Database in `config/dns.json`.
 | Cloudflare Malware | 1.1.1.2 | 1.0.0.2 | Security |
 | Cloudflare Family | 1.1.1.3 | 1.0.0.3 | Family Safe |
 | Google | 8.8.8.8 | 8.8.4.4 | Standard |
+| OpenDNS | 208.67.222.222 | 208.67.220.220 | Standard (Cisco) |
 | Quad9 | 9.9.9.9 | 149.112.112.112 | Security |
 | AdGuard | 94.140.14.14 | 94.140.15.15 | Ad Blocking |
 | AdGuard Family | 94.140.14.15 | 94.140.15.16 | Family Safe |
-| NextDNS | Custom | Custom | Configurable |
+| CleanBrowsing Security | 185.228.168.9 | 185.228.169.9 | Security |
+| CleanBrowsing Family | 185.228.168.168 | 185.228.169.168 | Family Safe |
 
 ```powershell
 # Set Cloudflare DNS
 Set-WinDebloat7DNS -Provider Cloudflare
+
+# Set OpenDNS
+Set-WinDebloat7DNS -Provider OpenDNS
 
 # Set custom DNS
 Set-WinDebloat7DNS -Provider Custom -CustomPrimary "1.2.3.4" -CustomSecondary "5.6.7.8"
