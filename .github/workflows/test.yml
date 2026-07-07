@@ -15,7 +15,7 @@ jobs:
         os: [windows-latest]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     # Project scripts require PowerShell 7.6+; install the latest stable as a
     # dotnet global tool in case the runner image ships an older pwsh.

@@ -15,7 +15,7 @@ jobs:
         os: [windows-latest]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     # The project requires PowerShell 7.6+ (#Requires -Version 7.6). The runner
     # image may ship an older pwsh, so install the latest stable as a dotnet
@@ -50,7 +50,7 @@ jobs:
     name: Lint Code
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Install PSScriptAnalyzer
       shell: pwsh
