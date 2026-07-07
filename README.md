@@ -4,19 +4,27 @@
 
 # Win-Debloat7
 
-### The Ultimate Windows 10 & 11 Debloater, Optimizer, and Privacy Hardener
+### 🚀 The Ultimate Windows 10 & 11 Debloater, Optimizer & Privacy Hardener
 
-**Remove bloatware. Disable telemetry. Maximize performance. One command.**
-Open source. Transparent. Reversible. Built on PowerShell 7.6+.
+**Remove bloatware · Kill telemetry & AI · Boost performance — reversible, in one command.**
+
+*100% open source · DPAPI‑encrypted rollback · GUI + TUI · Built on PowerShell 7.6 LTS*
+
+<br>
 
 [![GitHub Release](https://img.shields.io/github/v/release/tomytate/Win-Debloat7?style=for-the-badge&color=00D9FF&label=Latest)](https://github.com/tomytate/Win-Debloat7/releases)
 [![Total Downloads](https://img.shields.io/github/downloads/tomytate/Win-Debloat7/total?style=for-the-badge&color=00D9FF&label=Downloads)](https://github.com/tomytate/Win-Debloat7/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/tomytate/Win-Debloat7?style=for-the-badge&color=00D9FF)](https://github.com/tomytate/Win-Debloat7/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/tomytate/Win-Debloat7?style=for-the-badge&color=FFD700)](https://github.com/tomytate/Win-Debloat7/stargazers)
+[![Windows 10 | 11](https://img.shields.io/badge/Windows-10%20%7C%2011-00D9FF?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/tomytate/Win-Debloat7)
+[![PowerShell 7.6 LTS](https://img.shields.io/badge/PowerShell-7.6%20LTS-00D9FF?style=for-the-badge&logo=powershell&logoColor=white)](https://github.com/PowerShell/PowerShell/releases)
 [![MIT License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge&color=00D9FF)](LICENSE)
-[![PowerShell 7.6+](https://img.shields.io/badge/PowerShell-7.6+-00D9FF?style=for-the-badge&logo=powershell)](https://github.com/PowerShell/PowerShell/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/tomytate/Win-Debloat7/ci.yml?style=for-the-badge&label=CI)](https://github.com/tomytate/Win-Debloat7/actions)
 
-**[⚡ Quick Install](#-quick-install) · [📖 Features](#-features-overview) · [🏗️ Profiles](docs/Profiles.md) · [📚 Wiki](docs/Home.md) · [🐛 Report Bug](https://github.com/tomytate/Win-Debloat7/issues)**
+**[⚡ Install](#-quick-install) · [📖 Features](#-features-overview) · [🆚 Editions](#-editions-standard-vs-extras) · [🛡️ Safety](#-safety--encrypted-rollback) · [📚 Wiki](docs/Home.md) · [💬 Discuss](https://github.com/tomytate/Win-Debloat7/discussions)**
+
+<br>
+
+### ⭐ Reclaiming your PC? [**Star the repo**](https://github.com/tomytate/Win-Debloat7) — it takes 1 second and genuinely helps the project grow!
 
 </div>
 
@@ -32,6 +40,7 @@ Open source. Transparent. Reversible. Built on PowerShell 7.6+.
 
 - [What is Win-Debloat7?](#-what-is-win-debloat7)
 - [Quick Install](#-quick-install)
+- [Editions: Standard vs Extras](#-editions-standard-vs-extras)
 - [Features Overview](#-features-overview)
 - [Bloatware Removal](#-bloatware-removal)
 - [Privacy & AI Disablement](#-privacy--ai-disablement)
@@ -41,7 +50,7 @@ Open source. Transparent. Reversible. Built on PowerShell 7.6+.
 - [Windows 11 UI & System Customization](#-windows-11-ui--system-customization)
 - [Enterprise Deployment (Sysprep)](#-enterprise-deployment--sysprep)
 - [Safety & Rollback](#-safety--encrypted-rollback)
-- [Why Win-Debloat7?](#-why-win-debloat7-vs-alternatives)
+- [Why Win-Debloat7?](#-why-win-debloat7)
 - [Trust & Verification](#-trust--verification)
 - [FAQ](#-frequently-asked-questions)
 - [Contributing](#-contributing)
@@ -114,6 +123,28 @@ cd Win-Debloat7
 </details>
 
 **Requirements:** Windows 10 (22H2+) or Windows 11 · PowerShell 7.6+ LTS (auto-installed by the EXE) · Administrator privileges
+
+---
+
+## 🆚 Editions: Standard vs Extras
+
+Both editions ship the **exact same** debloating, privacy, performance, and software engine. **Extras** simply bundles two powerful (but antivirus‑flagged) third‑party tools on top.
+
+| Capability | 🛡️ **Standard** | ⚠️ **Extras** |
+|:---|:---:|:---:|
+| 🧹 Bloatware removal (139 tiered apps) | ✅ | ✅ |
+| 🔒 Privacy hardening & telemetry blocking | ✅ | ✅ |
+| 🤖 AI disablement (Copilot, Recall, Click‑to‑Do…) | ✅ | ✅ |
+| ⚡ Performance, gaming & service tuning | ✅ | ✅ |
+| 📦 Software installer (175 apps + AI CLIs) | ✅ | ✅ |
+| 💾 Encrypted snapshots & one‑click rollback | ✅ | ✅ |
+| 🖥️ GUI + TUI, YAML profiles, Sysprep | ✅ | ✅ |
+| 🚫 **Defender Remover** — fully strip Windows Defender | — | ✅ |
+| 🔑 **MAS** — activate Windows & Office (Microsoft Activation Scripts) | — | ✅ |
+| 🛡️ Antivirus warnings | **None** ✅ | Expected ⚠️ |
+| 👥 Recommended for | **Everyone** | Advanced users |
+
+> **Which do I pick?** Go with **Standard** — it's clean, triggers zero AV warnings, and covers 99% of use cases. Choose **Extras** *only* if you specifically need to remove Windows Defender or activate Windows/Office. Extras is flagged by antivirus **by design**: Defender Remover and MAS are classified as "HackTools," so those alerts are expected, not malware.
 
 ---
 
@@ -334,21 +365,36 @@ We know debloating can be risky. Win-Debloat7 is built with **enterprise-grade s
 
 ---
 
-## 🏆 Why Win-Debloat7 vs Alternatives?
+## 💎 Why Win-Debloat7?
 
-| Feature | Win-Debloat7 | Chris Titus WinUtil | O&O ShutUp10 | Sophia Script |
-|---------|:------------:|:-------------------:|:------------:|:-------------:|
-| **Open Source** | ✅ MIT | ✅ MIT | ❌ Proprietary | ✅ MIT |
-| **Config as Code (YAML)** | ✅ | ❌ | ❌ | ❌ |
-| **Encrypted Rollback** | ✅ DPAPI | ❌ | ⚠️ Manual | ⚠️ Manual |
-| **AI Disablement Suite** | ✅ 6 features | ⚠️ Partial | ⚠️ Partial | ⚠️ Partial |
-| **Service Presets (JSON)** | ✅ 5 presets | ❌ | ❌ | ❌ |
-| **Hardware Detection** | ✅ RAM/CPU/GPU | ❌ | ❌ | ❌ |
-| **Software Installer** | ✅ 175 apps + AI CLIs | ✅ Curated | ❌ | ❌ |
-| **GUI + TUI** | ✅ Both | ✅ GUI | ✅ GUI | ❌ CLI only |
-| **Sysprep / OEM** | ✅ | ❌ | ❌ | ❌ |
-| **Unattended Deploy** | ✅ | ⚠️ Limited | ❌ | ⚠️ Limited |
-| **DNS Management** | ✅ 11 providers | ❌ | ❌ | ❌ |
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**🔐 Reversible by design**
+Every change is preceded by a DPAPI‑encrypted snapshot. One click restores your exact previous state — debloat fearlessly.
+
+**📜 Configuration as code**
+Define your ideal setup once in a YAML profile, then version it, share it, and redeploy it on any machine. It's `terraform apply` for Windows.
+
+**🤖 Actually removes AI**
+Copilot, Recall, Click‑to‑Do, and Notepad/Paint/Edge AI — neutralized through Group Policy, not flimsy UI toggles that Windows re‑enables.
+
+</td>
+<td width="50%" valign="top">
+
+**🖥️ GUI *and* TUI**
+A polished dark‑mode dashboard for clicking, plus a fast terminal menu for power users — identical capabilities, your choice.
+
+**🏢 Enterprise‑ready**
+Headless `-Unattended` deploys for Intune / SCCM / PDQ, and Sysprep support to bake settings into OEM images for every future user.
+
+**🧪 Transparent & trusted**
+100% open PowerShell — the Standard edition has **zero** compiled binaries. Every push is verified by Pester + PSScriptAnalyzer in CI.
+
+</td>
+</tr>
+</table>
 
 ---
 
@@ -426,6 +472,18 @@ Invoke-Pester -Path tests/Overall.Tests.ps1 -Output Detailed
 
 ---
 
+## 📈 Star History
+
+<div align="center">
+
+<a href="https://star-history.com/#tomytate/Win-Debloat7&Date">
+  <img src="https://api.star-history.com/svg?repos=tomytate/Win-Debloat7&type=Date" alt="Star History Chart" width="620">
+</a>
+
+</div>
+
+---
+
 <div align="center">
 
 ### ⚡ Ready to Reclaim Your PC?
@@ -434,11 +492,19 @@ Invoke-Pester -Path tests/Overall.Tests.ps1 -Output Detailed
 iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup-standard.ps1 | iex
 ```
 
-**[📥 Download Latest Release](https://github.com/tomytate/Win-Debloat7/releases) · [📖 Read the Wiki](docs/Home.md) · [💬 Join Discussions](https://github.com/tomytate/Win-Debloat7/discussions) · [🔐 Security Policy](SECURITY.md)**
+**[📥 Download](https://github.com/tomytate/Win-Debloat7/releases) · [📖 Wiki](docs/Home.md) · [💬 Discussions](https://github.com/tomytate/Win-Debloat7/discussions) · [🔐 Security](SECURITY.md)**
 
 <br>
 
-Made with ⚡ by **[Tomy Tate](https://github.com/tomytate)** | Licensed under **[MIT](LICENSE)**
+### ⭐ If Win-Debloat7 gave you a faster, cleaner, more private PC — [**drop a star!**](https://github.com/tomytate/Win-Debloat7) ⭐
+
+It costs nothing, motivates development, and helps other users find the project.
+
+<br>
+
+Made with ⚡ by **[Tomy Tate](https://github.com/tomytate)** · Licensed under **[MIT](LICENSE)**
+
+<sub><a href="#win-debloat7">↑ Back to top</a></sub>
 
 *Enjoy a faster, cleaner, more private Windows experience.*
 
