@@ -8,10 +8,9 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Privacy
-    Version: 1.3.0
-    
+    Version: 1.3.1
 .LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
+    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
 
 #Requires -Version 7.6
@@ -21,6 +20,7 @@ using namespace System.Management.Automation
 
 Import-Module "$PSScriptRoot\..\..\core\Logger.psm1" -Force
 Import-Module "$PSScriptRoot\..\..\core\Registry.psm1" -Force
+Import-Module "$PSScriptRoot\Tasks.psm1" -Force
 
 <#
 .SYNOPSIS
@@ -103,9 +103,26 @@ function Set-WinDebloat7Privacy {
         
         $results = @(
             (Set-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value $telemetryVal),
-            (Set-RegistryKey -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name "AllowTelemetry" -Value $telemetryVal)
+            (Set-RegistryKey -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name "AllowTelemetry" -Value $telemetryVal),
+            # Tailored experiences based on diagnostic data
+            (Set-RegistryKey -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy" -Name "TailoredExperiencesWithDiagnosticDataEnabled" -Value 0),
+            # Online speech recognition
+            (Set-RegistryKey -Path "HKCU:\SOFTWARE\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy" -Name "HasAccepted" -Value 0),
+            # Inking & typing telemetry / personalization harvesting
+            (Set-RegistryKey -Path "HKCU:\SOFTWARE\Microsoft\Input\TIPC" -Name "Enabled" -Value 0),
+            (Set-RegistryKey -Path "HKCU:\SOFTWARE\Microsoft\InputPersonalization" -Name "RestrictImplicitInkCollection" -Value 1),
+            (Set-RegistryKey -Path "HKCU:\SOFTWARE\Microsoft\InputPersonalization" -Name "RestrictImplicitTextCollection" -Value 1),
+            (Set-RegistryKey -Path "HKCU:\SOFTWARE\Microsoft\InputPersonalization\TrainedDataStore" -Name "HarvestContacts" -Value 0),
+            (Set-RegistryKey -Path "HKCU:\SOFTWARE\Microsoft\Personalization\Settings" -Name "AcceptedPrivacyPolicy" -Value 0),
+            # App launch tracking for Start/search ranking
+            (Set-RegistryKey -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "Start_TrackProgs" -Value 0),
+            # Feedback frequency: never
+            (Set-RegistryKey -Path "HKCU:\SOFTWARE\Microsoft\Siuf\Rules" -Name "NumberOfSIUFInPeriod" -Value 0),
+            # Edge browser diagnostic data & personalization reporting
+            (Set-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "PersonalizationReportingEnabled" -Value 0),
+            (Set-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "DiagnosticData" -Value 0)
         )
-        
+
         $successCount += ($results | Where-Object { $_ }).Count
         $failCount += ($results | Where-Object { -not $_ }).Count
         

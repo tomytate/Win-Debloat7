@@ -8,10 +8,9 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Bloatware
-    Version: 1.3.0
-    
+    Version: 1.3.1
 .LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
+    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
 
 #Requires -Version 7.6
@@ -21,63 +20,104 @@ using namespace System.Management.Automation
 using namespace System.Collections.Generic
 
 Import-Module "$PSScriptRoot\..\..\core\Logger.psm1" -Force
+Import-Module "$PSScriptRoot\..\..\core\Registry.psm1" -Force
 
 #region Bloatware Definitions
-$Script:BloatwareApps = @(
-    # Microsoft Core Bloat
-    "Microsoft.3DBuilder", "Microsoft.BingFinance", "Microsoft.BingNews", "Microsoft.BingSports", 
-    "Microsoft.BingWeather", "Microsoft.GetHelp", "Microsoft.Getstarted", "Microsoft.Microsoft3DViewer",
-    "Microsoft.MicrosoftOfficeHub", "Microsoft.MicrosoftSolitaireCollection", "Microsoft.MixedReality.Portal",
-    "Microsoft.OneConnect", "Microsoft.People", "Microsoft.PowerAutomateDesktop", "Microsoft.Print3D",
-    "Microsoft.SkypeApp", "Microsoft.Todos", "Microsoft.WindowsAlarms", "Microsoft.WindowsFeedbackHub",
-    "Microsoft.WindowsMaps", "Microsoft.WindowsSoundRecorder", "Microsoft.XboxApp", "Microsoft.YourPhone",
-    "Microsoft.ZuneMusic", "Microsoft.ZuneVideo", "Microsoft.Teams", "Microsoft.MSTeams",
-    
-    # 25H2 / AI Bloat
-    "Microsoft.Copilot", "MicrosoftWindows.Client.CoPilot", "MicrosoftWindows.Client.WebExperience", 
-    "Microsoft.OutlookForWindows", "Microsoft.Windows.DevHome", "Clipchamp.Clipchamp",
-    "Microsoft.Windows.Ai.Copilot.Provider", "Microsoft.ScreenSketch", "Microsoft.Whiteboard",
-    "Microsoft.GamingApp", "Microsoft.XboxGameOverlay", "Microsoft.XboxGamingOverlay",
-    "Microsoft.XboxIdentityProvider", "Microsoft.XboxSpeechToTextOverlay",
-    
-    # Third Party / Streaming
-    "Disney", "SpotifyAB.SpotifyMusic", "PandoraMedia", "AmazonVideo.PrimeVideo", "Netflix",
-    "Facebook", "Instagram", "Twitter", "TikTok", "CandyCrush", "BubbleWitch", "FarmVille",
-    "BytedancePte.Ltd.TikTok", "DolbyLaboratories.DolbyAccess", "Duolingo-LearnLanguagesforFree",
-    "EclipseManager", "ActiproSoftwareLLC", "AdobeSystemsIncorporated.AdobePhotoshopExpress",
-    
-    # HP OEM Bloat
-    "AD2F1837.HPJumpStarts", "AD2F1837.HPPCHardwareDiagnosticsWindows", "AD2F1837.HPPowerManager",
-    "AD2F1837.HPPrivacySettings", "AD2F1837.HPSupportAssistant", "AD2F1837.HPSystemInformation",
-    "AD2F1837.HPQuickDrop", "AD2F1837.HPWorkWell", "AD2F1837.HPDesktopSupportUtilities",
-    "AD2F1837.myHP", "AD2F1837.HPEasyClean", "AD2F1837.HPAudioCenter",
-    
-    # Dell OEM Bloat
-    "DellInc.DellSupportAssistforPCs", "DellInc.DellPowerManager", "DellInc.DellDigitalDelivery",
-    "DellInc.DellCustomerConnect", "DellInc.DellCommandUpdate", "DellInc.DellDigitalLifestyle",
-    "DellInc.PartnerPromo", "DellInc.DellOptimizer", "DellInc.DellUpdate",
-    
-    # Lenovo OEM Bloat
-    "E046963F.LenovoCompanion", "E046963F.LenovoSettings", "LenovoCorporation.LenovoID",
-    
-    # Acer OEM Bloat
-    "AcerIncorporated.AcerCare", "AcerIncorporated.AcerQuickAccess"
-)
+# Apps are tiered so removal_mode actually changes behavior:
+#   Conservative = ThirdParty (sponsored/OEM junk only)
+#   Moderate     = ThirdParty + Microsoft consumer bloat
+#   Aggressive   = everything, including Xbox/Copilot ecosystem
+$Script:BloatwareCategories = @{
+    ThirdParty = @(
+        # Sponsored / Streaming / Social
+        "Disney", "SpotifyAB.SpotifyMusic", "PandoraMedia", "AmazonVideo.PrimeVideo", "Netflix",
+        "Facebook", "Instagram", "Twitter", "TikTok", "CandyCrush", "BubbleWitch", "FarmVille",
+        "BytedancePte.Ltd.TikTok", "DolbyLaboratories.DolbyAccess", "Duolingo-LearnLanguagesforFree",
+        "EclipseManager", "ActiproSoftwareLLC", "AdobeSystemsIncorporated.AdobePhotoshopExpress",
+        "Amazon.com.Amazon", "Flipboard", "iHeartRadio", "HULULLC.HULUPLUS", "SlingTV",
+        "TuneInRadio", "WinZipUniversal", "ACGMediaPlayer", "Asphalt8Airborne", "AutodeskSketchBook",
+        "CaesarsSlotsFreeCasino", "COOKINGFEVER", "CyberLinkMediaSuiteEssentials", "DrawboardPDF",
+        "flaregamesGmbH.RoyalRevolt", "HiddenCity", "MarchofEmpires", "NYTCrossword", "OneCalendar",
+        "PhototasticCollage", "PicsArt-PhotoStudio", "PolarrPhotoEditorAcademicEdition",
+        "Sidia.LiveWallpaper", "LinkedInforWindows",
+
+        # HP OEM Bloat
+        "AD2F1837.HPJumpStarts", "AD2F1837.HPPCHardwareDiagnosticsWindows", "AD2F1837.HPPowerManager",
+        "AD2F1837.HPPrivacySettings", "AD2F1837.HPSupportAssistant", "AD2F1837.HPSystemInformation",
+        "AD2F1837.HPQuickDrop", "AD2F1837.HPWorkWell", "AD2F1837.HPDesktopSupportUtilities",
+        "AD2F1837.myHP", "AD2F1837.HPEasyClean", "AD2F1837.HPAudioCenter", "AD2F1837.HPAIExperienceCenter",
+        "AD2F1837.HPConnectedMusic", "AD2F1837.HPConnectedPhotopoweredbySnapfish", "AD2F1837.HPFileViewer",
+        "AD2F1837.HPPrinterControl", "AD2F1837.HPQuickTouch", "AD2F1837.HPRegistration",
+        "AD2F1837.HPSureShieldAI", "AD2F1837.HPWelcome",
+
+        # Dell OEM Bloat
+        "DellInc.DellSupportAssistforPCs", "DellInc.DellPowerManager", "DellInc.DellDigitalDelivery",
+        "DellInc.DellCustomerConnect", "DellInc.DellCommandUpdate", "DellInc.DellDigitalLifestyle",
+        "DellInc.PartnerPromo", "DellInc.DellOptimizer", "DellInc.DellUpdate", "DellInc.DellMobileConnect",
+
+        # Lenovo OEM Bloat
+        "E046963F.LenovoCompanion", "E046963F.LenovoSettings", "LenovoCorporation.LenovoID",
+        "LenovoCompanyLimited.LenovoVantageService",
+
+        # Acer OEM Bloat
+        "AcerIncorporated.AcerCare", "AcerIncorporated.AcerQuickAccess"
+    )
+
+    Microsoft  = @(
+        "Microsoft.3DBuilder", "Microsoft.BingFinance", "Microsoft.BingNews", "Microsoft.BingSports",
+        "Microsoft.BingWeather", "Microsoft.GetHelp", "Microsoft.Getstarted", "Microsoft.Microsoft3DViewer",
+        "Microsoft.MicrosoftOfficeHub", "Microsoft.MicrosoftSolitaireCollection", "Microsoft.MixedReality.Portal",
+        "Microsoft.OneConnect", "Microsoft.People", "Microsoft.PowerAutomateDesktop", "Microsoft.Print3D",
+        "Microsoft.SkypeApp", "Microsoft.Todos", "Microsoft.WindowsAlarms", "Microsoft.WindowsFeedbackHub",
+        "Microsoft.WindowsMaps", "Microsoft.WindowsSoundRecorder", "Microsoft.YourPhone",
+        "Microsoft.ZuneMusic", "Microsoft.ZuneVideo", "Microsoft.Teams", "Microsoft.MSTeams",
+        "Microsoft.OutlookForWindows", "Microsoft.Windows.DevHome", "Clipchamp.Clipchamp", "Microsoft.Whiteboard",
+        # Cortana (discontinued) & Bing consumer apps
+        "Microsoft.549981C3F5F10", "Microsoft.BingFoodAndDrink", "Microsoft.BingHealthAndFitness",
+        "Microsoft.BingSearch", "Microsoft.BingTranslator", "Microsoft.BingTravel",
+        # Other Microsoft consumer bloat
+        "Microsoft.News", "Microsoft.Messaging", "Microsoft.MicrosoftJournal",
+        "Microsoft.MicrosoftPowerBIForWindows", "Microsoft.NetworkSpeedTest", "Microsoft.Office.Sway",
+        "Microsoft.PCManager", "Microsoft.M365Companions", "Microsoft.StartExperiencesApp",
+        "MicrosoftWindows.CrossDevice", "Microsoft.Xbox.TCUI"
+    )
+
+    Aggressive = @(
+        # AI / Copilot / Widgets ecosystem
+        "Microsoft.Copilot", "MicrosoftWindows.Client.CoPilot", "MicrosoftWindows.Client.WebExperience",
+        "Microsoft.Windows.Ai.Copilot.Provider", "Microsoft.Windows.AIHub", "Microsoft.WidgetsPlatformRuntime",
+        "MicrosoftCorporationII.QuickAssist",
+
+        # Xbox ecosystem
+        "Microsoft.XboxApp", "Microsoft.GamingApp", "Microsoft.XboxGameOverlay", "Microsoft.XboxGamingOverlay",
+        "Microsoft.XboxIdentityProvider", "Microsoft.XboxSpeechToTextOverlay"
+    )
+}
 #endregion
 
 <#
 .SYNOPSIS
     Gets the list of bloatware apps that can be removed.
-    
+
+.PARAMETER Mode
+    Removal tier to return: Conservative, Moderate, or Aggressive (default: all).
+
 .OUTPUTS
     [string[]] Array of app package names.
 #>
 function Get-WinDebloat7BloatwareList {
     [CmdletBinding()]
     [OutputType([string[]])]
-    param()
-    
-    return $Script:BloatwareApps
+    param(
+        [ValidateSet("Conservative", "Moderate", "Aggressive")]
+        [string]$Mode = "Aggressive"
+    )
+
+    switch ($Mode) {
+        "Conservative" { return $Script:BloatwareCategories.ThirdParty }
+        "Moderate" { return $Script:BloatwareCategories.ThirdParty + $Script:BloatwareCategories.Microsoft }
+        default { return $Script:BloatwareCategories.ThirdParty + $Script:BloatwareCategories.Microsoft + $Script:BloatwareCategories.Aggressive }
+    }
 }
 
 <#
@@ -139,13 +179,16 @@ function Remove-WinDebloat7Bloatware {
     $failCount = 0
     $skippedCount = 0
     
-    # Determine which apps to target (custom_list or built-in)
+    # Determine which apps to target (custom_list or built-in tier for the removal mode)
     $targetApps = if ($Config.bloatware.custom_list -and $Config.bloatware.custom_list.Count -gt 0) {
         Write-Log -Message "Using custom bloatware list from profile ($($Config.bloatware.custom_list.Count) apps)" -Level Info
         $Config.bloatware.custom_list
     }
+    elseif ($removalMode -in @("Conservative", "Moderate", "Aggressive")) {
+        Get-WinDebloat7BloatwareList -Mode $removalMode
+    }
     else {
-        $Script:BloatwareApps
+        Get-WinDebloat7BloatwareList -Mode Moderate
     }
     
     $total = $currentPackages.Count + $provisionedPackages.Count
@@ -201,11 +244,7 @@ function Remove-WinDebloat7Bloatware {
             
             if ($PSCmdlet.ShouldProcess($pkg.DisplayName, "Deprovision Bloatware")) {
                 try {
-                    $pkg | Remove-AppxProvisionedPackage -Online -AllUsers -ErrorAction Stop
-                    # successCount tracked above (usually we count per app, this might duplicate count if both present? 
-                    # Original code counted per TARGET APP.
-                    # This counts per PACKAGE.
-                    # Acceptable difference for performance.
+                    $pkg | Remove-AppxProvisionedPackage -Online -AllUsers -ErrorAction Stop | Out-Null
                 }
                 catch {
                     Write-Log -Message "Failed deprovision: $($_.Exception.Message)" -Level Debug

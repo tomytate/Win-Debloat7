@@ -4,10 +4,10 @@
     # RootModule        = ''
 
     # Version number of this module.
-    ModuleVersion     = '1.3.0'
+    ModuleVersion     = '1.3.1'
 
     # ID used to uniquely identify this module
-    GUID              = 'a1b2c3d4-e5f6-7890-1234-567890abcdef'
+    GUID              = 'a272c231-f85d-416c-af92-9ae26c4d72dc'
 
     # Author of this module
     Author            = 'tomytate'
@@ -19,9 +19,10 @@
     Copyright         = '(c) 2026 tomytate. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'Power User Windows Optimization Framework (PowerShell 7.6+)'
+    Description       = 'Power User Windows Optimization Framework (PowerShell 7.6+ LTS)'
 
-    # Minimum version of the Windows PowerShell engine required by this module
+    # Minimum version of the PowerShell engine required by this module.
+    # 7.6 is the current LTS (built on .NET 10); the EXE launcher auto-installs it.
     PowerShellVersion = '7.6'
 
     # Modules that must be imported into the global environment prior to importing this module
@@ -54,6 +55,7 @@
         'src\modules\Privacy\Firewall.psm1',
         'src\modules\Integrations\Integrations.psm1',
         'src\modules\Tweaks\UI.psm1',
+        'src\modules\Tweaks\System.psm1',
         # Extras module excluded related to standard release
         'src\ui\Colors.psm1',
         'src\ui\Menu.psm1',
@@ -68,6 +70,7 @@
         'New-WinDebloat7Snapshot', 'Restore-WinDebloat7Snapshot', 'Get-WinDebloat7Snapshot',
         'Set-RegistryKey', 'Get-RegistryKey', 'Test-RegistryKey', 'Export-RegistryKey',
         'Test-WinDebloat7Sysprep', 'Mount-WinDebloat7DefaultHive', 'Dismount-WinDebloat7DefaultHive',
+        'Get-WinDebloat7SystemState', 'Get-WinDebloat7PrivacyScore', 'Get-WinDebloat7RecommendedProfile',
         # Modules
         'Get-WinDebloat7BloatwareList', 'Remove-WinDebloat7Bloatware', 'Uninstall-WinDebloat7OneDrive', 'Uninstall-WinDebloat7Edge', 'Uninstall-WinDebloat7Xbox', 'Disable-WinDebloat7AIandAds',
         'Set-WinDebloat7Privacy',
@@ -91,7 +94,7 @@
         'Get-WinDebloat7NetworkStatus', 'Set-WinDebloat7Network',
         # Privacy Tasks
         'Get-WinDebloat7TelemetryTasks', 'Disable-WinDebloat7TelemetryTasks', 'Enable-WinDebloat7TelemetryTasks',
-        # Hosts Blocking
+        # Firewall Blocking
         'Add-WinDebloat7FirewallBlock', 'Remove-WinDebloat7FirewallBlock',
         'Get-WinDebloat7FirewallStatus', 'Get-WinDebloat7TelemetryDomains',
         # Integrations
@@ -109,6 +112,16 @@
         # Extras (only available in Extras edition)
         # UI Tweaks
         'Set-WinDebloat7TaskbarAlignment', 'Set-WinDebloat7ContextMenu', 'Set-WinDebloat7Explorer', 'Set-WinDebloat7StartMenu',
+        'Set-WinDebloat7Search', 'Set-WinDebloat7TaskbarTweaks', 'Set-WinDebloat7ContextMenuItems', 'Restart-WinDebloat7Explorer',
+        # System & QoL Tweaks (adapted from Win11Debloat, MIT)
+        'Disable-WinDebloat7FastStartup', 'Disable-WinDebloat7ModernStandbyNetworking',
+        'Disable-WinDebloat7AutoBitLocker', 'Disable-WinDebloat7DeliveryOptimization',
+        'Disable-WinDebloat7StorageSense', 'Set-WinDebloat7UpdateBehavior',
+        'Disable-WinDebloat7WindowsSuggestions', 'Disable-WinDebloat7SettingsHome',
+        'Disable-WinDebloat7ShareDragTray', 'Disable-WinDebloat7PhoneLinkStart',
+        'Disable-WinDebloat7StickyKeysShortcut', 'Disable-WinDebloat7FindMyDevice',
+        'Disable-WinDebloat7Transparency', 'Disable-WinDebloat7SnapAssist',
+        'Disable-WinDebloat7Widgets', 'Disable-WinDebloat7ChatTaskbar', 'Disable-WinDebloat7StartAllApps',
         # UI
         'Show-MainMenu', 'Show-WinDebloat7GUI',
         'Write-WD7Host', 'Show-WD7Header', 'Show-WD7Separator', 'Show-WD7Progress', 'Show-WD7StatusBadge'
@@ -127,7 +140,7 @@
     PrivateData       = @{
         PSData = @{
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags         = @('Optimization', 'Debloat', 'Windows11', 'PowerShell7.6', 'Privacy', 'Performance')
+            Tags         = @('Optimization', 'Debloat', 'Windows11', 'PowerShell7', 'Privacy', 'Performance')
             
             # Project URI
             ProjectUri   = 'https://github.com/tomytate/Win-Debloat7'
@@ -137,6 +150,20 @@
             
             # Release Notes
             ReleaseNotes = @'
+## v1.3.1 (2026-07-06) - Stability, Correctness & PowerShell 7.6 LTS
+- NEW: Standardized on PowerShell 7.6 LTS (7.6.3, .NET 10); EXE launchers now
+  verify the installed version and auto-install/upgrade PowerShell 7.6
+  (winget forced-MSI first, official MSI download fallback, ARM64 aware).
+- NEW: CLI/TUI profiles now apply network and software sections.
+- NEW: Pre-change snapshots are DPAPI-encrypted with plaintext metadata sidecar.
+- PERF: GUI bloatware counter uses the PS 7.6 PSWhere() intrinsic.
+- FIX: TUI menu letter options no longer execute twice (switch case dedup).
+- FIX: Third Party Tools menu crash (invalid color name).
+- FIX: Removal modes (Conservative/Moderate/Aggressive) now target different app tiers.
+- FIX: Ultimate Performance plan activation (duplicate-then-activate).
+- FIX: Chocolatey package IDs no longer passed to winget in Essentials installer.
+- FIX: GUI checkboxes now sync with live system state before Apply.
+
 ## v1.2.6 (2026-02-05) - Production Polish
 - FIX: Winget Source Certificate Error (0x8a15005e) bypassed.
 - PERF: Async GUI Dashboard loading (Non-blocking Bloatware count).

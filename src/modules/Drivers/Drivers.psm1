@@ -8,10 +8,9 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Drivers
-    Version: 1.3.0
-    
+    Version: 1.3.1
 .LINK
-    https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75
+    https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
 
 #Requires -Version 7.6
@@ -20,6 +19,7 @@
 using namespace System.Management.Automation
 
 Import-Module "$PSScriptRoot\..\..\core\Logger.psm1" -Force
+Import-Module "$PSScriptRoot\..\Integrations\Integrations.psm1" -Force
 
 #region Driver Status
 
@@ -231,16 +231,20 @@ function Update-GPUDriverViaWinget {
     Write-Log -Message "Detected GPU: $($gpu.Name) ($($gpu.Vendor))" -Level Info
     
     $packages = switch ($gpu.Vendor) {
-        "NVIDIA" { 
+        "NVIDIA" {
+            # NVIDIA does not publish GeForce Experience / NVIDIA App on winget;
+            # offer the trusted community driver tools that ARE on winget.
             @(
-                @{ Name = "GeForce Experience"; Id = "NVIDIA.GeForceExperience" }
-                @{ Name = "NVIDIA App"; Id = "NVIDIA.NVIDIAApp" }
+                @{ Name = "NVCleanstall (clean driver installer)"; Id = "TechPowerUp.NVCleanstall" }
+                @{ Name = "TinyNvidiaUpdateChecker (driver update checker)"; Id = "Hawaii_Beach.TinyNvidiaUpdateChecker" }
             )
         }
         "AMD" {
-            @(
-                @{ Name = "AMD Software: Adrenalin Edition"; Id = "AMD.RyzenMaster" }
-            )
+            # AMD Adrenalin is not distributable via winget or Chocolatey -
+            # open the official download page instead.
+            Write-Log -Message "AMD Adrenalin is not available via winget. Opening the official AMD driver page..." -Level Info
+            Start-Process "https://www.amd.com/en/support/download/drivers.html"
+            return
         }
         "Intel" {
             @(
@@ -292,45 +296,13 @@ function Start-SnappyDriverInstaller {
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([void])]
     param()
-    
-    $sdioPath = "$env:ProgramData\Win-Debloat7\Tools\SDIO"
-    $sdioExe = "$sdioPath\SDIO_x64_R2408.exe"
-    
-    # Check if already downloaded
-    if (-not (Test-Path $sdioExe)) {
-        Write-Log -Message "Snappy Driver Installer Origin not found. Downloading..." -Level Info
-        
-        try {
-            New-Item -Path $sdioPath -ItemType Directory -Force | Out-Null
-            
-            # SDIO download URL (check for latest version yourself)
-            $sdioUrl = "https://www.glenn.delahoy.com/downloads/sdio/SDIO_1.12.18.781.zip"
-            $zipPath = "$env:TEMP\sdio.zip"
-            
-            if ($PSCmdlet.ShouldProcess("SDIO", "Download and extract")) {
-                Invoke-WebRequest -Uri $sdioUrl -OutFile $zipPath -MaximumRetryCount 3 -RetryIntervalSec 5 -ErrorAction Stop
-                Expand-Archive -Path $zipPath -DestinationPath $sdioPath -Force
-                Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
-                
-                # Find the exe
-                $sdioExe = Get-ChildItem $sdioPath -Filter "SDIO*.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
-            }
-        }
-        catch {
-            Write-Log -Message "Failed to download SDIO: $($_.Exception.Message)" -Level Error
-            Write-Log -Message "Download manually from: https://www.glenn.delahoy.com/snappy-driver-installer-origin/" -Level Info
-            return
-        }
-    }
-    
-    if (Test-Path $sdioExe) {
-        Write-Log -Message "Launching Snappy Driver Installer Origin..." -Level Info
-        if ($PSCmdlet.ShouldProcess("SDIO", "Launch")) {
-            Start-Process -FilePath $sdioExe
-        }
-    }
-    else {
-        Write-Log -Message "SDIO executable not found." -Level Error
+
+    # Single SDIO implementation lives in the Integrations module: it downloads
+    # the rolling SDIO_Latest.zip and launches the x64 executable it finds
+    # (the previous copy here pinned an old build and searched for a stale
+    # exe name that fresh downloads never matched).
+    if ($PSCmdlet.ShouldProcess("SDIO", "Download and launch")) {
+        Update-WinDebloat7SDIO
     }
 }
 

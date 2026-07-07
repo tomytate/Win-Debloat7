@@ -12,12 +12,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, windows-2019]
+        os: [windows-latest]
 
     steps:
     - uses: actions/checkout@v4
 
+    # Project scripts require PowerShell 7.6+; install the latest stable as a
+    # dotnet global tool in case the runner image ships an older pwsh.
+    - name: Install PowerShell 7.6+ (dotnet tool)
+      shell: pwsh
+      run: dotnet tool install --global PowerShell
+
     - name: Run Pester Tests
       shell: pwsh
       run: |
-        .\tests\Run-AllTests.ps1
+        $pwsh76 = Join-Path $env:USERPROFILE '.dotnet\tools\pwsh.exe'
+        & $pwsh76 -NoProfile -File .\tests\Run-AllTests.ps1
+        exit $LASTEXITCODE

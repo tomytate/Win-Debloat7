@@ -1,53 +1,66 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Reflection;
 
 namespace WinDebloat7
 {
     /// <summary>
-    /// Note: To comply with Windows 11 25H2 Smart App Control (SAC), the compiled output of this
-    /// launcher MUST be digitally signed with a valid CA or Microsoft Trusted Signing certificate.
-    /// Unsigned binaries will be blocked by default.
+    /// Single-file launcher: extracts the embedded payload and runs Win-Debloat7.ps1
+    /// under PowerShell 7.6+ (current LTS). If a suitable PowerShell is not installed,
+    /// the launcher installs it automatically:
+    ///   1. winget (forcing the MSI via --installer-type wix; since 7.6.0 winget
+    ///      defaults to the MSIX/Store package, whose sandbox breaks admin tooling
+    ///      such as Set-ExecutionPolicy -Scope LocalMachine and WSMan remoting)
+    ///   2. Direct MSI download from the official GitHub release as fallback.
+    ///
+    /// Note: To comply with Windows 11 Smart App Control (SAC), the compiled output
+    /// of this launcher MUST be digitally signed with a valid CA or Microsoft Trusted
+    /// Signing certificate. Unsigned binaries will be blocked by default.
     /// </summary>
     class Launcher
     {
+        // Minimum PowerShell version required by Win-Debloat7 (#Requires -Version 7.6)
+        const int MinMajor = 7;
+        const int MinMinor = 6;
+
+        // Pinned fallback MSI release, used only when winget is unavailable or fails.
+        // winget always installs the latest stable; bump this constant on new releases.
+        const string FallbackMsiVersion = "7.6.3";
+
+        static string DefaultPwshPath
+        {
+            get { return Environment.ExpandEnvironmentVariables(@"%ProgramFiles%\PowerShell\7\pwsh.exe"); }
+        }
+
         static void Main(string[] args)
         {
-            try 
+            try
             {
-                // 1. Check for PowerShell 7 (pwsh)
-                if (!IsPwshInstalled())
+                // 1. Ensure PowerShell 7.6+ is available (auto-install if needed)
+                string pwshPath = EnsurePowerShell();
+                if (pwshPath == null)
                 {
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("⚡ PowerShell 7.6+ not found.");
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("🚀 Downloading and Installing PowerShell 7 (Auto)...");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Could not install PowerShell " + MinMajor + "." + MinMinor + "+ automatically.");
                     Console.ResetColor();
-
-                    if (!InstallPowerShell7())
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("❌ Failed to install PowerShell 7. Please install manually.");
-                        Console.ReadKey();
-                        return;
-                    }
-                    
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("✅ PowerShell 7 Installed! Launching Win-Debloat7...");
-                    Console.ResetColor();
+                    Console.WriteLine("Press any key to open the download page...");
+                    Console.ReadKey();
+                    Process.Start(new ProcessStartInfo("https://github.com/PowerShell/PowerShell/releases/latest") { UseShellExecute = true });
+                    return;
                 }
 
                 // 2. Setup Temp Directory
                 string tempPath = Path.Combine(Path.GetTempPath(), "WD7_" + Guid.NewGuid().ToString().Substring(0, 8));
                 Directory.CreateDirectory(tempPath);
-                
+
                 string zipPath = Path.Combine(tempPath, "payload.zip");
-                
+
                 // 3. Extract Embedded Resource
                 Assembly assembly = Assembly.GetExecutingAssembly();
                 string resourceName = null;
-                
+
                 foreach (string name in assembly.GetManifestResourceNames())
                 {
                     if (name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
@@ -79,47 +92,37 @@ namespace WinDebloat7
                     "Write-Host '🚀 Initializing Win-Debloat7...' -ForegroundColor Cyan; " +
                     "Expand-Archive -LiteralPath '{0}' -DestinationPath '{1}' -Force; " +
                     "Set-Location '{1}'; " +
-                    "& './Win-Debloat7.ps1' {2}", 
+                    "& './Win-Debloat7.ps1' {2}",
                     zipPath, tempPath, args.Length > 0 ? String.Join(" ", args) : ""
                 );
 
                 ProcessStartInfo startInfo = new ProcessStartInfo();
-                
-                // Try to resolve pwsh path (PATH might be stale after fresh install)
-                string pwshPath = "pwsh.exe";
-                string defaultInstall = @"C:\Program Files\PowerShell\7\pwsh.exe";
-                if (!IsPwshInPath() && File.Exists(defaultInstall))
-                {
-                    pwshPath = defaultInstall;
-                }
-                
                 startInfo.FileName = pwshPath;
                 string encodedCmd = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(scriptCmd));
                 startInfo.Arguments = "-NoProfile -ExecutionPolicy Bypass -EncodedCommand " + encodedCmd;
                 startInfo.UseShellExecute = false;
 
                 // 5. Launch
-                try 
+                try
                 {
                     Process p = Process.Start(startInfo);
-                    if (p != null) 
+                    if (p != null)
                     {
                         p.WaitForExit();
                     }
                 }
                 catch (System.ComponentModel.Win32Exception)
                 {
-                     Console.ForegroundColor = ConsoleColor.Red;
-                     Console.WriteLine("Error: Failed to launch pwsh.exe.");
-                     Console.WriteLine("System PATH might not be updated yet.");
-                     Console.WriteLine("Tried launching: " + pwshPath);
-                     Console.ResetColor();
-                     Console.WriteLine("Please restart the application.");
-                     Console.ReadKey();
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Error: Failed to launch PowerShell.");
+                    Console.WriteLine("Tried launching: " + pwshPath);
+                    Console.ResetColor();
+                    Console.WriteLine("Please restart the application.");
+                    Console.ReadKey();
                 }
 
                 // 6. Cleanup
-                try 
+                try
                 {
                     Directory.Delete(tempPath, true);
                 }
@@ -135,52 +138,182 @@ namespace WinDebloat7
             }
         }
 
-        static bool IsPwshInPath()
+        /// <summary>
+        /// Returns the path to a pwsh.exe meeting the minimum version, installing or
+        /// upgrading PowerShell automatically when necessary. Returns null on failure.
+        /// </summary>
+        static string EnsurePowerShell()
         {
-            try {
-                Process.Start(new ProcessStartInfo { FileName = "pwsh", Arguments = "-h", UseShellExecute = false, CreateNoWindow = true }).WaitForExit();
-                return true;
-            } catch { return false; }
+            string pwsh = ResolvePwsh();
+            if (pwsh != null) return pwsh;
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("⚡ PowerShell " + MinMajor + "." + MinMinor + "+ (LTS) not found.");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("🚀 Installing the latest PowerShell " + MinMajor + "." + MinMinor + " automatically...");
+            Console.ResetColor();
+
+            // Attempt 1: winget install (forced MSI - the MSIX default is sandboxed)
+            if (RunWinget("install --id Microsoft.PowerShell --source winget --installer-type wix " +
+                          "--accept-source-agreements --accept-package-agreements --silent --disable-interactivity"))
+            {
+                pwsh = ResolvePwsh();
+                if (pwsh != null) { ReportInstalled(pwsh); return pwsh; }
+            }
+
+            // Attempt 2: an older PowerShell 7 may already be installed - upgrade it
+            if (RunWinget("upgrade --id Microsoft.PowerShell --source winget " +
+                          "--accept-source-agreements --accept-package-agreements --silent --disable-interactivity"))
+            {
+                pwsh = ResolvePwsh();
+                if (pwsh != null) { ReportInstalled(pwsh); return pwsh; }
+            }
+
+            // Attempt 3: direct MSI download from the official GitHub release
+            Console.WriteLine("winget unavailable or failed. Downloading the official MSI package...");
+            if (InstallViaMsi())
+            {
+                pwsh = ResolvePwsh();
+                if (pwsh != null) { ReportInstalled(pwsh); return pwsh; }
+            }
+
+            return null;
         }
 
-        static bool IsPwshInstalled()
+        static void ReportInstalled(string pwshPath)
         {
-            // Check PATH first
-            if (IsPwshInPath()) return true;
-            
-            // Check default location
-            if (File.Exists(@"C:\Program Files\PowerShell\7\pwsh.exe")) return true;
-            
-            return false;
+            Version v = GetPwshVersion(pwshPath);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("✅ PowerShell " + (v != null ? v.ToString() : "7") + " ready! Launching Win-Debloat7...");
+            Console.ResetColor();
         }
 
-        static bool InstallPowerShell7()
+        /// <summary>
+        /// Finds a pwsh.exe that satisfies the minimum version: PATH first, then the
+        /// default machine-wide install location (PATH is stale right after install).
+        /// </summary>
+        static string ResolvePwsh()
+        {
+            Version v = GetPwshVersion("pwsh.exe");
+            if (IsSufficient(v)) return "pwsh.exe";
+
+            if (File.Exists(DefaultPwshPath))
+            {
+                v = GetPwshVersion(DefaultPwshPath);
+                if (IsSufficient(v)) return DefaultPwshPath;
+            }
+
+            return null;
+        }
+
+        static bool IsSufficient(Version v)
+        {
+            if (v == null) return false;
+            return v.Major > MinMajor || (v.Major == MinMajor && v.Minor >= MinMinor);
+        }
+
+        /// <summary>
+        /// Queries a pwsh executable for its engine version. Returns null if the
+        /// executable is missing or the output cannot be parsed.
+        /// </summary>
+        static Version GetPwshVersion(string exePath)
         {
             try
             {
-                // Install via Winget (available on Windows 10 1709+ / Windows 11)
-                Console.WriteLine("Installing PowerShell 7.6 via Winget...");
-                
-                string installCmd = "winget install --id Microsoft.PowerShell --version 7.6.1 --source winget " +
-                                    "--accept-source-agreements --accept-package-agreements --silent";
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = exePath;
+                psi.Arguments = "-NoProfile -NoLogo -Command \"$PSVersionTable.PSVersion.ToString()\"";
+                psi.UseShellExecute = false;
+                psi.RedirectStandardOutput = true;
+                psi.CreateNoWindow = true;
 
-                ProcessStartInfo psi = new ProcessStartInfo
+                using (Process p = Process.Start(psi))
                 {
-                    FileName = "cmd.exe",
-                    Arguments = "/c " + installCmd,
-                    UseShellExecute = false,
-                    CreateNoWindow = false
-                };
-                
+                    string output = p.StandardOutput.ReadToEnd().Trim();
+                    p.WaitForExit(15000);
+
+                    // Strip prerelease suffixes like "7.7.0-preview.2"
+                    int dash = output.IndexOf('-');
+                    if (dash > 0) output = output.Substring(0, dash);
+
+                    Version v;
+                    if (Version.TryParse(output, out v)) return v;
+                }
+            }
+            catch { /* pwsh missing or not runnable */ }
+
+            return null;
+        }
+
+        static bool RunWinget(string arguments)
+        {
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = "cmd.exe";
+                psi.Arguments = "/c winget " + arguments;
+                psi.UseShellExecute = false;
+                psi.CreateNoWindow = false;
+
                 Process p = Process.Start(psi);
                 p.WaitForExit();
-                
                 return p.ExitCode == 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Downloads the pinned PowerShell MSI (x64/arm64) from the official GitHub
+        /// release and installs it machine-wide with PATH registration.
+        /// </summary>
+        static bool InstallViaMsi()
+        {
+            string msiPath = null;
+            try
+            {
+                // Detect OS architecture (launcher may run as a 32-bit process on x64)
+                string arch = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITEW6432");
+                if (string.IsNullOrEmpty(arch)) arch = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+                string msiArch = (arch != null && arch.Equals("ARM64", StringComparison.OrdinalIgnoreCase)) ? "arm64" : "x64";
+
+                string url = string.Format(
+                    "https://github.com/PowerShell/PowerShell/releases/download/v{0}/PowerShell-{0}-win-{1}.msi",
+                    FallbackMsiVersion, msiArch);
+
+                msiPath = Path.Combine(Path.GetTempPath(), string.Format("PowerShell-{0}-win-{1}.msi", FallbackMsiVersion, msiArch));
+
+                Console.WriteLine("Downloading " + url);
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+                using (WebClient client = new WebClient())
+                {
+                    client.Headers.Add("User-Agent", "Win-Debloat7-Launcher");
+                    client.DownloadFile(url, msiPath);
+                }
+
+                Console.WriteLine("Installing PowerShell " + FallbackMsiVersion + " (this may take a minute)...");
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = "msiexec.exe";
+                psi.Arguments = string.Format("/package \"{0}\" /passive ADD_PATH=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1", msiPath);
+                psi.UseShellExecute = true; // allow UAC elevation prompt if needed
+
+                Process p = Process.Start(psi);
+                p.WaitForExit();
+
+                // 0 = success, 3010 = success but reboot required
+                return p.ExitCode == 0 || p.ExitCode == 3010;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Install failed: " + ex.Message);
+                Console.WriteLine("MSI install failed: " + ex.Message);
                 return false;
+            }
+            finally
+            {
+                try { if (msiPath != null && File.Exists(msiPath)) File.Delete(msiPath); }
+                catch { /* ignore cleanup errors */ }
             }
         }
     }

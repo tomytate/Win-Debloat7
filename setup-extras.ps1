@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 Write-Host "⚠️  Win-Debloat7 Installer (EXTRAS EDITION)" -ForegroundColor Yellow
 Write-Host "========================================" -ForegroundColor Yellow

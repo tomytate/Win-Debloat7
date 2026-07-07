@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 <#
 .SYNOPSIS
     Win-Debloat7 - The Power User's Windows Optimization Platform
@@ -29,7 +29,7 @@
     Applies the moderate profile without prompts (for automation).
     
 .NOTES
-    Version: 1.3.0
+    Version: 1.3.1
     Author: tomytate
     License: MIT
     Requires: PowerShell 7.6+, Administrator privileges
@@ -47,8 +47,11 @@ param(
     [ValidateScript({ Test-Path $_ -PathType Leaf })]
     [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+            $null = $commandName, $parameterName, $fakeBoundParameters # required by completer signature
+            if (-not $commandAst.Extent.File) { return }
             $profilesDir = Join-Path (Split-Path $commandAst.Extent.File -Parent) "profiles"
-            Get-ChildItem -Path $profilesDir -Filter "*.yaml" | 
+            if (-not (Test-Path $profilesDir)) { return }
+            Get-ChildItem -Path $profilesDir -Filter "*.yaml" |
             Where-Object { $_.Name -like "$wordToComplete*" } |
             ForEach-Object {
                 [System.Management.Automation.CompletionResult]::new($_.FullName, $_.Name, 'ParameterValue', $_.Name)
@@ -56,8 +59,6 @@ param(
         })]
     [string]$ProfileFile,
 
-    [string]$ConfigUrl,
-    
     [switch]$Unattended,
     
     [switch]$Maintenance,
@@ -123,8 +124,6 @@ catch {
     exit 1
 }
 
-# The manifest already loads UI modules, but we keep this block for safety if needed
-# or we can remove it since Menu.psm1 is loaded by the manifest
 Write-Host "Framework loaded." -ForegroundColor Gray
 
 # Launch Application
@@ -143,10 +142,12 @@ if ($ProfileFile) {
     
     # Safety confirmation (unless -Unattended)
     if (-not $Unattended) {
+        $profileName = [string]$config.metadata.name
+        if ($profileName.Length -gt 43) { $profileName = $profileName.Substring(0, 40) + "..." }
         Write-Host ""
         Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Yellow
         Write-Host "║  WARNING: This will modify your system configuration.    ║" -ForegroundColor Yellow
-        Write-Host "║  Profile: $($config.metadata.name.PadRight(43))║" -ForegroundColor Yellow
+        Write-Host "║  Profile: $($profileName.PadRight(43))║" -ForegroundColor Yellow
         Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Yellow
         Write-Host ""
         
@@ -162,17 +163,19 @@ if ($ProfileFile) {
     
     # Create snapshot before changes (ALWAYS, unless specifically disabled, which isn't a flag yet)
     Write-Log -Message "Creating pre-optimization snapshot..." -Level Info
-    New-WinDebloat7Snapshot -Name "Pre-$($config.metadata.name)" -Description "Auto-created before $($config.metadata.name) profile"
-    
+    New-WinDebloat7Snapshot -Name "Pre-$($config.metadata.name)" -Description "Auto-created before $($config.metadata.name) profile" -Encrypt | Out-Null
+
     # Benchmark Pre
     Write-Log -Message "Benchmarking system state (Pre-Optimization)..." -Level Info
     $preBench = Measure-WinDebloat7System
-    
-    # Apply modules
+
+    # Apply modules (all profile sections)
     Remove-WinDebloat7Bloatware -Config $config -Confirm:$false
     Set-WinDebloat7Privacy -Config $config -Confirm:$false
     Set-WinDebloat7Performance -Config $config -Confirm:$false
-    
+    Set-WinDebloat7Network -Config $config -Confirm:$false
+    Install-WinDebloat7ProfileSoftware -Config $config -Confirm:$false
+
     # Benchmark Post
     Write-Log -Message "Benchmarking system state (Post-Optimization)..." -Level Info
     $postBench = Measure-WinDebloat7System

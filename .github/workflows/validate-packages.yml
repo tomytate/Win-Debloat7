@@ -1,0 +1,32 @@
+name: Validate Package IDs
+
+# Package IDs rot (renames, delistings, discontinued apps). This workflow
+# re-validates the entire software catalog against live package sources
+# monthly, and can be run on demand before a release.
+
+on:
+  schedule:
+    - cron: '0 6 1 * *'   # 06:00 UTC on the 1st of every month
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate software catalog
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The validation script requires PowerShell 7.6+
+      - name: Install PowerShell 7.6+ (dotnet tool)
+        shell: pwsh
+        run: dotnet tool install --global PowerShell
+
+      - name: Validate package IDs
+        shell: pwsh
+        run: |
+          $pwsh76 = Join-Path $env:USERPROFILE '.dotnet\tools\pwsh.exe'
+          # winget is validated when the runner image provides it; the script
+          # falls back to Chocolatey-feed-only validation otherwise.
+          & $pwsh76 -NoProfile -File ./build/Test-PackageIds.ps1
+          exit $LASTEXITCODE

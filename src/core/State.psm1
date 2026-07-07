@@ -8,10 +8,9 @@
     
 .NOTES
     Module: Win-Debloat7.Core.State
-    Version: 1.3.0
-    
+    Version: 1.3.1
 .LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
+    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
 
 #Requires -Version 7.6
@@ -32,9 +31,6 @@ class SystemSnapshot {
     [array]$Services
     [string]$Version = "1.3.0"
 }
-
-# Cache for version info (PERF-001 fix)
-$Script:CachedVersionInfo = $null
 
 <#
 .SYNOPSIS
@@ -97,13 +93,16 @@ function New-WinDebloat7Snapshot {
     }
 
     # 1. Capture Services (PERF-002 fix: Filter to dynamically loaded services)
-    $servicesJsonPath = Join-Path $PSScriptRoot "..\..\..\config\services.json"
+    $servicesJsonPath = Join-Path $PSScriptRoot "..\..\config\services.json"
     $relevantServicePatterns = @('BITS', 'wuauserv', 'UsoSvc', 'Xbox*', 'Copilot', 'Connected*')
     if (Test-Path $servicesJsonPath) {
         try {
             $servicesDb = Get-Content $servicesJsonPath -Raw | ConvertFrom-Json
             $relevantServicePatterns += $servicesDb.services.psobject.properties.Name
-        } catch { }
+        }
+        catch {
+            Write-Verbose "Could not load services.json for snapshot filtering: $($_.Exception.Message)"
+        }
     }
     
     $serviceFilter = { 
@@ -149,10 +148,10 @@ function New-WinDebloat7Snapshot {
     try {
         if ($PSCmdlet.ShouldProcess($basePath, "Create Snapshot")) {
             New-Item -Path $basePath -ItemType Directory -Force | Out-Null
-            
+
             # Use PS 7.5 ConvertTo-CliXml for robust serialization
             $cliXml = $snapshot | ConvertTo-CliXml
-            
+
             if ($Encrypt) {
                 # SEC-005 fix: Encrypt snapshot using DPAPI
                 $bytes = [System.Text.Encoding]::UTF8.GetBytes($cliXml)
@@ -166,6 +165,16 @@ function New-WinDebloat7Snapshot {
                 $cliXml | Out-File -FilePath "$basePath\snapshot.clixml" -Encoding UTF8
                 Write-Log -Message "Snapshot saved: $($snapshot.Id)" -Level Success
             }
+
+            # Plaintext metadata sidecar so listings work for encrypted snapshots too
+            [ordered]@{
+                Id          = $snapshot.Id
+                Name        = $snapshot.Name
+                Description = $snapshot.Description
+                Timestamp   = $snapshot.Timestamp.ToString("o")
+                Encrypted   = [bool]$Encrypt
+                Version     = $snapshot.Version
+            } | ConvertTo-Json | Set-Content -Path "$basePath\meta.json" -Encoding UTF8
         }
     }
     catch {
@@ -259,8 +268,16 @@ function Restore-WinDebloat7Snapshot {
         if ($regData) {
             foreach ($prop in $regData.PSObject.Properties) {
                 if ($prop.Name -notmatch '^PS') {
-                    # Skip PS* internal properties
-                    if (Set-RegistryKey -Path $regPath -Name $prop.Name -Value $prop.Value) {
+                    # Skip PS* internal properties; infer registry type from the .NET type
+                    # so string values (e.g. consent "Deny") are not written back as DWord
+                    $regType = switch ($prop.Value) {
+                        { $_ -is [long] -or $_ -is [uint64] } { "QWord"; break }
+                        { $_ -is [int] -or $_ -is [uint32] -or $_ -is [byte] -or $_ -is [int16] } { "DWord"; break }
+                        { $_ -is [byte[]] } { "Binary"; break }
+                        { $_ -is [string[]] } { "MultiString"; break }
+                        default { "String" }
+                    }
+                    if (Set-RegistryKey -Path $regPath -Name $prop.Name -Value $prop.Value -Type $regType) {
                         $successCount++
                     }
                     else {
@@ -296,7 +313,8 @@ function Get-WinDebloat7Snapshot {
         Get-ChildItem $basePath -Directory | ForEach-Object {
             $clixmlPath = Join-Path $_.FullName "snapshot.clixml"
             $encryptedPath = Join-Path $_.FullName "snapshot.encrypted"
-            
+            $metaPath = Join-Path $_.FullName "meta.json"
+
             if (Test-Path $clixmlPath) {
                 try {
                     $content = Get-Content $clixmlPath -Raw
@@ -306,8 +324,23 @@ function Get-WinDebloat7Snapshot {
                     Write-Log -Message "Could not read snapshot: $($_.FullName)" -Level Debug
                 }
             }
+            elseif (Test-Path $metaPath) {
+                # Encrypted snapshot: use the plaintext metadata sidecar
+                try {
+                    $meta = Get-Content $metaPath -Raw | ConvertFrom-Json
+                    [PSCustomObject]@{
+                        Id        = $meta.Id
+                        Name      = $meta.Name
+                        Timestamp = [datetime]$meta.Timestamp
+                        Encrypted = $true
+                    }
+                }
+                catch {
+                    Write-Log -Message "Could not read snapshot metadata: $metaPath" -Level Debug
+                }
+            }
             elseif (Test-Path $encryptedPath) {
-                # Return metadata only for encrypted snapshots
+                # Legacy encrypted snapshot without a metadata sidecar
                 [PSCustomObject]@{
                     Id        = $_.Name
                     Name      = "(Encrypted)"

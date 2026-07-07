@@ -41,6 +41,19 @@ Please note that this project is released with a [Contributor Code of Conduct](C
   ```powershell
   Invoke-ScriptAnalyzer -Path src -Recurse -Severity Error,Warning
   ```
+- CI enforces **zero Severity=Error findings**. Three warning categories are accepted by design:
+  `PSAvoidUsingWriteHost` (this is an interactive console tool), `PSUseSingularNouns`
+  (established public function names), and `PSAvoidOverwritingBuiltInCmdlets` for
+  `Write-Log` (a PSScriptAnalyzer compatibility-profile false positive).
+
+## 📦 Adding Software to the Catalog
+1. Edit `$Script:EssentialsApps` in `src/modules/Software/Software.psm1`.
+2. Provide **both** IDs where available: `@{ Name = "App"; Winget = "Publisher.App"; Choco = "app" }`. Leave one empty (`""`) if the app only exists on one manager. npm-published CLIs may add `Npm = "@scope/package"` (used as last-resort provider; Node.js LTS is auto-provisioned).
+3. Validate before committing:
+   ```powershell
+   ./build/Test-PackageIds.ps1
+   ```
+   CI re-validates the whole catalog monthly (`validate-packages.yml`) - stale IDs fail the build.
 
 ## 📦 Project Structure
 ```

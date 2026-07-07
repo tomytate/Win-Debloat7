@@ -8,10 +8,9 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Network
-    Version: 1.3.0
-    
+    Version: 1.3.1
 .LINK
-    https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75
+    https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
 
 #Requires -Version 7.6

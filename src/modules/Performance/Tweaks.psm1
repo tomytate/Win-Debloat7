@@ -9,7 +9,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Tweaks
-    Version: 1.0.0
+    Version: 1.3.1
 #>
 
 #region AI Feature Tweaks

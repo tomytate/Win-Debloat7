@@ -8,10 +8,9 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Windows11.VersionDetection
-    Version: 1.3.0
-    
+    Version: 1.3.1
 .LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
+    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
 
 #Requires -Version 7.6
@@ -19,11 +18,14 @@
 using namespace System.Management.Automation
 
 class WindowsVersionInfo {
-    [string]$ProductName
-    [string]$DisplayVersion
+    [string]$ProductName    # Raw CIM caption, e.g. "Microsoft Windows 11 Pro"
+    [string]$Edition        # Home / Pro / Enterprise / Education...
+    [string]$DisplayVersion # Feature-update label, e.g. "24H2"
+    [string]$FriendlyName   # Feature-update label (alias of DisplayVersion)
     [int]$BuildNumber
-    [string]$FriendlyName
+    [int]$Ubr              # Update Build Revision (the .xxxx after the build)
     [bool]$IsWindows11
+    [string]$FullName       # Composed, display-ready, e.g. "Windows 11 Pro"
 }
 
 # Cache to prevent repeated CIM queries (PERF-001 fix)
@@ -66,34 +68,78 @@ function Get-WindowsVersionInfo {
     
     $os = if ($TestOS) { $TestOS } else { Get-CimInstance Win32_OperatingSystem }
     $build = [int]$os.BuildNumber
-    
+
     $info = [WindowsVersionInfo]::new()
     $info.ProductName = $os.Caption
     $info.BuildNumber = $build
     $info.IsWindows11 = $build -ge 22000
-    
-    # Try to get DisplayVersion from registry
-    try {
-        $info.DisplayVersion = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name "DisplayVersion" -ErrorAction Stop
+
+    # Read the registry once for the authoritative feature-update label, edition,
+    # and update revision. CIM's Caption is unreliable after in-place upgrades.
+    # Skipped under -TestOS so unit tests exercise the build->label fallback map
+    # deterministically instead of reading the host's real registry.
+    $cvKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+    $displayVersion = $null
+    $editionId = $null
+    if (-not $TestOS) {
+        try { $displayVersion = Get-ItemPropertyValue -Path $cvKey -Name "DisplayVersion" -ErrorAction Stop } catch { }
+        if (-not $displayVersion) {
+            # Pre-2004 builds used ReleaseId (e.g. "1909") instead of DisplayVersion
+            try { $displayVersion = Get-ItemPropertyValue -Path $cvKey -Name "ReleaseId" -ErrorAction Stop } catch { }
+        }
+        try { $editionId = Get-ItemPropertyValue -Path $cvKey -Name "EditionID" -ErrorAction Stop } catch { }
+        try { $info.Ubr = [int](Get-ItemPropertyValue -Path $cvKey -Name "UBR" -ErrorAction Stop) } catch { }
     }
-    catch {
-        $info.DisplayVersion = "Unknown"
+
+    # Prefer the registry's DisplayVersion; fall back to a correct build->label map
+    # (ordered elseif chain - the module's old switch had no 'break' and always
+    # collapsed to "21H2" because every -ge condition matched).
+    if ($displayVersion) {
+        $info.DisplayVersion = $displayVersion
     }
-    
-    # Determine Friendly Name based on build number
-    $info.FriendlyName = switch ($build) {
-        { $_ -ge 26200 } { "25H2" }
-        { $_ -ge 26100 } { "24H2" }
-        { $_ -ge 22631 } { "23H2" }
-        { $_ -ge 22621 } { "22H2" }
-        { $_ -ge 22000 } { "21H2" }
-        default { "Windows 10 / Older" }
+    else {
+        $info.DisplayVersion =
+        if ($build -ge 26200) { "25H2" }
+        elseif ($build -ge 26100) { "24H2" }
+        elseif ($build -ge 22631) { "23H2" }
+        elseif ($build -ge 22621) { "22H2" }
+        elseif ($build -ge 22000) { "21H2" }
+        elseif ($build -ge 19045) { "22H2" }   # Windows 10
+        elseif ($build -ge 19044) { "21H2" }   # Windows 10
+        elseif ($build -ge 19043) { "21H1" }   # Windows 10
+        elseif ($build -ge 19042) { "20H2" }   # Windows 10
+        elseif ($build -ge 19041) { "2004" }   # Windows 10
+        elseif ($build -ge 18363) { "1909" }   # Windows 10
+        else { "Legacy" }
     }
-    
+    $info.FriendlyName = $info.DisplayVersion
+
+    # Edition: prefer EditionID (Core/Professional/Enterprise/...), else parse Caption
+    $info.Edition =
+    switch -Wildcard ($editionId) {
+        "Core*" { "Home"; break }
+        "Professional*" { "Pro"; break }
+        "Enterprise*" { "Enterprise"; break }
+        "Education*" { "Education"; break }
+        "ServerStandard*" { "Server Standard"; break }
+        "ServerDatacenter*" { "Server Datacenter"; break }
+        default {
+            $m = [regex]::Match($os.Caption, '(Home|Pro(?:fessional)?|Enterprise|Education|Server\s+\w+)')
+            if ($m.Success) { $m.Value -replace 'Professional', 'Pro' } else { "" }
+        }
+    }
+
+    # Compose a display-ready name; force the "11" label when the build says so
+    # even if a stale Caption still reports Windows 10.
+    $osFamily = if ($info.IsWindows11) { "Windows 11" }
+    elseif ($build -ge 10240) { "Windows 10" }
+    else { ($os.Caption -replace '^Microsoft\s+', '').Trim() }
+    $info.FullName = (@($osFamily, $info.Edition) | Where-Object { $_ }) -join ' '
+
     # Update cache
     $Script:CachedVersionInfo = $info
     $Script:CacheTimestamp = $now
-    
+
     return $info
 }
 

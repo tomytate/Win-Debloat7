@@ -1,7 +1,7 @@
 $packageName = 'win-debloat7'
-$version     = '1.3.0'
+$version     = '1.3.1'
 $url = "https://github.com/tomytate/Win-Debloat7/releases/download/v$version/Win-Debloat7.exe"
-$checksum    = "92B9F9E19A54185E39696FFD0DE837DD28B174F7A7A6CCBA4FC9297C553CF05C" 
+$checksum    = "5ABE40052C93C116F209C9D3D5AD230E902798FF5ED04126423F6E0BB69BC21F" 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $exePath = Join-Path $toolsDir "Win-Debloat7.exe"
 
@@ -16,12 +16,7 @@ $packageArgs = @{
 
 Get-ChocolateyWebFile @packageArgs
 
-# Create Shim (Chocolatey automatically shims executables in the package folder if not ignored, but let's be explicit)
-# Actually, just dropping it in tools/ is enough for automatic shimming if we don't name it .ignore.
-# But we might want a clean alias.
-# Install-BinFile -Name "win-debloat7" -Path $exePath # Not needed if file is in tools and named right?
-# Actually, the file is named Win-Debloat7.exe. Shim will be Win-Debloat7.exe. 
-# We want win-debloat7 (lowercase) alias too?
+# Chocolatey auto-shims EXEs in tools/; also register a lowercase alias
 Install-BinFile -Name "win-debloat7" -Path $exePath
 
 # Create Start Menu Shortcut

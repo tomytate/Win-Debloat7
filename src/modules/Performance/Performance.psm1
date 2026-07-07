@@ -8,10 +8,9 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Performance
-    Version: 1.3.0
-    
+    Version: 1.3.1
 .LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
+    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
 
 #Requires -Version 7.6
@@ -68,7 +67,7 @@ function Set-WinDebloat7Performance {
     
     $successCount = 0
     $failCount = 0
-    $totalSteps = 5
+    $totalSteps = 6
     $currentStep = 0
     
     # 1. Power Plans (using named constants)
@@ -93,18 +92,38 @@ function Set-WinDebloat7Performance {
             "Ultimate" {
                 $guid = $Script:PowerPlanGUIDs.Ultimate
                 if ($PSCmdlet.ShouldProcess("Power Plan", "Set to Ultimate Performance")) {
-                    # Duplicate Ultimate Performance scheme if not exists
+                    # The hidden Ultimate Performance scheme cannot be activated directly on
+                    # most systems - it must be duplicated first, then the COPY's new GUID
+                    # is activated. Reuse an existing copy if one is already installed.
                     $existingPlans = powercfg -list 2>&1
-                    if ($existingPlans -notmatch $guid) {
-                        Start-Process -FilePath "powercfg.exe" -ArgumentList "-DuplicateScheme", "$guid" -Wait -NoNewWindow
-                    }
-                    $proc = Start-Process -FilePath "powercfg.exe" -ArgumentList "-SetActive", "$guid" -Wait -NoNewWindow -PassThru
-                    if ($proc.ExitCode -eq 0) {
-                        Write-Log -Message "Power Plan set to Ultimate Performance" -Level Success
-                        $successCount++
+                    $activeGuid = $null
+
+                    if ($existingPlans -match $guid) {
+                        $activeGuid = $guid
                     }
                     else {
-                        Write-Log -Message "Failed to set power plan: $($proc.ExitCode)" -Level Error
+                        $duplicateOutput = powercfg /duplicatescheme $guid 2>&1
+                        foreach ($line in $duplicateOutput) {
+                            if ($line -match '\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b') {
+                                $activeGuid = $matches[0]
+                                break
+                            }
+                        }
+                    }
+
+                    if ($activeGuid) {
+                        $proc = Start-Process -FilePath "powercfg.exe" -ArgumentList "-SetActive", "$activeGuid" -Wait -NoNewWindow -PassThru
+                        if ($proc.ExitCode -eq 0) {
+                            Write-Log -Message "Power Plan set to Ultimate Performance" -Level Success
+                            $successCount++
+                        }
+                        else {
+                            Write-Log -Message "Failed to set power plan: $($proc.ExitCode)" -Level Error
+                            $failCount++
+                        }
+                    }
+                    else {
+                        Write-Log -Message "Could not duplicate Ultimate Performance scheme (unsupported on this system?)" -Level Error
                         $failCount++
                     }
                 }
@@ -150,6 +169,8 @@ function Set-WinDebloat7Performance {
     }
     
     # 3. RAM Optimization (Service Host Split)
+    $currentStep++
+    Write-Progress -Activity "Applying Performance Settings" -Status "Optimizing Service Host Split" -PercentComplete (($currentStep / $totalSteps) * 100)
     $ramGB = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB
     if ($ramGB -gt 4) {
         # Set Split Threshold to RAM size to reduce process overhead on modern systems
@@ -160,7 +181,7 @@ function Set-WinDebloat7Performance {
         }
     }
     
-    # 3. Game Mode & DVR
+    # 4. Game Mode & DVR
     if ($Config.performance.disable_game_bar) {
         $currentStep++
         Write-Progress -Activity "Applying Performance Settings" -Status "Disabling Game Bar" -PercentComplete (($currentStep / $totalSteps) * 100)
@@ -175,7 +196,7 @@ function Set-WinDebloat7Performance {
         $failCount += ($results | Where-Object { -not $_ }).Count
     }
     
-    # 4. Background Apps
+    # 5. Background Apps
     if ($Config.performance.disable_background_apps) {
         $currentStep++
         Write-Progress -Activity "Applying Performance Settings" -Status "Disabling Background Apps" -PercentComplete (($currentStep / $totalSteps) * 100)
@@ -190,7 +211,7 @@ function Set-WinDebloat7Performance {
         $failCount += ($results | Where-Object { -not $_ }).Count
     }
     
-    # 5. Network Throttling
+    # 6. Network Throttling
     $currentStep++
     Write-Progress -Activity "Applying Performance Settings" -Status "Disabling Network Throttling" -PercentComplete (($currentStep / $totalSteps) * 100)
     Write-Log -Message "Disabling Network Throttling" -Level Info

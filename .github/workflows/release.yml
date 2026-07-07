@@ -18,18 +18,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install PowerShell 7.5 (Preview)
+      # Build scripts require PowerShell 7.6+; install the latest stable as a
+      # dotnet global tool in case the runner image ships an older pwsh.
+      - name: Install PowerShell 7.6+ (dotnet tool)
         shell: pwsh
-        run: |
-           # Use simple Zip install (default) preventing MSI parameter issues
-           & { $(irm https://aka.ms/install-powershell.ps1) } -Preview
+        run: dotnet tool install --global PowerShell
 
       - name: Build Dual Release
         shell: pwsh
         run: |
+          $pwsh76 = Join-Path $env:USERPROFILE '.dotnet\tools\pwsh.exe'
           $tag = "${{ github.ref_name }}"
           $version = $tag.TrimStart('v')
-          ./build/Build-DualRelease.ps1 -Version $version -OutputDir dist
+          & $pwsh76 -NoProfile -File ./build/Build-DualRelease.ps1 -Version $version -OutputDir dist
 
       - name: Publish Release
         uses: softprops/action-gh-release@v1

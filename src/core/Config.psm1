@@ -8,10 +8,9 @@
     
 .NOTES
     Module: Win-Debloat7.Core.Config
-    Version: 1.3.0
-    
+    Version: 1.3.1
 .LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-75
+    https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
 
 #Requires -Version 7.6
@@ -155,6 +154,7 @@ function Import-WinDebloat7Config {
             @{ Section = 'bloatware'; Field = 'custom_list' }
             @{ Section = 'bloatware'; Field = 'exclude_list' }
             @{ Section = 'software'; Field = 'install_list' }
+            @{ Section = 'software'; Field = 'uninstall_list' }
         )
         
         foreach ($item in $listFields) {
@@ -184,11 +184,15 @@ function Import-WinDebloat7Config {
             'disableRecall'         = 'disable_recall'
         }
         
-        foreach ($section in $Config.PSObject.Properties) {
-            if ($null -ne $section.Value -and $section.Value -is [PSCustomObject]) {
-                foreach ($prop in $section.Value.PSObject.Properties) {
-                    if ($typoMap.ContainsKey($prop.Name)) {
-                        Write-Log -Message "Config typo: '$($prop.Name)' should be '$($typoMap[$prop.Name])' in [$($section.Name)]" -Level Warning
+        # ConvertFrom-Yaml returns nested dictionaries, so inspect keys (not PSObject properties)
+        if ($Config -is [System.Collections.IDictionary]) {
+            foreach ($sectionName in @($Config.Keys)) {
+                $section = $Config[$sectionName]
+                if ($section -is [System.Collections.IDictionary]) {
+                    foreach ($key in @($section.Keys)) {
+                        if ($typoMap.ContainsKey($key)) {
+                            Write-Log -Message "Config typo: '$key' should be '$($typoMap[$key])' in [$sectionName]" -Level Warning
+                        }
                     }
                 }
             }

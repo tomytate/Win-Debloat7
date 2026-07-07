@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Privacy.Firewall
-    Version: 1.4.0
+    Version: 1.3.1
 #>
 
 #Requires -Version 7.6
@@ -81,11 +81,12 @@ $Script:TelemetryDomains = @(
     Cleans up the deprecated hosts file block if it exists.
 #>
 function Remove-LegacyWinDebloat7HostsBlock {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param()
-    
+
     try {
         if (-not (Test-Path $Script:HostsFilePath)) { return }
+        if (-not $PSCmdlet.ShouldProcess($Script:HostsFilePath, "Remove legacy telemetry block")) { return }
         $content = Get-Content $Script:HostsFilePath -Raw -ErrorAction SilentlyContinue
         if ($content -match [regex]::Escape($Script:BlockMarkerStart)) {
             Write-Log -Message "Found legacy hosts file telemetry block. Cleaning up..." -Level Info
@@ -135,8 +136,9 @@ function Add-WinDebloat7FirewallBlock {
                 try {
                     $ips = [System.Net.Dns]::GetHostAddresses($cleanDomain)
                     $ipsToBlock += $ips.IPAddressToString
-                } catch {
-                    # Domain not resolvable or already blocked
+                }
+                catch {
+                    Write-Verbose "Domain not resolvable (or already blocked): $cleanDomain"
                 }
             }
             

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Interactive Menu System for Win-Debloat7
     
@@ -7,7 +7,7 @@
     
 .NOTES
     Module: Win-Debloat7.UI.Menu
-    Version: 1.3.0
+    Version: 1.3.1
 #>
 
 #Requires -Version 7.6
@@ -41,6 +41,8 @@ function Show-MainMenu {
         Write-WD7Host "  [8] System Info" -Color White
         Write-WD7Host "  [9] Snapshots / Restore" -Color White
         Write-WD7Host "  [X] Tweaks & Customization" -Color Secondary
+        Write-WD7Host "  [S] Service Optimizer (Presets)" -Color White
+        Write-WD7Host "  [U] Update All Apps" -Color White
         Write-WD7Host "  [R] System Repair Tools" -Color Warning
         Write-WD7Host "  [F] Windows Features Manager" -Color White
         Write-WD7Host "  [T] Third Party Tools" -Color White
@@ -60,9 +62,11 @@ function Show-MainMenu {
         Show-WD7Separator
         $choice = Read-Host "  Enter selection"
         
+        # Note: PowerShell 'switch' is case-insensitive AND executes every matching
+        # clause, so letter options must appear exactly once.
         switch ($choice) {
             "1" { Invoke-Profile "$PSScriptRoot\..\..\profiles\moderate.yaml" }
-            "2" { 
+            "2" {
                 try {
                     Import-Module "$PSScriptRoot\gui\GUI.psm1" -Force
                     Show-WinDebloat7GUI
@@ -80,14 +84,15 @@ function Show-MainMenu {
             "8" { Show-SystemInfo }
             "9" { Show-SnapshotMenu }
             "X" { Show-TweaksMenu }
-            "x" { Show-TweaksMenu }
+            "S" { Show-ServicesMenu }
+            "U" {
+                Update-WinDebloat7Software
+                Read-Host "`nPress Enter to continue..."
+            }
             "R" { Show-RepairMenu }
-            "r" { Show-RepairMenu }
             "F" { Show-FeaturesMenu }
-            "f" { Show-FeaturesMenu }
             "T" { Show-IntegrationsMenu }
-            "t" { Show-IntegrationsMenu }
-            "D" {  
+            "D" {
                 if ($extrasAvailable) {
                     Invoke-WinDebloat7DefenderRemover
                     Read-Host "`nPress Enter to continue..."
@@ -97,21 +102,7 @@ function Show-MainMenu {
                     Start-Sleep -Seconds 2
                 }
             }
-            "d" { 
-                # Case insensitive handler for D
-                if ($extrasAvailable) { Invoke-WinDebloat7DefenderRemover; Read-Host "`nPress Enter..." } 
-            }
-            "A" { 
-                if ($extrasAvailable) {
-                    Invoke-WinDebloat7Activation
-                    Read-Host "`nPress Enter to continue..."
-                }
-                else {
-                    Write-WD7Host "Extras module not installed. Download Extras edition for this feature." -Color Warning
-                    Start-Sleep -Seconds 2
-                }
-            }
-            "a" { 
+            "A" {
                 if ($extrasAvailable) {
                     Invoke-WinDebloat7Activation
                     Read-Host "`nPress Enter to continue..."
@@ -126,7 +117,6 @@ function Show-MainMenu {
                 Read-Host "`nPress Enter to continue..."
             }
             "Q" { exit }
-            "q" { exit }
             default { Write-WD7Host "Invalid selection." -Color Warning; Start-Sleep -Seconds 1 }
         }
     }
@@ -137,17 +127,20 @@ function Show-TweaksMenu {
         Show-WD7Header
         Show-WD7Separator -Title "TWEAKS & CUSTOMIZATION" -Color Secondary
         
-        Write-WD7Host "  [1] UI Customization (Taskbar, Context Menu)" -Color White
+        Write-WD7Host "  [1] UI Customization (Taskbar, Context Menu, Explorer)" -Color White
         Write-WD7Host "  [2] Advanced Removal (OneDrive, Edge, Xbox)" -Color White
+        Write-WD7Host "  [3] Search & Suggestions (Bing, Ads, Tips)" -Color White
+        Write-WD7Host "  [4] System QoL (Fast Startup, BitLocker, Updates...)" -Color White
         Write-WD7Host "  [B] Back" -Color Dark
-        
+
         $sel = Read-Host "`nSelect option"
-        
+
         switch ($sel) {
             "1" { Show-UICustomizationMenu }
             "2" { Show-AdvancedRemovalMenu }
+            "3" { Show-SearchSuggestionsMenu }
+            "4" { Show-SystemQoLMenu }
             "B" { return }
-            "b" { return }
         }
     }
 }
@@ -155,7 +148,7 @@ function Show-TweaksMenu {
 function Show-UICustomizationMenu {
     Show-WD7Header
     Show-WD7Separator -Title "UI CUSTOMIZATION" -Color Secondary
-    
+
     Write-Host "  [1] Align Taskbar: Left" -ForegroundColor White
     Write-Host "  [2] Align Taskbar: Center" -ForegroundColor White
     Write-Host "  [3] Context Menu: Classic (Win10)" -ForegroundColor White
@@ -163,9 +156,22 @@ function Show-UICustomizationMenu {
     Write-Host "  [5] Hide 'Gallery' from Explorer" -ForegroundColor White
     Write-Host "  [6] Hide 'Home' from Explorer" -ForegroundColor White
     Write-Host "  [7] Disable Start Menu 'Recommended'" -ForegroundColor White
-    
+    Write-Host "  [8] Explorer: Show file extensions (security best practice)" -ForegroundColor White
+    Write-Host "  [9] Explorer: Show hidden files" -ForegroundColor White
+    Write-Host "  [10] Explorer: Open to 'This PC'" -ForegroundColor White
+    Write-Host "  [11] Taskbar: Hide search / [12] Search icon only" -ForegroundColor White
+    Write-Host "  [13] Taskbar: Hide Task View button" -ForegroundColor White
+    Write-Host "  [14] Taskbar: Enable 'End Task' in right-click menu" -ForegroundColor White
+    Write-Host "  [15] Taskbar: Click focuses last active window" -ForegroundColor White
+    Write-Host "  [16] Taskbar: Disable Widgets / [17] Hide Chat icon" -ForegroundColor White
+    Write-Host "  [18] Explorer: Hide OneDrive / [19] 3D Objects / [20] Music" -ForegroundColor White
+    Write-Host "  [21] Context menu: remove Share / Give access / Include in library" -ForegroundColor White
+    Write-Host "  [22] Disable transparency / [23] Disable Snap Assist" -ForegroundColor White
+    Write-Host "  [24] Start: hide 'All Apps' list" -ForegroundColor White
+    Write-WD7Host "  [R] Restart Explorer (apply pending UI changes)" -Color Primary
+
     $sel = Read-Host "`nSelect tweak to apply (or Enter to cancel)"
-    
+
     switch ($sel) {
         "1" { Set-WinDebloat7TaskbarAlignment -Alignment Left }
         "2" { Set-WinDebloat7TaskbarAlignment -Alignment Center }
@@ -174,6 +180,88 @@ function Show-UICustomizationMenu {
         "5" { Set-WinDebloat7Explorer -HideGallery }
         "6" { Set-WinDebloat7Explorer -HideHome }
         "7" { Set-WinDebloat7StartMenu -DisableRecommended }
+        "8" { Set-WinDebloat7Explorer -ShowFileExtensions }
+        "9" { Set-WinDebloat7Explorer -ShowHiddenFiles }
+        "10" { Set-WinDebloat7Explorer -LaunchTo ThisPC }
+        "11" { Set-WinDebloat7TaskbarTweaks -SearchMode Hidden }
+        "12" { Set-WinDebloat7TaskbarTweaks -SearchMode Icon }
+        "13" { Set-WinDebloat7TaskbarTweaks -HideTaskView }
+        "14" { Set-WinDebloat7TaskbarTweaks -EnableEndTask }
+        "15" { Set-WinDebloat7TaskbarTweaks -EnableLastActiveClick }
+        "16" { Disable-WinDebloat7Widgets }
+        "17" { Disable-WinDebloat7ChatTaskbar }
+        "18" { Set-WinDebloat7Explorer -HideOneDrive }
+        "19" { Set-WinDebloat7Explorer -Hide3DObjects }
+        "20" { Set-WinDebloat7Explorer -HideMusic }
+        "21" { Set-WinDebloat7ContextMenuItems -HideShare -HideGiveAccessTo -HideIncludeInLibrary }
+        "22" { Disable-WinDebloat7Transparency }
+        "23" { Disable-WinDebloat7SnapAssist }
+        "24" { Disable-WinDebloat7StartAllApps }
+        "R" { Restart-WinDebloat7Explorer }
+    }
+    if ($sel) { Read-Host "Press Enter..." }
+}
+
+function Show-SearchSuggestionsMenu {
+    Show-WD7Header
+    Show-WD7Separator -Title "SEARCH & SUGGESTIONS" -Color Secondary
+
+    Write-Host "  [1] Disable Bing web results & Cortana in Start search" -ForegroundColor White
+    Write-Host "  [2] Disable Search Highlights (branded search content)" -ForegroundColor White
+    Write-Host "  [3] Disable device search history" -ForegroundColor White
+    Write-Host "  [4] Disable ALL Windows suggestions & ads (Start, Settings," -ForegroundColor White
+    Write-Host "      lock screen tips, promoted-app installs, nag toasts)" -ForegroundColor White
+    Write-Host "  [5] Hide the Settings 'Home' page" -ForegroundColor White
+    Write-Host "  [6] Hide Phone Link panel in Start" -ForegroundColor White
+    Write-Host "  [A] Apply all of the above" -ForegroundColor Yellow
+
+    $sel = Read-Host "`nSelect tweak to apply (or Enter to cancel)"
+
+    switch ($sel) {
+        "1" { Set-WinDebloat7Search -DisableBingSearch }
+        "2" { Set-WinDebloat7Search -DisableSearchHighlights }
+        "3" { Set-WinDebloat7Search -DisableSearchHistory }
+        "4" { Disable-WinDebloat7WindowsSuggestions }
+        "5" { Disable-WinDebloat7SettingsHome }
+        "6" { Disable-WinDebloat7PhoneLinkStart }
+        "A" {
+            Set-WinDebloat7Search -DisableBingSearch -DisableSearchHighlights -DisableSearchHistory
+            Disable-WinDebloat7WindowsSuggestions
+            Disable-WinDebloat7SettingsHome
+            Disable-WinDebloat7PhoneLinkStart
+        }
+    }
+    if ($sel) { Read-Host "Press Enter..." }
+}
+
+function Show-SystemQoLMenu {
+    Show-WD7Header
+    Show-WD7Separator -Title "SYSTEM QOL TWEAKS" -Color Secondary
+
+    Write-Host "  [1] Disable Fast Startup (clean full shutdowns)" -ForegroundColor White
+    Write-Host "  [2] Prevent automatic BitLocker encryption (24H2+ installs)" -ForegroundColor White
+    Write-Host "  [3] Disable Delivery Optimization (P2P update sharing)" -ForegroundColor White
+    Write-Host "  [4] Disable Storage Sense (automatic disk cleanup)" -ForegroundColor White
+    Write-Host "  [5] Prevent auto-reboot after updates while signed in" -ForegroundColor White
+    Write-Host "  [6] Turn off 'Get latest updates as soon as available'" -ForegroundColor White
+    Write-Host "  [7] Disable Sticky Keys shortcut (5x Shift pop-up)" -ForegroundColor White
+    Write-Host "  [8] Disable drag-to-share tray (24H2+)" -ForegroundColor White
+    Write-Host "  [9] Disable Find My Device" -ForegroundColor White
+    Write-Host "  [10] Disable Modern Standby networking (battery saver)" -ForegroundColor White
+
+    $sel = Read-Host "`nSelect tweak to apply (or Enter to cancel)"
+
+    switch ($sel) {
+        "1" { Disable-WinDebloat7FastStartup }
+        "2" { Disable-WinDebloat7AutoBitLocker }
+        "3" { Disable-WinDebloat7DeliveryOptimization }
+        "4" { Disable-WinDebloat7StorageSense }
+        "5" { Set-WinDebloat7UpdateBehavior -NoAutoReboot }
+        "6" { Set-WinDebloat7UpdateBehavior -NoEarlyUpdates }
+        "7" { Disable-WinDebloat7StickyKeysShortcut }
+        "8" { Disable-WinDebloat7ShareDragTray }
+        "9" { Disable-WinDebloat7FindMyDevice }
+        "10" { Disable-WinDebloat7ModernStandbyNetworking }
     }
     if ($sel) { Read-Host "Press Enter..." }
 }
@@ -199,6 +287,47 @@ function Show-AdvancedRemovalMenu {
 }
 
 
+function Show-ServicesMenu {
+    Show-WD7Header
+    Show-WD7Separator -Title "SERVICE OPTIMIZER" -Color Secondary
+
+    Write-WD7Host "  Preset-based service tuning (config/services.json):" -Color Info
+    Write-Host ""
+    Write-Host "  [1] Privacy     - Disable telemetry & diagnostic services" -ForegroundColor White
+    Write-Host "  [2] Performance - Trim background services (Search, Sensors, Maps)" -ForegroundColor White
+    Write-Host "  [3] Security    - Disable risky services (RemoteRegistry, UPnP)" -ForegroundColor White
+    Write-Host "  [4] Minimal     - Bare essentials (RetailDemo, Fax, WMP Sharing)" -ForegroundColor White
+    Write-Host "  [5] Gaming      - Trim Xbox services (for non-gamers)" -ForegroundColor White
+    Write-Host "  [V] View current service status" -ForegroundColor Gray
+
+    $sel = Read-Host "`nSelect option (or Enter to cancel)"
+
+    if ($sel -match '^[Vv]$') {
+        Write-WD7Host "`nQuerying services (this may take a moment)..." -Color Info
+        Get-WinDebloat7ServiceStatus | Sort-Object Category, Name |
+        Format-Table Name, Status, CurrentStartup, RecommendedStartup, Category -AutoSize | Out-Host
+        Read-Host "Press Enter..."
+        return
+    }
+
+    $preset = switch ($sel) {
+        "1" { "Privacy" }
+        "2" { "Performance" }
+        "3" { "Security" }
+        "4" { "Minimal" }
+        "5" { "Gaming" }
+        default { $null }
+    }
+
+    if ($preset) {
+        $confirm = Read-Host "Apply the '$preset' service preset now? [Y/N]"
+        if ($confirm -match '^[Yy]') {
+            Set-WinDebloat7Services -Preset $preset -Confirm:$false
+        }
+        Read-Host "Press Enter..."
+    }
+}
+
 function Show-ProfileSelection {
     Show-WD7Header
     Show-WD7Separator -Title "SELECT PROFILE" -Color Secondary
@@ -217,8 +346,8 @@ function Show-ProfileSelection {
     $sel = Read-Host "`nSelect Profile number"
     
     if ($sel -match "^[Bb]$") { return }
-    
-    if ($profileMap.ContainsKey([int]$sel)) {
+
+    if ($sel -match '^\d+$' -and $profileMap.ContainsKey([int]$sel)) {
         Invoke-Profile $profileMap[[int]$sel]
     }
     else {
@@ -238,13 +367,15 @@ function Invoke-Profile {
         
         # 1. Auto-Snapshot before changes
         Write-WD7Host "Creating safety snapshot..." -Color Info
-        New-WinDebloat7Snapshot -Name "Pre-$($config.metadata.name)" -Description "Before applying profile" | Out-Null
-        
+        New-WinDebloat7Snapshot -Name "Pre-$($config.metadata.name)" -Description "Before applying profile" -Encrypt | Out-Null
+
         # 2. Modules
         Remove-WinDebloat7Bloatware -Config $config
         Set-WinDebloat7Privacy -Config $config
         Set-WinDebloat7Performance -Config $config
-        
+        Set-WinDebloat7Network -Config $config
+        Install-WinDebloat7ProfileSoftware -Config $config
+
         Write-WD7Host "`n[✓] Optimization Complete!" -Color Success
         Read-Host "Press Enter to return to menu..."
         
@@ -284,9 +415,8 @@ function Show-SnapshotMenu {
     $c = Read-Host "Select"
     
     switch ($c) {
-        "C" { New-WinDebloat7Snapshot -Name "Manual-User" -Description "Created via Menu"; Start-Sleep -Seconds 1 }
-        "c" { New-WinDebloat7Snapshot -Name "Manual-User" -Description "Created via Menu"; Start-Sleep -Seconds 1 }
-        "R" { 
+        "C" { New-WinDebloat7Snapshot -Name "Manual-User" -Description "Created via Menu" | Out-Null; Start-Sleep -Seconds 1 }
+        "R" {
             $id = Read-Host "Enter Snapshot ID to restore"
             if ($id) { Restore-WinDebloat7Snapshot -SnapshotId $id }
             Read-Host "Press Enter..."
@@ -436,7 +566,7 @@ function Show-FeaturesMenu {
 
 function Show-IntegrationsMenu {
     Show-WD7Header
-    Show-WD7Separator -Title "THIRD PARTY TOOLS" -Color Phone
+    Show-WD7Separator -Title "THIRD PARTY TOOLS" -Color Warning
     
     Write-Host "  [1] O&O ShutUp10++ (Privacy)" -ForegroundColor White
     Write-Host "  [2] Malwarebytes AdwCleaner (Cleaning)" -ForegroundColor White

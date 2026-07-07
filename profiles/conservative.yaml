@@ -10,7 +10,7 @@ metadata:
 
 bloatware:
   removal_mode: "Custom"
-  remove_list:
+  custom_list:
     - "Microsoft.BingWeather"
     - "Microsoft.GetHelp"
     - "Microsoft.Getstarted"

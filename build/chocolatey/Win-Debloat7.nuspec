@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>win-debloat7</id>
-    <version>1.3.0</version>
+    <version>1.3.1</version>
     <packageSourceUrl>https://github.com/tomytate/Win-Debloat7</packageSourceUrl>
     <owners>tomytate</owners>
     <title>Win-Debloat7 (Premium)</title>
@@ -18,7 +18,7 @@
     <tags>win-debloat7 debloat windows11 optimize privacy powershell</tags>
     <summary>The Power User's Windows Optimization Platform</summary>
     <description>
-Win-Debloat7 is a modern, modular, and safe Windows debloating and optimization framework designed for PowerShell 7.5+.
+Win-Debloat7 is a modern, modular, and safe Windows debloating and optimization framework designed for PowerShell 7.6+.
 
 ### Features
 * **Debloat**: Remove pre-installed bloatware safely.
@@ -32,7 +32,7 @@ Win-Debloat7 is a modern, modular, and safe Windows debloating and optimization 
     </description>
     <releaseNotes>https://github.com/tomytate/Win-Debloat7/releases/tag/v1.3.0</releaseNotes>
     <dependencies>
-      <dependency id="powershell-core" version="7.5.0" />
+      <dependency id="powershell-core" version="7.6.0" />
     </dependencies>
   </metadata>
   <files>

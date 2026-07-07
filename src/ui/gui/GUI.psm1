@@ -8,7 +8,7 @@
 
 .NOTES
     Module: Win-Debloat7.UI.GUI
-    Version: 1.3.0
+    Version: 1.3.1
 #>
 
 #Requires -Version 7.6
@@ -26,8 +26,11 @@ Import-Module "$scriptRoot\..\..\modules\Bloatware\Bloatware.psm1" -Force -Error
 Import-Module "$scriptRoot\..\..\modules\Privacy\Privacy.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Performance\Performance.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Performance\Gaming.psm1" -Force -ErrorAction SilentlyContinue
+Import-Module "$scriptRoot\..\..\modules\Performance\Tweaks.psm1" -Force -ErrorAction SilentlyContinue
+Import-Module "$scriptRoot\..\..\modules\Performance\Services.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Drivers\Drivers.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Tweaks\UI.psm1" -Force -ErrorAction SilentlyContinue
+Import-Module "$scriptRoot\..\..\modules\Tweaks\System.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Software\Software.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Network\Network.psm1" -Force -ErrorAction SilentlyContinue
 Import-Module "$scriptRoot\..\..\modules\Privacy\Tasks.psm1" -Force -ErrorAction SilentlyContinue
@@ -62,9 +65,6 @@ function Show-WinDebloat7GUI {
         # Get controls
         $txtStatus = & $getCtrl "txtStatus"
 
-        # ═══════════════════════════════════════════════════════════════════════════════
-        # SIDEBAR NAVIGATION
-        # ═══════════════════════════════════════════════════════════════════════════════
         # ═══════════════════════════════════════════════════════════════════════════════
         # SIDEBAR NAVIGATION
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -111,33 +111,70 @@ function Show-WinDebloat7GUI {
             [System.Windows.Threading.Dispatcher]::PushFrame($frame)
         }
 
-        try {
-            # OS Info - Robust Version Detection
-            $os = Get-CimInstance Win32_OperatingSystem
-            $build = [int]$os.BuildNumber
+        # Total RAM is constant; capture once for the live-usage detail line
+        $ramTotalGB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 0)
 
-            # Detect Windows version based on build number
-            $verName = switch ($build) {
-                { $_ -ge 26200 } { "25H2"; break }
-                { $_ -ge 26100 } { "24H2"; break }
-                { $_ -ge 22631 } { "23H2"; break }
-                { $_ -ge 22621 } { "22H2"; break }
-                { $_ -ge 22000 } { "21H2"; break }
-                { $_ -ge 19045 } { "22H2"; break } # Win10
-                { $_ -ge 19044 } { "21H2"; break } # Win10
-                default { "" }
+        # ── Shared live-stats refresh ────────────────────────────────────────────
+        # Both the initial paint and the recurring timer call this exact block, so
+        # the RAM formula and privacy-score criteria live in ONE place (previously
+        # the scoring was duplicated and inconsistent between the two).
+        $refreshLiveStats = {
+            try {
+                # Live RAM usage from OS free/total counters (KB)
+                $osm = Get-CimInstance Win32_OperatingSystem
+                $totalMB = $osm.TotalVisibleMemorySize / 1KB
+                $freeMB = $osm.FreePhysicalMemory / 1KB
+                $usedGB = [math]::Round(($totalMB - $freeMB) / 1KB, 1)
+                $usedPct = if ($totalMB -gt 0) { [math]::Round((($totalMB - $freeMB) / $totalMB) * 100) } else { 0 }
+                $conns = (Get-NetTCPConnection -State Established -ErrorAction SilentlyContinue).Count
+                (& $getCtrl "txtRAM").Text = "$usedPct"
+                (& $getCtrl "txtRAMDetail").Text = "$usedGB / $ramTotalGB GB · $conns conns"
+                (& $getCtrl "txtRAM").Foreground =
+                if ($usedPct -ge 85) { [System.Windows.Media.Brushes]::OrangeRed }
+                elseif ($usedPct -ge 70) { [System.Windows.Media.Brushes]::Gold }
+                else { [System.Windows.Media.Brushes]::White }
+
+                # Privacy score via the single scoring function (criteria sum to 100)
+                $sysState = Get-WinDebloat7SystemState
+                $ps = Get-WinDebloat7PrivacyScore -State $sysState
+                $scoreBrush =
+                if ($ps.Score -ge 75) { [System.Windows.Media.Brushes]::LimeGreen }
+                elseif ($ps.Score -ge 40) { [System.Windows.Media.Brushes]::Gold }
+                else { [System.Windows.Media.Brushes]::OrangeRed }
+                (& $getCtrl "txtPrivacyScore").Text = "$($ps.Score)"
+                (& $getCtrl "txtPrivacyScore").Foreground = $scoreBrush
+                (& $getCtrl "txtPrivacyGrade").Text = "$($ps.Grade) · $($ps.Rating)"
+                (& $getCtrl "txtPrivacyGrade").Foreground = $scoreBrush
+
+                # Tooltip lists exactly which risks are costing points
+                $active = @($ps.Breakdown | Where-Object { $_.Active })
+                $tip = if ($active.Count -eq 0) { "Fully hardened - no active privacy risks." }
+                else { "Points lost (hover breakdown):`n" + (($active | ForEach-Object { "  - $($_.Name):  -$($_.Weight)" }) -join "`n") }
+                (& $getCtrl "txtPrivacyScore").ToolTip = $tip
+                (& $getCtrl "txtPrivacyGrade").ToolTip = $tip
+                (& $getCtrl "txtPrivacyLabel").ToolTip = $tip
+
+                # Status indicators (Telemetry / Copilot / Recall)
+                (& $getCtrl "txtTelemetryStatus").Text = if ($sysState.Telemetry) { "Enabled" } else { "Disabled" }
+                (& $getCtrl "indicatorTelemetry").Fill = if ($sysState.Telemetry) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
+                (& $getCtrl "txtCopilotStatus").Text = if ($sysState.Copilot) { "Enabled" } else { "Disabled" }
+                (& $getCtrl "indicatorCopilot").Fill = if ($sysState.Copilot) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
+                (& $getCtrl "txtRecallStatus").Text = if ($sysState.Recall) { "Enabled" } else { "Disabled" }
+                (& $getCtrl "indicatorRecall").Fill = if ($sysState.Recall) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
             }
+            catch {
+                Write-Verbose "Live stats refresh failed: $($_.Exception.Message)"
+            }
+        }
 
-            $osNameStr = $os.Caption -replace "Microsoft\s+", ""
-            if ($build -ge 22000 -and $osNameStr -notmatch "11") { $osNameStr = "Windows 11" } # Force 11 labels if CIM is stale
-
-            (& $getCtrl "txtOSName").Text = $osNameStr
-            (& $getCtrl "txtOSVersion").Text = "Build $build $verName"
-
-            # RAM Display (Updated format)
-            $connStats = (Get-NetTCPConnection -State Established -ErrorAction SilentlyContinue).Count
-            $ram = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
-            (& $getCtrl "txtRAM").Text = "$ram GB | $connStats Active Conns"
+        try {
+            # OS info via the shared version-detection module (single source of
+            # truth; the module now returns the correct feature-update label and
+            # edition, and no longer collapses every Win11 build to "21H2").
+            $ver = Get-WindowsVersionInfo -Force
+            (& $getCtrl "txtOSName").Text = $ver.FullName
+            $ubr = if ($ver.Ubr) { ".$($ver.Ubr)" } else { "" }
+            (& $getCtrl "txtOSVersion").Text = "$($ver.DisplayVersion) · Build $($ver.BuildNumber)$ubr"
 
             # Bloatware count - Async Implementation (Optimization)
             # Get-AppxPackage is slow, so we load a placeholder and update it in the background
@@ -159,10 +196,11 @@ function Show-WinDebloat7GUI {
                 param($patterns)
                 try {
                     Import-Module Appx -ErrorAction SilentlyContinue
-                    $apps = Get-AppxPackage -AllUsers -ErrorAction Stop
+                    $apps = @(Get-AppxPackage -AllUsers -ErrorAction Stop)
                     $count = 0
                     foreach ($p in $patterns) {
-                        $count += ($apps | Where-Object { $_.Name -like $p }).Count
+                        # PS 7.6: PSWhere() intrinsic skips the pipeline (faster on large collections)
+                        $count += $apps.PSWhere({ $_.Name -like $p }).Count
                     }
                     return $count
                 }
@@ -198,72 +236,45 @@ function Show-WinDebloat7GUI {
             # Privacy score calculation
             $sysState = Get-WinDebloat7SystemState
 
-            $privacyScore = 100
-            if ($sysState.Telemetry) { $privacyScore -= 25 }
-            if ($sysState.Copilot) { $privacyScore -= 15 }
-            if ($sysState.Recall) { $privacyScore -= 15 }
-            if ($sysState.ActivityHistory) { $privacyScore -= 10 }
-            if ($sysState.Location) { $privacyScore -= 10 }
-            if ($sysState.AdvertisingId) { $privacyScore -= 10 } # Assuming exists
+            # Sync tweak toggles with the live system state so "Apply" is a no-op
+            # unless the user actually changes something (prevents e.g. Windows
+            # Update being disabled just because a checkbox defaulted to unchecked)
+            $checkboxStateMap = @{
+                chkDarkTheme        = $sysState.DarkTheme
+                chkActivityHistory  = $sysState.ActivityHistory
+                chkBackgroundApps   = $sysState.BackgroundApps
+                chkClipboardHistory = $sysState.ClipboardHistory
+                chkHibernate        = $sysState.Hibernate
+                chkLocation         = $sysState.Location
+                chkCopilot          = $sysState.Copilot
+                chkRecall           = $sysState.Recall
+                chkWindowsUpdate    = $sysState.WindowsUpdate
+                chkTelemetry        = $sysState.Telemetry
+                chkGamingNetwork    = $sysState.GamingNetwork
+                chkGamingInput      = $sysState.GamingInput
+                chkGamingMMCSS      = $sysState.GamingMMCSS
+                chkUltimatePlan     = $sysState.UltimatePlan
+            }
+            foreach ($ctrlName in $checkboxStateMap.Keys) {
+                $ctrl = & $getCtrl $ctrlName
+                if ($ctrl) { $ctrl.IsChecked = [bool]$checkboxStateMap[$ctrlName] }
+            }
+            if ($sysState.UltimatePlan) {
+                $radUlt = & $getCtrl "radUltimate"
+                if ($radUlt) { $radUlt.IsChecked = $true }
+            }
 
-            $privacyScore = [Math]::Max(0, [Math]::Min(100, $privacyScore))
-
-            # Update score text
-            (& $getCtrl "txtPrivacyScore").Text = "$privacyScore"
-
-            # Update status indicators (Safe / Warning)
-            (& $getCtrl "txtTelemetryStatus").Text = if ($sysState.Telemetry) { "Enabled" } else { "Disabled" }
-            (& $getCtrl "indicatorTelemetry").Fill = if ($sysState.Telemetry) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-
-            (& $getCtrl "txtCopilotStatus").Text = if ($sysState.Copilot) { "Enabled" } else { "Disabled" }
-            (& $getCtrl "indicatorCopilot").Fill = if ($sysState.Copilot) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-
-            (& $getCtrl "txtRecallStatus").Text = if ($sysState.Recall) { "Enabled" } else { "Disabled" }
-            (& $getCtrl "indicatorRecall").Fill = if ($sysState.Recall) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-
+            # Paint the live stats (RAM, privacy score, indicators) via the shared block
+            & $refreshLiveStats
         }
         catch {
             Write-Warning "Dashboard Population Error: $($_.Exception.Message)"
         }
 
-        # 3.1 Real-time Monitoring Timer
+        # 3.1 Real-time Monitoring Timer — reuses the shared live-stats block
         $timer = [System.Windows.Threading.DispatcherTimer]::new()
-        $timer.Interval = [TimeSpan]::FromSeconds(15)
-        $timer.Add_Tick({
-                try {
-                    # Update Connections & Privacy Score (Background Check)
-                    $sysState = Get-WinDebloat7SystemState
-
-                    # Update RAM & Connections (Using cached RAM format)
-                    $conn = (Get-NetTCPConnection -State Established -ErrorAction SilentlyContinue).Count
-                    (& $getCtrl "txtRAM").Text = "$ram GB | $conn Active Conns"
-
-                    # Re-calculate score/status
-                    $pScore = 100
-                    if ($sysState.Telemetry) { $pScore -= 25 }
-                    if ($sysState.Copilot) { $pScore -= 15 }
-                    if ($sysState.Recall) { $pScore -= 15 }
-                    if ($sysState.ActivityHistory) { $pScore -= 10 }
-                    if ($sysState.Location) { $pScore -= 10 }
-                    if ($sysState.AdvertisingId) { $pScore -= 10 }
-                    $pScore = [Math]::Max(0, [Math]::Min(100, $pScore))
-
-                    (& $getCtrl "txtPrivacyScore").Text = "$pScore"
-
-                    (& $getCtrl "txtTelemetryStatus").Text = if ($sysState.Telemetry) { "Enabled" } else { "Disabled" }
-                    (& $getCtrl "indicatorTelemetry").Fill = if ($sysState.Telemetry) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-
-                    (& $getCtrl "txtCopilotStatus").Text = if ($sysState.Copilot) { "Enabled" } else { "Disabled" }
-                    (& $getCtrl "indicatorCopilot").Fill = if ($sysState.Copilot) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-
-                    (& $getCtrl "txtRecallStatus").Text = if ($sysState.Recall) { "Enabled" } else { "Disabled" }
-                    (& $getCtrl "indicatorRecall").Fill = if ($sysState.Recall) { [System.Windows.Media.Brushes]::Orange } else { [System.Windows.Media.Brushes]::LimeGreen }
-                }
-                catch {
-                    # Suppress UI update errors during closing/heavy load
-                    Write-Verbose "UI update suppressed: $($_.Exception.Message)"
-                }
-            })
+        $timer.Interval = [TimeSpan]::FromSeconds(5)
+        $timer.Add_Tick({ & $refreshLiveStats })
         $timer.Start()
 
         # Stop timer on close
@@ -278,7 +289,7 @@ function Show-WinDebloat7GUI {
                 [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
                     # 1. Safety Snapshot
-                    New-WinDebloat7Snapshot -Name "Auto-QuickOptimize" -Description "Created before Quick Optimize"
+                    New-WinDebloat7Snapshot -Name "Auto-QuickOptimize" -Description "Created before Quick Optimize" -Encrypt | Out-Null
 
                     # 2. Apply Profile
                     $txtStatus.Text = "Applying Optimization Profile..."
@@ -343,14 +354,17 @@ function Show-WinDebloat7GUI {
                     $clipVal = if ((& $getCtrl "chkClipboardHistory").IsChecked) { 1 } else { 0 }
                     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Clipboard" -Name "EnableClipboardHistory" -Value $clipVal -Force -ErrorAction SilentlyContinue
 
-                    # 4. Activity History & Location (Privacy Module)
+                    # 4. Activity History, Location & Telemetry (Privacy Module)
                     $disableActivity = -not (& $getCtrl "chkActivityHistory").IsChecked
                     $disableLocation = -not (& $getCtrl "chkLocation").IsChecked
                     $disableCopilot = -not (& $getCtrl "chkCopilot").IsChecked
                     $disableRecall = -not (& $getCtrl "chkRecall").IsChecked
+                    # Unchecked telemetry toggle = restrict to Security level; checked = leave as-is
+                    $telemetryLevel = if ((& $getCtrl "chkTelemetry").IsChecked) { $null } else { "Security" }
 
                     $config = [pscustomobject]@{
                         privacy = [pscustomobject]@{
+                            telemetry_level           = $telemetryLevel
                             disable_activity_history  = $disableActivity
                             disable_location_tracking = $disableLocation
                             disable_copilot           = $disableCopilot
@@ -407,8 +421,8 @@ function Show-WinDebloat7GUI {
                             Write-Log -Message "Set power plan to High Performance" -Level Info
                         }
                         elseif ((& $getCtrl "radUltimate").IsChecked) {
-                            Start-Process -FilePath "powercfg.exe" -ArgumentList "/s", "e9a42b02-d5df-448d-aa00-03f14749eb61" -Wait -NoNewWindow
-                            Write-Log -Message "Set power plan to Ultimate Performance" -Level Info
+                            # The hidden Ultimate scheme must be duplicated before activation
+                            Enable-WinDebloat7UltimatePower
                         }
                         else {
                             Start-Process -FilePath "powercfg.exe" -ArgumentList "/s", "381b4222-f694-41f0-9685-ff5bb260df2e" -Wait -NoNewWindow
@@ -437,12 +451,37 @@ function Show-WinDebloat7GUI {
                         }
 
                         if ((& $getCtrl "chkUltimatePlan").IsChecked) {
-                            # Duplicate Ultimate Plan attempt
-                            Start-Process -FilePath "powercfg.exe" -ArgumentList "/duplicatescheme", "e9a42b02-d5df-448d-aa00-03f14749eb61" -Wait -NoNewWindow
-                            Write-Log -Message "Duplicated Ultimate Performance power scheme" -Level Info
+                            Enable-WinDebloat7UltimatePower
                         }
 
                         $txtStatus.Text = "Performance Optimized!"
+                    }
+                    catch {
+                        $txtStatus.Text = "Error: $($_.Exception.Message)"
+                    }
+                    finally {
+                        [System.Windows.Input.Mouse]::OverrideCursor = $null
+                    }
+                })
+        }
+
+        # Service Optimizer preset (config/services.json)
+        $btnApplyServices = $window.FindName("btnApplyServices")
+        if ($btnApplyServices) {
+            $btnApplyServices.Add_Click({
+                    $presetItem = ($window.FindName("cmbServicePreset")).SelectedItem
+                    if (-not $presetItem) {
+                        $txtStatus.Text = "Select a service preset first."
+                        return
+                    }
+                    $preset = [string]$presetItem.Content
+
+                    $txtStatus.Text = "Applying '$preset' service preset..."
+                    & $updateGui
+                    [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
+                    try {
+                        Set-WinDebloat7Services -Preset $preset -Confirm:$false
+                        $txtStatus.Text = "'$preset' service preset applied!"
                     }
                     catch {
                         $txtStatus.Text = "Error: $($_.Exception.Message)"
@@ -463,6 +502,79 @@ function Show-WinDebloat7GUI {
                 try {
                     Add-WinDebloat7FirewallBlock -Confirm:$false
                     $txtStatus.Text = "Telemetry Blocked!"
+                }
+                catch {
+                    $txtStatus.Text = "Error: $($_.Exception.Message)"
+                }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
+                }
+            })
+
+        # System QoL tab — apply the checked one-way tweaks
+        $btnApplyQoL = $window.FindName("btnApplyQoL")
+        if ($btnApplyQoL) {
+            $btnApplyQoL.Add_Click({
+                    $txtStatus.Text = "Applying System QoL tweaks..."
+                    & $updateGui
+                    [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
+                    $applied = 0
+                    try {
+                        # Each checkbox maps to a one-way tweak; only checked ones run
+                        if ((& $getCtrl "chkQolFastStartup").IsChecked) { Disable-WinDebloat7FastStartup -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolBitlocker").IsChecked) { Disable-WinDebloat7AutoBitLocker -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolDeliveryOpt").IsChecked) { Disable-WinDebloat7DeliveryOptimization -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolStorageSense").IsChecked) { Disable-WinDebloat7StorageSense -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolNoAutoReboot").IsChecked) { Set-WinDebloat7UpdateBehavior -NoAutoReboot -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolNoEarlyUpdates").IsChecked) { Set-WinDebloat7UpdateBehavior -NoEarlyUpdates -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolModernStandby").IsChecked) { Disable-WinDebloat7ModernStandbyNetworking -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolFindMyDevice").IsChecked) { Disable-WinDebloat7FindMyDevice -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolStickyKeys").IsChecked) { Disable-WinDebloat7StickyKeysShortcut -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolWidgets").IsChecked) { Disable-WinDebloat7Widgets -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolChat").IsChecked) { Disable-WinDebloat7ChatTaskbar -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolTransparency").IsChecked) { Disable-WinDebloat7Transparency -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolSnapAssist").IsChecked) { Disable-WinDebloat7SnapAssist -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolStartAllApps").IsChecked) { Disable-WinDebloat7StartAllApps -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolFileExt").IsChecked) { Set-WinDebloat7Explorer -ShowFileExtensions -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolHiddenFiles").IsChecked) { Set-WinDebloat7Explorer -ShowHiddenFiles -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolHideOneDrive").IsChecked) { Set-WinDebloat7Explorer -HideOneDrive -Confirm:$false; $applied++ }
+                        if ((& $getCtrl "chkQolContextClean").IsChecked) { Set-WinDebloat7ContextMenuItems -HideShare -HideGiveAccessTo -HideIncludeInLibrary -Confirm:$false; $applied++ }
+
+                        $txtStatus.Text = if ($applied -gt 0) { "$applied System QoL tweak(s) applied! Restart Explorer to see UI changes." } else { "No QoL tweaks selected." }
+                    }
+                    catch {
+                        $txtStatus.Text = "Error: $($_.Exception.Message)"
+                    }
+                    finally {
+                        [System.Windows.Input.Mouse]::OverrideCursor = $null
+                    }
+                })
+        }
+
+        (& $getCtrl "btnDebloatSearch").Add_Click({
+                $txtStatus.Text = "Debloating Windows Search..."
+                & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
+                try {
+                    Set-WinDebloat7Search -DisableBingSearch -DisableSearchHighlights -DisableSearchHistory -Confirm:$false
+                    $txtStatus.Text = "Search debloated (Bing results, highlights, and history disabled)!"
+                }
+                catch {
+                    $txtStatus.Text = "Error: $($_.Exception.Message)"
+                }
+                finally {
+                    [System.Windows.Input.Mouse]::OverrideCursor = $null
+                }
+            })
+
+        (& $getCtrl "btnDisableSuggestions").Add_Click({
+                $txtStatus.Text = "Disabling Windows suggestions and ads..."
+                & $updateGui
+                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
+                try {
+                    Disable-WinDebloat7WindowsSuggestions -Confirm:$false
+                    Disable-WinDebloat7SettingsHome -Confirm:$false
+                    $txtStatus.Text = "Suggestions and ad surfaces disabled!"
                 }
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
@@ -512,12 +624,17 @@ function Show-WinDebloat7GUI {
             $essentials = Get-WinDebloat7EssentialsList
             $categoriesList = [System.Collections.ArrayList]@()
 
-            foreach ($catKey in $essentials.Keys) {
+            # Sorted for a stable category order (hashtable key order is not guaranteed);
+            # carry both provider IDs so Chocolatey-only apps install via fallback
+            foreach ($catKey in ($essentials.Keys | Sort-Object)) {
                 $appsList = [System.Collections.ArrayList]@()
                 foreach ($appDef in $essentials[$catKey].Apps) {
                     $appsList.Add([pscustomobject]@{
                             Name       = $appDef.Name
                             PackageId  = $appDef.Winget
+                            ChocoId    = $appDef.Choco
+                            MsstoreId  = $appDef.Msstore
+                            NpmId      = $appDef.Npm
                             IsSelected = $false
                         }) | Out-Null
                 }
@@ -532,35 +649,68 @@ function Show-WinDebloat7GUI {
             Write-Warning "Software list failed to load: $($_.Exception.Message)"
         }
 
+        # Live search filter: rebuilds the visible list; selections persist because
+        # filtered views reuse the same underlying app objects
+        $txtSearch = $window.FindName("txtSoftwareSearch")
+        if ($txtSearch) {
+            $txtSearch.Add_TextChanged({
+                    $filter = $txtSearch.Text
+                    if ([string]::IsNullOrWhiteSpace($filter)) {
+                        $icSoftware.ItemsSource = $categoriesList
+                        return
+                    }
+                    $filtered = [System.Collections.ArrayList]@()
+                    foreach ($cat in $categoriesList) {
+                        $matchApps = @($cat.Apps | Where-Object { $_.Name -like "*$filter*" })
+                        if ($matchApps.Count -gt 0) {
+                            $filtered.Add([pscustomobject]@{
+                                    CategoryName = $cat.CategoryName
+                                    Apps         = $matchApps
+                                }) | Out-Null
+                        }
+                    }
+                    $icSoftware.ItemsSource = $filtered
+                })
+        }
+
         # Select/Deselect All
         $btnSelectAll = $window.FindName("btnSelectAllApps")
         if ($btnSelectAll) {
             $btnSelectAll.Add_Click({
-                    foreach ($cat in $icSoftware.ItemsSource) {
+                    # Operates on the current view (respects an active search filter)
+                    $currentView = $icSoftware.ItemsSource
+                    foreach ($cat in $currentView) {
                         foreach ($app in $cat.Apps) { $app.IsSelected = $true }
                     }
-                    # Force refresh hack
+                    # Force refresh while preserving the filtered view
                     $icSoftware.ItemsSource = $null
-                    $icSoftware.ItemsSource = $categoriesList
+                    $icSoftware.ItemsSource = $currentView
                 })
         }
 
         $btnDeselectAll = $window.FindName("btnDeselectAllApps")
         if ($btnDeselectAll) {
             $btnDeselectAll.Add_Click({
-                    foreach ($cat in $icSoftware.ItemsSource) {
+                    $currentView = $icSoftware.ItemsSource
+                    foreach ($cat in $currentView) {
                         foreach ($app in $cat.Apps) { $app.IsSelected = $false }
                     }
                     $icSoftware.ItemsSource = $null
-                    $icSoftware.ItemsSource = $categoriesList
+                    $icSoftware.ItemsSource = $currentView
                 })
         }
 
         (& $getCtrl "btnInstallSoftware").Add_Click({
-                $selectedApps = [System.Collections.Generic.List[string]]::new()
-                foreach ($cat in $icSoftware.ItemsSource) {
+                # Pass full app objects (-Apps) so winget/Chocolatey fallback works,
+                # including apps that only exist on one package manager.
+                # Iterate the MASTER list so selections hidden by an active search
+                # filter are still included.
+                $selectedApps = @()
+                foreach ($cat in $categoriesList) {
                     foreach ($app in $cat.Apps) {
-                        if ($app.IsSelected) { $selectedApps.Add($app.PackageId) }
+                        if ($app.IsSelected) {
+                            $selectedApps += @{ Name = $app.Name; Winget = $app.PackageId; Choco = $app.ChocoId; Msstore = $app.MsstoreId; Npm = $app.NpmId }
+                        }
                     }
                 }
 
@@ -573,8 +723,8 @@ function Show-WinDebloat7GUI {
                 & $updateGui
                 [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
-                    Install-WinDebloat7Software -Packages $selectedApps.ToArray() -Quiet
-                    $txtStatus.Text = "Installation Complete!"
+                    $result = Install-WinDebloat7Software -Apps $selectedApps -Quiet
+                    $txtStatus.Text = "Installation Complete! $($result.Successful) installed, $($result.Failed) failed."
                 }
                 catch {
                     $txtStatus.Text = "Error: $($_.Exception.Message)"
@@ -622,12 +772,24 @@ function Show-WinDebloat7GUI {
         # ═══════════════════════════════════════════════════════════════════════════════
         # SNAPSHOTS TAB
         # ═══════════════════════════════════════════════════════════════════════════════
+
+        # Populate the snapshot list on startup (previously empty until a new one was created)
+        try {
+            $lstSnapshotsInit = & $getCtrl "lstSnapshots"
+            foreach ($snap in (Get-WinDebloat7Snapshot)) {
+                $lstSnapshotsInit.Items.Add("$($snap.Timestamp) - $($snap.Name) [$($snap.Id)]") | Out-Null
+            }
+        }
+        catch {
+            Write-Verbose "Could not populate snapshot list: $($_.Exception.Message)"
+        }
+
         (& $getCtrl "btnCreateSnapshot").Add_Click({
                 $txtStatus.Text = "Creating Snapshot..."
                 & $updateGui
                 [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
-                    New-WinDebloat7Snapshot -Name "GUI-Snapshot" -Description "Created via GUI"
+                    New-WinDebloat7Snapshot -Name "GUI-Snapshot" -Description "Created via GUI" -Encrypt | Out-Null
                     $txtStatus.Text = "Snapshot Created!"
 
                     # Refresh list
@@ -653,24 +815,21 @@ function Show-WinDebloat7GUI {
                     if ($lstSnapshots.SelectedItem) {
                         $txtStatus.Text = "Restoring Snapshot..."
                         & $updateGui
+                        [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                         try {
-                            [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
-                            try {
-                                # Extract ID from "Timestamp - Name [ID]" string
-                                if ($lstSnapshots.SelectedItem -match '\[(.*?)\]$') {
-                                    $snapId = $matches[1]
-                                    Restore-WinDebloat7Snapshot -SnapshotId $snapId -Confirm:$false
-                                    $txtStatus.Text = "System Restored Successfully!"
-                                }
-                            }
-                            catch {
-                                $txtStatus.Text = "Error: $($_.Exception.Message)"
-                            }
-                            finally {
-                                [System.Windows.Input.Mouse]::OverrideCursor = $null
+                            # Extract ID from "Timestamp - Name [ID]" string
+                            if ($lstSnapshots.SelectedItem -match '\[(.*?)\]$') {
+                                $snapId = $matches[1]
+                                Restore-WinDebloat7Snapshot -SnapshotId $snapId -Confirm:$false
+                                $txtStatus.Text = "System Restored Successfully!"
                             }
                         }
-                        catch { $txtStatus.Text = "Error: $($_.Exception.Message)" } # This catch handles errors from setting cursor or the inner try/finally block
+                        catch {
+                            $txtStatus.Text = "Error: $($_.Exception.Message)"
+                        }
+                        finally {
+                            [System.Windows.Input.Mouse]::OverrideCursor = $null
+                        }
                     }
                 })
         }
@@ -705,11 +864,26 @@ function Show-WinDebloat7GUI {
             })
 
         # 2. Maintenance Tools
+        (& $getCtrl "btnRestartExplorer").Add_Click({
+                $txtStatus.Text = "Restarting Explorer..."
+                & $updateGui
+                try {
+                    Restart-WinDebloat7Explorer -Confirm:$false
+                    $txtStatus.Text = "Explorer restarted."
+                }
+                catch {
+                    $txtStatus.Text = "Error: $($_.Exception.Message)"
+                }
+            })
+
         (& $getCtrl "btnUpdateDrivers").Add_Click({
                 $txtStatus.Text = "Launching Driver Update Center..."
                 & $updateGui
                 try {
-                    Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-Command", "Update-WinDebloat7Drivers -Method Interactive" -Verb RunAs
+                    # The spawned pwsh has no modules loaded - import the manifest first
+                    $manifestPath = (Resolve-Path (Join-Path $scriptRoot "..\..\..\Win-Debloat7.psd1")).Path
+                    $driverCmd = "Import-Module '$manifestPath' -Force; Update-WinDebloat7Drivers -Method Interactive"
+                    Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-NoExit", "-Command", $driverCmd -Verb RunAs
                     $txtStatus.Text = "Driver Update Center Launched!"
                 }
                 catch {

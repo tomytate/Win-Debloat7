@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Services
-    Version: 1.0.0
+    Version: 1.3.1
 #>
 
 #Requires -Version 7.6
@@ -37,10 +37,10 @@ function Set-WinDebloat7Services {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet("Privacy", "Performance", "Security", "Minimal", "Custom")]
+        [ValidateSet("Privacy", "Performance", "Security", "Minimal", "Gaming")]
         [string]$Preset,
 
-        [string]$ConfigPath = "$PSScriptRoot\..\..\..\..\config\services.json"
+        [string]$ConfigPath = "$PSScriptRoot\..\..\..\config\services.json"
     )
 
     # Load services configuration
@@ -145,7 +145,7 @@ function Get-WinDebloat7ServicePresets {
     [OutputType([string[]])]
     param()
 
-    return @("Privacy", "Performance", "Security", "Minimal")
+    return @("Privacy", "Performance", "Security", "Minimal", "Gaming")
 }
 
 function Get-WinDebloat7ServiceStatus {
@@ -159,7 +159,7 @@ function Get-WinDebloat7ServiceStatus {
     [CmdletBinding()]
     [OutputType([psobject[]])]
     param(
-        [string]$ConfigPath = "$PSScriptRoot\..\..\..\..\config\services.json"
+        [string]$ConfigPath = "$PSScriptRoot\..\..\..\config\services.json"
     )
 
     if (-not (Test-Path $ConfigPath)) {

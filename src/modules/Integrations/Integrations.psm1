@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Integrations
-    Version: 1.0.0
+    Version: 1.3.1
 #>
 
 function Invoke-WinDebloat7ShutUp10 {
@@ -78,11 +78,11 @@ function Update-WinDebloat7SDIO {
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param(
-        [string]$Path = "$env:SystemDrive\WinDebloat7_Tools\SDIO"
+        # Aligned with the rest of the app's tool storage (ProgramData)
+        [string]$Path = "$env:ProgramData\Win-Debloat7\Tools\SDIO"
     )
 
-    # SDIO URL often changes or requires parsing. Using a fixed prominent mirror for now.
-    # Note: SDIO is a large zip.
+    # Official rolling "latest" archive (verified live 2026-07-06)
     $url = "https://www.glenn.delahoy.com/downloads/sdio/SDIO_Latest.zip"
     $zip = "$env:TEMP\SDIO.zip"
     

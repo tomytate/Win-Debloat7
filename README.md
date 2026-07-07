@@ -14,7 +14,7 @@ Open source. Transparent. Reversible. Built on PowerShell 7.6+.
 [![GitHub Stars](https://img.shields.io/github/stars/tomytate/Win-Debloat7?style=for-the-badge&color=00D9FF)](https://github.com/tomytate/Win-Debloat7/stargazers)
 [![MIT License](https://img.shields.io/github/license/tomytate/Win-Debloat7?style=for-the-badge&color=00D9FF)](LICENSE)
 [![PowerShell 7.6+](https://img.shields.io/badge/PowerShell-7.6+-00D9FF?style=for-the-badge&logo=powershell)](https://github.com/PowerShell/PowerShell/releases)
-[![Pester Tests](https://img.shields.io/badge/Tests-35%2F35_Passed-00FF88?style=for-the-badge)](tests/)
+[![CI](https://img.shields.io/github/actions/workflow/status/tomytate/Win-Debloat7/ci.yml?style=for-the-badge&label=CI)](https://github.com/tomytate/Win-Debloat7/actions)
 
 **[⚡ Quick Install](#-quick-install) · [📖 Features](#-features-overview) · [🏗️ Profiles](docs/Profiles.md) · [📚 Wiki](docs/Home.md) · [🐛 Report Bug](https://github.com/tomytate/Win-Debloat7/issues)**
 
@@ -37,7 +37,8 @@ Open source. Transparent. Reversible. Built on PowerShell 7.6+.
 - [Privacy & AI Disablement](#-privacy--ai-disablement)
 - [Performance Optimization](#-performance-optimization)
 - [Network & DNS Configuration](#-network--dns-configuration)
-- [Windows 11 UI Customization](#-windows-11-ui-customization)
+- [Software Installer & AI Tools](#-software-installer--ai-tools)
+- [Windows 11 UI & System Customization](#-windows-11-ui--system-customization)
 - [Enterprise Deployment (Sysprep)](#-enterprise-deployment--sysprep)
 - [Safety & Rollback](#-safety--encrypted-rollback)
 - [Why Win-Debloat7?](#-why-win-debloat7-vs-alternatives)
@@ -55,16 +56,16 @@ Unlike legacy debloat scripts that blindly delete registry keys, Win-Debloat7 tr
 
 > **"It's like `terraform apply` for your Windows PC."**
 
-### Key Stats (v1.3.0)
+### Key Stats (v1.3.1)
 
 | Metric | Value |
 |--------|-------|
-| **Modules** | 28 registered |
-| **Functions** | 91 exported (Standard) |
-| **Bloatware Patterns** | 80+ apps detected |
-| **DNS Providers** | 10 (including family/security variants) |
-| **Service Presets** | 4 intelligent profiles |
-| **Test Coverage** | 35/35 Pester tests passed |
+| **Modules** | 29 registered |
+| **Functions** | 115 exported (Standard) |
+| **Bloatware Patterns** | 139 apps (tiered) |
+| **DNS Providers** | 11 (including family/security variants) |
+| **Service Presets** | 5 intelligent profiles |
+| **Test Coverage** | Full Pester suite + PSScriptAnalyzer on every push (CI) |
 | **PSScriptAnalyzer** | 0 errors |
 
 ---
@@ -93,7 +94,7 @@ iwr -useb https://raw.githubusercontent.com/tomytate/Win-Debloat7/main/setup-ext
    - **Win-Debloat7.exe** (Standard)
    - **Win-Debloat7-Extras.exe** (Extras)
 2. Right-click → **Run as Administrator**.
-3. The launcher auto-installs PowerShell 7.6 if missing.
+3. The launcher verifies your PowerShell version and auto-installs PowerShell 7.6 LTS (currently 7.6.3) if missing or outdated.
 </details>
 
 <details>
@@ -112,24 +113,27 @@ cd Win-Debloat7
 </pre>
 </details>
 
-**Requirements:** Windows 10 (22H2+) or Windows 11 · PowerShell 7.6+ · Administrator privileges
+**Requirements:** Windows 10 (22H2+) or Windows 11 · PowerShell 7.6+ LTS (auto-installed by the EXE) · Administrator privileges
 
 ---
 
 ## 📖 Features Overview
 
-Win-Debloat7 ships with **91 functions** across **28 modules**, organized into 9 feature areas:
+Win-Debloat7 ships with **115 functions** across **29 modules**, organized into 12 feature areas:
 
 | Feature | Description | Key Functions |
 |---------|-------------|---------------|
-| 🧹 **Bloatware Removal** | Remove 80+ pre-installed apps with O(N) regex | `Remove-WinDebloat7Bloatware` |
+| 🧹 **Bloatware Removal** | Remove 139 tiered apps with O(N) regex | `Remove-WinDebloat7Bloatware` |
 | 🔒 **Privacy Hardening** | Disable telemetry, block tracking domains | `Set-WinDebloat7Privacy` |
 | 🤖 **AI Disablement** | Neutralize Copilot, Recall, Click-to-Do | `Disable-WinDebloat7AIRecall` |
 | ⚡ **Performance Tuning** | Ultimate power plan, service presets | `Set-WinDebloat7Performance` |
-| 🌐 **Network & DNS** | 10 DNS providers, IPv6 toggle | `Set-WinDebloat7DNS` |
+| 🌐 **Network & DNS** | 11 DNS providers, IPv6 toggle | `Set-WinDebloat7DNS` |
 | 🎮 **Gaming Mode** | Nagle's algorithm, Game DVR, GPU priority | `Set-WinDebloat7Gaming` |
-| 🖥️ **UI Customization** | Taskbar, context menu, Start Menu tweaks | `Set-WinDebloat7TaskbarAlignment` |
+| 📦 **Software Installer** | 175 curated apps (winget/choco/Store/npm) incl. AI CLIs | `Install-WinDebloat7Essentials` |
+| 🖥️ **UI Customization** | Taskbar, context menu, Explorer, search, suggestions | `Set-WinDebloat7TaskbarTweaks` |
+| 🧰 **System QoL** | Fast Startup, auto-BitLocker, Widgets, Storage Sense | `Disable-WinDebloat7WindowsSuggestions` |
 | 🔧 **System Repair** | 4-step industrial repair sequence | `Repair-WinDebloat7System` |
+| 🩺 **Live Dashboard** | Windows version, graded privacy score, live RAM | `Get-WinDebloat7PrivacyScore` |
 | 🏢 **Enterprise (Sysprep)** | OEM image deployment, headless mode | `Invoke-WinDebloat7SysprepDefaults` |
 
 ---
@@ -166,7 +170,7 @@ Removes pre-installed Appx packages using **O(N) regex matching** (50x faster th
 ### Telemetry Blocking
 - **DiagTrack** service disabled (Connected User Experiences)
 - **WaaSMedicSvc** neutralized
-- **100+ telemetry domains** blocked via hosts file
+- **45 telemetry domains** blocked via Windows Defender Firewall (resolved to IPs)
 - **Advertising ID** reset and disabled
 - **Telemetry scheduled tasks** disabled
 
@@ -191,14 +195,15 @@ Completely neutralizes Microsoft's AI integration features added in Windows 11 2
 - **Plan Duplication**: Clone the plan for custom modifications
 
 ### Service Optimization
-4 intelligent presets driven by `config/services.json`:
+5 intelligent presets driven by `config/services.json`:
 
 | Preset | Purpose | Services Affected |
 |--------|---------|-------------------|
 | **Privacy** | Disable telemetry services | DiagTrack, dmwappushservice, WaaSMedicSvc |
 | **Performance** | Disable background services | SysMain, WSearch, Fax, PrintWorkflow |
 | **Security** | Harden attack surface | RemoteRegistry, SMB1, NetBIOS |
-| **Minimal** | Bare essentials only | Combined Privacy + Performance |
+| **Minimal** | Bare essentials only | RetailDemo, Fax, WMPNetworkSvc, AJRouter |
+| **Gaming** | Trim Xbox services (non-gamers) | XblAuthManager, XblGameSave, XboxNetApiSvc |
 
 ### Gaming Tweaks
 - Disable **Nagle's Algorithm** (TCPNoDelay = 1)
@@ -221,6 +226,7 @@ Set your DNS provider in one command. Full database stored in `config/dns.json`.
 | Google | 8.8.8.8 | 8.8.4.4 | Standard |
 | OpenDNS | 208.67.222.222 | 208.67.220.220 | Standard (Cisco) |
 | Quad9 | 9.9.9.9 | 149.112.112.112 | Security |
+| NextDNS | 45.90.28.0 | 45.90.30.0 | Customizable |
 | AdGuard | 94.140.14.14 | 94.140.15.15 | Ad Blocking |
 | AdGuard Family | 94.140.14.15 | 94.140.15.16 | Family Safe |
 | CleanBrowsing Security | 185.228.168.9 | 185.228.169.9 | Security |
@@ -239,16 +245,41 @@ Set-WinDebloat7DNS -Provider Custom -CustomPrimary "1.2.3.4" -CustomSecondary "5
 
 ---
 
-## 🖥️ Windows 11 UI Customization
+## 📦 Software Installer & AI Tools
+
+A curated catalog of **175 apps** across **12 categories**, installable from the GUI (live search) or TUI. Every package ID is validated against live sources, and a monthly CI job re-checks them so nothing rots. Each app can install via **winget → Chocolatey → Microsoft Store → npm**, whichever channel actually carries it — with automatic fallback and package-manager provisioning.
+
+Includes a dedicated **AI Assistants & CLIs** category:
+
+| Type | Apps |
+|------|------|
+| **AI CLIs** | Claude Code, Gemini CLI, OpenAI Codex, GitHub Copilot CLI |
+| **Desktop assistants** | Claude Desktop, ChatGPT, Microsoft Copilot, Perplexity (+ Comet browser) |
+| **Multi-model / local LLMs** | Cherry Studio, Chatbox, Msty, Ollama, LM Studio, Jan, GPT4All |
+
+```powershell
+# Install a whole category, or specific apps
+Install-WinDebloat7Essentials -Categories AITools, DevTools
+
+# Profiles can install AND uninstall software
+software:
+  install_list:   [ "Anthropic.ClaudeCode", "Mozilla.Firefox" ]
+  uninstall_list: [ "Microsoft.Teams" ]
+```
+
+---
+
+## 🖥️ Windows 11 UI & System Customization
 
 | Tweak | Function | Options |
 |-------|----------|---------|
-| **Taskbar Alignment** | `Set-WinDebloat7TaskbarAlignment` | Left, Center |
-| **Context Menu** | `Set-WinDebloat7ContextMenu` | Classic (Win10), Modern (Win11) |
-| **Explorer** | `Set-WinDebloat7Explorer` | Hide Gallery, Hide Home |
-| **Start Menu** | `Set-WinDebloat7StartMenu` | Disable Recommended section |
-| **Desktop Ads** | `Disable-WinDebloat7DesktopSpotlight` | Remove Spotlight ads |
-| **Settings Ads** | `Disable-WinDebloat7Settings365Ads` | Remove M365 promotions |
+| **Taskbar** | `Set-WinDebloat7TaskbarAlignment` / `Set-WinDebloat7TaskbarTweaks` | Alignment, search modes, Task View, Widgets, Chat, End Task |
+| **Context Menu** | `Set-WinDebloat7ContextMenu` / `Set-WinDebloat7ContextMenuItems` | Classic/Modern, remove Share / Give access / Include in library |
+| **Explorer** | `Set-WinDebloat7Explorer` | Hide Gallery/Home/OneDrive, show extensions & hidden files, landing page |
+| **Search** | `Set-WinDebloat7Search` | Remove Bing/Cortana, Search Highlights, history |
+| **Suggestions & Ads** | `Disable-WinDebloat7WindowsSuggestions` | Kill Start/Settings/lock-screen suggestions, promoted-app installs |
+| **System QoL** | `Disable-WinDebloat7FastStartup` … | Fast Startup, auto-BitLocker, Delivery Optimization, Storage Sense, transparency, Snap Assist |
+| **Desktop/Settings Ads** | `Disable-WinDebloat7DesktopSpotlight` | Remove Spotlight & M365 promotions |
 
 ---
 
@@ -276,7 +307,7 @@ performance:
 
 ```powershell
 # Headless deployment (for RMM tools like Intune, SCCM, PDQ)
-./Win-Debloat7.exe -Profile my-baseline.yaml -Unattended
+./Win-Debloat7.exe -ProfileFile my-baseline.yaml -Unattended
 ```
 
 ### Sysprep / OEM Support
@@ -299,7 +330,7 @@ We know debloating can be risky. Win-Debloat7 is built with **enterprise-grade s
 | **Bypass 24h Limit** | Creates snapshots without the Windows "1 per day" restriction |
 | **Non-Destructive** | Standard edition never touches Store/Update unless explicitly asked |
 | **Structured Logs** | Every action logged to `C:\ProgramData\Win-Debloat7\Logs` |
-| **Pester Verified** | 35/35 compliance tests passed on every release |
+| **CI Verified** | Pester suite + PSScriptAnalyzer run on every push |
 
 ---
 
@@ -311,12 +342,13 @@ We know debloating can be risky. Win-Debloat7 is built with **enterprise-grade s
 | **Config as Code (YAML)** | ✅ | ❌ | ❌ | ❌ |
 | **Encrypted Rollback** | ✅ DPAPI | ❌ | ⚠️ Manual | ⚠️ Manual |
 | **AI Disablement Suite** | ✅ 6 features | ⚠️ Partial | ⚠️ Partial | ⚠️ Partial |
-| **Service Presets (JSON)** | ✅ 4 presets | ❌ | ❌ | ❌ |
+| **Service Presets (JSON)** | ✅ 5 presets | ❌ | ❌ | ❌ |
 | **Hardware Detection** | ✅ RAM/CPU/GPU | ❌ | ❌ | ❌ |
+| **Software Installer** | ✅ 175 apps + AI CLIs | ✅ Curated | ❌ | ❌ |
 | **GUI + TUI** | ✅ Both | ✅ GUI | ✅ GUI | ❌ CLI only |
 | **Sysprep / OEM** | ✅ | ❌ | ❌ | ❌ |
 | **Unattended Deploy** | ✅ | ⚠️ Limited | ❌ | ⚠️ Limited |
-| **DNS Management** | ✅ 10 providers | ❌ | ❌ | ❌ |
+| **DNS Management** | ✅ 11 providers | ❌ | ❌ | ❌ |
 
 ---
 
@@ -335,7 +367,7 @@ We know debloating can be risky. Win-Debloat7 is built with **enterprise-grade s
 - 🔓 **100% Open Source**: No compiled binaries in Standard edition.
 - 📋 **Structured Logs**: Every action logged with timestamps and severity levels.
 - 🔐 **Encrypted Snapshots**: Rollback state stored with Windows DPAPI.
-- 🧪 **Verified**: 35/35 Pester tests + 0 PSScriptAnalyzer errors on every release.
+- 🧪 **Verified**: Pester compliance suite + PSScriptAnalyzer (0 errors) enforced by CI.
 
 > **If Standard Edition triggers AV warnings, [report it immediately](https://github.com/tomytate/Win-Debloat7/issues) as a false positive.**
 
@@ -346,7 +378,7 @@ We know debloating can be risky. Win-Debloat7 is built with **enterprise-grade s
 <details>
 <summary><b>Is Win-Debloat7 safe to use?</b></summary>
 <br>
-Yes. The Standard edition uses only official PowerShell APIs and Group Policy modifications. Every change creates an encrypted snapshot for instant rollback. The codebase passes 35/35 Pester compliance tests.
+Yes. The Standard edition uses only official PowerShell APIs and Group Policy modifications. Every change creates an encrypted snapshot for instant rollback. The codebase is verified by a Pester compliance suite and PSScriptAnalyzer in CI.
 </details>
 
 <details>
@@ -370,7 +402,7 @@ Yes. Win-Debloat7 supports Windows 10 (22H2+) and Windows 11 (all versions throu
 <details>
 <summary><b>Can I use this in an enterprise / Intune / SCCM deployment?</b></summary>
 <br>
-Yes. Use <code>-Profile config.yaml -Unattended</code> for headless deployment via any RMM tool. The Sysprep module (<code>Invoke-WinDebloat7SysprepDefaults</code>) applies settings to the Default User hive for OEM image preparation.
+Yes. Use <code>-ProfileFile config.yaml -Unattended</code> for headless deployment via any RMM tool. The Sysprep module (<code>Invoke-WinDebloat7SysprepDefaults</code>) applies settings to the Default User hive for OEM image preparation.
 </details>
 
 <details>

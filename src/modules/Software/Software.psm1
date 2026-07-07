@@ -8,10 +8,9 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Software
-    Version: 1.3.0
-    
+    Version: 1.3.1
 .LINK
-    https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-75
+    https://learn.microsoft.com/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
 
 #Requires -Version 7.6
@@ -38,10 +37,10 @@ function Test-PackageManager {
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet("Winget", "Chocolatey")]
+        [ValidateSet("Winget", "Chocolatey", "Npm", "Msstore")]
         [string]$Name
     )
-    
+
     switch ($Name) {
         "Winget" {
             try {
@@ -61,6 +60,15 @@ function Test-PackageManager {
                 return $false
             }
         }
+        "Npm" {
+            if (Get-Command npm -ErrorAction SilentlyContinue) { return $true }
+            # PATH may be stale right after a Node.js install
+            return (Test-Path (Join-Path $env:ProgramFiles "nodejs\npm.cmd"))
+        }
+        "Msstore" {
+            # Microsoft Store installs ride the winget CLI (--source msstore)
+            return [bool](Get-Command winget -ErrorAction SilentlyContinue)
+        }
     }
     return $false
 }
@@ -70,8 +78,8 @@ function Test-PackageManager {
     Installs a package manager if not present.
     
 .PARAMETER Name
-    Package manager to install: Winget or Chocolatey.
-    
+    Package manager to install: Winget, Chocolatey, or Npm (installs Node.js LTS).
+
 .PARAMETER Force
     Skip confirmation prompt.
 #>
@@ -80,12 +88,14 @@ function Install-PackageManager {
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet("Winget", "Chocolatey")]
+        [ValidateSet("Winget", "Chocolatey", "Npm", "Msstore")]
         [string]$Name,
-        
+
         [switch]$Force
     )
     
+    if ($Name -eq "Msstore") { $Name = "Winget" } # Store installs just need winget
+
     if (Test-PackageManager -Name $Name) {
         Write-Log -Message "$Name is already installed." -Level Info
         return $true
@@ -148,8 +158,26 @@ function Install-PackageManager {
                 return $false
             }
         }
+        "Npm" {
+            Write-Log -Message "Installing Node.js LTS (provides npm)..." -Level Info
+            try {
+                if ($PSCmdlet.ShouldProcess("Node.js LTS", "Install via winget")) {
+                    $exitCode = Invoke-WD7PackageInstall -Provider Winget -PackageId "OpenJS.NodeJS.LTS" -Quiet
+                    if ($exitCode -eq 0 -and (Test-PackageManager -Name Npm)) {
+                        Write-Log -Message "Node.js LTS installed successfully." -Level Success
+                        return $true
+                    }
+                    Write-Log -Message "Node.js installation failed (Exit: $exitCode)." -Level Error
+                    return $false
+                }
+            }
+            catch {
+                Write-Log -Message "Failed to install Node.js: $($_.Exception.Message)" -Level Error
+                return $false
+            }
+        }
     }
-    
+
     return $false
 }
 
@@ -171,6 +199,10 @@ $Script:EssentialsApps = @{
             @{ Name = "Opera GX"; Winget = "Opera.OperaGX"; Choco = "opera-gx" }
             @{ Name = "LibreWolf"; Winget = "LibreWolf.LibreWolf"; Choco = "librewolf" }
             @{ Name = "Tor Browser"; Winget = "TorProject.TorBrowser"; Choco = "tor-browser" }
+            @{ Name = "Arc Browser"; Winget = "TheBrowserCompany.Arc"; Choco = "" }
+            @{ Name = "Zen Browser"; Winget = "Zen-Team.Zen-Browser"; Choco = "" }
+            @{ Name = "Waterfox"; Winget = "Waterfox.Waterfox"; Choco = "waterfox" }
+            @{ Name = "Floorp"; Winget = "Ablaze.Floorp"; Choco = "floorp" }
         )
     }
     
@@ -187,6 +219,8 @@ $Script:EssentialsApps = @{
             @{ Name = "Node.js LTS"; Winget = "OpenJS.NodeJS.LTS"; Choco = "nodejs-lts" }
             @{ Name = "Python 3.12"; Winget = "Python.Python.3.12"; Choco = "python312" }
             @{ Name = "DirectX Runtime"; Winget = ""; Choco = "directx" }
+            @{ Name = ".NET 10 Desktop Runtime"; Winget = "Microsoft.DotNet.DesktopRuntime.10"; Choco = "dotnet-10.0-desktopruntime" }
+            @{ Name = "Python 3.13"; Winget = "Python.Python.3.13"; Choco = "python313" }
         )
     }
     
@@ -198,18 +232,28 @@ $Script:EssentialsApps = @{
             @{ Name = "WinRAR"; Winget = "RARLab.WinRAR"; Choco = "winrar" }
             @{ Name = "Everything Search"; Winget = "voidtools.Everything"; Choco = "everything" }
             @{ Name = "PowerToys"; Winget = "Microsoft.PowerToys"; Choco = "powertoys" }
-            @{ Name = "Sysinternals Suite"; Winget = "Microsoft.Sysinternals"; Choco = "sysinternals" }
+            @{ Name = "Sysinternals Suite"; Winget = "Microsoft.Sysinternals.Suite"; Choco = "sysinternals" }
             @{ Name = "Process Explorer"; Winget = "Microsoft.Sysinternals.ProcessExplorer"; Choco = "procexp" }
             @{ Name = "HWiNFO"; Winget = "REALiX.HWiNFO"; Choco = "hwinfo" }
             @{ Name = "CPU-Z"; Winget = "CPUID.CPU-Z"; Choco = "cpu-z" }
             @{ Name = "GPU-Z"; Winget = "TechPowerUp.GPU-Z"; Choco = "gpu-z" }
             @{ Name = "CrystalDiskInfo"; Winget = "CrystalDewWorld.CrystalDiskInfo"; Choco = "crystaldiskinfo" }
-            @{ Name = "TreeSize Free"; Winget = "JAMSoftware.TreeSizeFree"; Choco = "treesizefree" }
-            @{ Name = "WizTree"; Winget = "NimbleWorks.WizTree"; Choco = "wiztree" }
+            @{ Name = "TreeSize Free"; Winget = "JAMSoftware.TreeSize.Free"; Choco = "treesizefree" }
+            @{ Name = "WizTree"; Winget = "AntibodySoftware.WizTree"; Choco = "wiztree" }
             @{ Name = "Revo Uninstaller"; Winget = "RevoUninstaller.RevoUninstaller"; Choco = "revo-uninstaller" }
             @{ Name = "BleachBit"; Winget = "BleachBit.BleachBit"; Choco = "bleachbit" }
             @{ Name = "Rufus"; Winget = "Rufus.Rufus"; Choco = "rufus" }
             @{ Name = "balenaEtcher"; Winget = "Balena.Etcher"; Choco = "etcher" }
+            @{ Name = "UniGetUI (winget GUI)"; Winget = "Devolutions.UniGetUI"; Choco = "wingetui" }
+            @{ Name = "NanaZip"; Winget = "M2Team.NanaZip"; Choco = "nanazip" }
+            @{ Name = "FanControl"; Winget = "Rem0o.FanControl"; Choco = "" }
+            @{ Name = "CrystalDiskMark"; Winget = "CrystalDewWorld.CrystalDiskMark"; Choco = "crystaldiskmark" }
+            @{ Name = "EarTrumpet"; Winget = "File-New-Project.EarTrumpet"; Choco = "eartrumpet" }
+            @{ Name = "Twinkle Tray"; Winget = "xanderfrangos.twinkletray"; Choco = "twinkle-tray" }
+            @{ Name = "AutoHotkey"; Winget = "AutoHotkey.AutoHotkey"; Choco = "autohotkey" }
+            @{ Name = "Flow Launcher"; Winget = "Flow-Launcher.Flow-Launcher"; Choco = "flow-launcher" }
+            @{ Name = "Ditto Clipboard"; Winget = "Ditto.Ditto"; Choco = "ditto" }
+            @{ Name = "LocalSend"; Winget = "LocalSend.LocalSend"; Choco = "localsend" }
         )
     }
     
@@ -232,6 +276,12 @@ $Script:EssentialsApps = @{
             @{ Name = "Krita"; Winget = "KDE.Krita"; Choco = "krita" }
             @{ Name = "Inkscape"; Winget = "Inkscape.Inkscape"; Choco = "inkscape" }
             @{ Name = "Blender"; Winget = "BlenderFoundation.Blender"; Choco = "blender" }
+            @{ Name = "paint.net"; Winget = "dotPDN.PaintDotNet"; Choco = "paint.net" }
+            @{ Name = "Shotcut"; Winget = "Meltytech.Shotcut"; Choco = "shotcut" }
+            @{ Name = "Kdenlive"; Winget = "KDE.Kdenlive"; Choco = "kdenlive" }
+            @{ Name = "Greenshot"; Winget = "Greenshot.Greenshot"; Choco = "greenshot" }
+            @{ Name = "Plex"; Winget = "Plex.Plex"; Choco = "plex" }
+            @{ Name = "Jellyfin Media Player"; Winget = "Jellyfin.JellyfinMediaPlayer"; Choco = "jellyfin-media-player" }
         )
     }
     
@@ -246,8 +296,9 @@ $Script:EssentialsApps = @{
             @{ Name = "Zoom"; Winget = "Zoom.Zoom"; Choco = "zoom" }
             @{ Name = "Telegram"; Winget = "Telegram.TelegramDesktop"; Choco = "telegram" }
             @{ Name = "Signal"; Winget = "OpenWhisperSystems.Signal"; Choco = "signal" }
-            @{ Name = "WhatsApp"; Winget = "WhatsApp.WhatsApp"; Choco = "whatsapp" }
             @{ Name = "Thunderbird"; Winget = "Mozilla.Thunderbird"; Choco = "thunderbird" }
+            @{ Name = "Element (Matrix)"; Winget = "Element.Element"; Choco = "element-desktop" }
+            @{ Name = "TeamSpeak"; Winget = "TeamSpeakSystems.TeamSpeakClient"; Choco = "teamspeak" }
         )
     }
     
@@ -258,11 +309,15 @@ $Script:EssentialsApps = @{
             @{ Name = "Bitwarden"; Winget = "Bitwarden.Bitwarden"; Choco = "bitwarden" }
             @{ Name = "KeePassXC"; Winget = "KeePassXCTeam.KeePassXC"; Choco = "keepassxc" }
             @{ Name = "Malwarebytes"; Winget = "Malwarebytes.Malwarebytes"; Choco = "malwarebytes" }
-            @{ Name = "ProtonVPN"; Winget = "ProtonTechnologies.ProtonVPN"; Choco = "protonvpn" }
-            @{ Name = "Mullvad VPN"; Winget = "MullvadVPN.MullvadVPN"; Choco = "mullvad-vpn" }
+            @{ Name = "ProtonVPN"; Winget = "Proton.ProtonVPN"; Choco = "protonvpn" }
+            @{ Name = "Mullvad VPN"; Winget = "MullvadVPN.MullvadVPN"; Choco = "mullvad-app" }
             @{ Name = "WireGuard"; Winget = "WireGuard.WireGuard"; Choco = "wireguard" }
             @{ Name = "VeraCrypt"; Winget = "IDRIX.VeraCrypt"; Choco = "veracrypt" }
             @{ Name = "Gpg4win"; Winget = "GnuPG.Gpg4win"; Choco = "gpg4win" }
+            @{ Name = "KeePass"; Winget = "DominikReichl.KeePass"; Choco = "keepass" }
+            @{ Name = "Cryptomator"; Winget = "Cryptomator.Cryptomator"; Choco = "cryptomator" }
+            @{ Name = "NordVPN"; Winget = "NordSecurity.NordVPN"; Choco = "nordvpn" }
+            @{ Name = "AdGuard"; Winget = "AdGuard.AdGuard"; Choco = "" }
         )
     }
     
@@ -283,10 +338,17 @@ $Script:EssentialsApps = @{
             @{ Name = "Docker Desktop"; Winget = "Docker.DockerDesktop"; Choco = "docker-desktop" }
             @{ Name = "Postman"; Winget = "Postman.Postman"; Choco = "postman" }
             @{ Name = "HeidiSQL"; Winget = "HeidiSQL.HeidiSQL"; Choco = "heidisql" }
-            @{ Name = "DBeaver"; Winget = "dbeaver.dbeaver"; Choco = "dbeaver" }
+            @{ Name = "DBeaver"; Winget = "DBeaver.DBeaver.Community"; Choco = "dbeaver" }
             @{ Name = "WinSCP"; Winget = "WinSCP.WinSCP"; Choco = "winscp" }
             @{ Name = "PuTTY"; Winget = "PuTTY.PuTTY"; Choco = "putty" }
-            @{ Name = "FileZilla"; Winget = "TimKosse.FileZilla.Client"; Choco = "filezilla" }
+            @{ Name = "FileZilla"; Winget = ""; Choco = "filezilla" }
+            @{ Name = "GitHub CLI"; Winget = "GitHub.cli"; Choco = "gh" }
+            @{ Name = "Oh My Posh"; Winget = "JanDeDobbeleer.OhMyPosh"; Choco = "oh-my-posh" }
+            @{ Name = "Neovim"; Winget = "Neovim.Neovim"; Choco = "neovim" }
+            @{ Name = "Go"; Winget = "GoLang.Go"; Choco = "golang" }
+            @{ Name = "Rust (rustup)"; Winget = "Rustlang.Rustup"; Choco = "rustup.install" }
+            @{ Name = "Insomnia"; Winget = "Insomnia.Insomnia"; Choco = "insomnia-rest-api-client" }
+            @{ Name = "Cursor"; Winget = "Anysphere.Cursor"; Choco = "" }
         )
     }
     
@@ -299,11 +361,15 @@ $Script:EssentialsApps = @{
             @{ Name = "GOG Galaxy"; Winget = "GOG.Galaxy"; Choco = "goggalaxy" }
             @{ Name = "EA App"; Winget = "ElectronicArts.EADesktop"; Choco = "ea-app" }
             @{ Name = "Ubisoft Connect"; Winget = "Ubisoft.Connect"; Choco = "ubisoft-connect" }
-            @{ Name = "Battle.net"; Winget = "Blizzard.BattleNet"; Choco = "battle.net" }
+            @{ Name = "Battle.net"; Winget = "Blizzard.BattleNet"; Choco = "" }
             @{ Name = "Playnite"; Winget = "Playnite.Playnite"; Choco = "playnite" }
-            @{ Name = "Heroic Games Launcher"; Winget = "HeroicGamesLauncher.HeroicGamesLauncher"; Choco = "heroic" }
+            @{ Name = "Heroic Games Launcher"; Winget = "HeroicGamesLauncher.HeroicGamesLauncher"; Choco = "heroic-games-launcher" }
             @{ Name = "MSI Afterburner"; Winget = "Guru3D.Afterburner"; Choco = "msiafterburner" }
-            @{ Name = "RTSS"; Winget = "Guru3D.RTSS"; Choco = "rtss" }
+            @{ Name = "RTSS"; Winget = "Guru3D.RTSS"; Choco = "" }
+            @{ Name = "Prism Launcher"; Winget = "PrismLauncher.PrismLauncher"; Choco = "prismlauncher" }
+            @{ Name = "Parsec"; Winget = "Parsec.Parsec"; Choco = "parsec" }
+            @{ Name = "Moonlight (game streaming)"; Winget = "MoonlightGameStreamingProject.Moonlight"; Choco = "moonlight-qt" }
+            @{ Name = "Sunshine (game host)"; Winget = "LizardByte.Sunshine"; Choco = "sunshine" }
         )
     }
     
@@ -321,6 +387,10 @@ $Script:EssentialsApps = @{
             @{ Name = "Foxit Reader"; Winget = "Foxit.FoxitReader"; Choco = "foxitreader" }
             @{ Name = "SumatraPDF"; Winget = "SumatraPDF.SumatraPDF"; Choco = "sumatrapdf" }
             @{ Name = "Calibre"; Winget = "calibre.calibre"; Choco = "calibre" }
+            @{ Name = "Joplin"; Winget = "Joplin.Joplin"; Choco = "joplin" }
+            @{ Name = "Anki"; Winget = "Anki.Anki"; Choco = "anki" }
+            @{ Name = "Zotero"; Winget = "DigitalScholar.Zotero"; Choco = "zotero" }
+            @{ Name = "draw.io"; Winget = "JGraph.Draw"; Choco = "drawio" }
         )
     }
     
@@ -335,6 +405,10 @@ $Script:EssentialsApps = @{
             @{ Name = "Nmap"; Winget = "Insecure.Nmap"; Choco = "nmap" }
             @{ Name = "Advanced IP Scanner"; Winget = "Famatech.AdvancedIPScanner"; Choco = "advanced-ip-scanner" }
             @{ Name = "Angry IP Scanner"; Winget = "angryziber.AngryIPScanner"; Choco = "angryip" }
+            @{ Name = "Tailscale"; Winget = "Tailscale.Tailscale"; Choco = "tailscale" }
+            @{ Name = "Syncthing"; Winget = "Syncthing.Syncthing"; Choco = "syncthing" }
+            @{ Name = "RustDesk"; Winget = ""; Choco = "rustdesk" }
+            @{ Name = "AnyDesk"; Winget = "AnyDesk.AnyDesk"; Choco = "anydesk" }
         )
     }
     
@@ -342,12 +416,42 @@ $Script:EssentialsApps = @{
     Drivers       = @{
         DisplayName = "GPU Drivers & Tools"
         Apps        = @(
-            @{ Name = "NVIDIA GeForce Experience"; Winget = "NVIDIA.GeForceExperience"; Choco = "geforce-experience" }
-            @{ Name = "AMD Radeon Software"; Winget = "AMD.RyzenMaster"; Choco = "amd-ryzen-master" }
-            @{ Name = "Intel Graphics Command Center"; Winget = "Intel.IntelDriverAndSupportAssistant"; Choco = "intel-dsa" }
+            @{ Name = "NVIDIA App"; Winget = ""; Choco = "nvidia-app" }
+            @{ Name = "Intel Driver & Support Assistant"; Winget = "Intel.IntelDriverAndSupportAssistant"; Choco = "intel-dsa" }
             @{ Name = "DDU (Display Driver Uninstaller)"; Winget = "Wagnardsoft.DisplayDriverUninstaller"; Choco = "ddu" }
-            @{ Name = "NVCleanstall"; Winget = "TechPowerUp.NVCleanstall"; Choco = "nvcleanstall" }
+            @{ Name = "NVCleanstall"; Winget = "TechPowerUp.NVCleanstall"; Choco = "" }
             @{ Name = "Snappy Driver Installer Origin"; Winget = "GlennDelahoy.SnappyDriverInstallerOrigin"; Choco = "sdio" }
+        )
+    }
+
+    # === AI TOOLS ===
+    # CLIs published only to npm carry an Npm ID (Node.js LTS is provisioned
+    # automatically); Store-only official apps (ChatGPT, Microsoft Copilot)
+    # carry an Msstore ID. All IDs validated live 2026-07-06.
+    AITools       = @{
+        DisplayName = "AI Assistants & CLIs"
+        Apps        = @(
+            # CLIs / coding agents
+            @{ Name = "Claude Code (CLI)"; Winget = "Anthropic.ClaudeCode"; Choco = ""; Npm = "@anthropic-ai/claude-code" }
+            @{ Name = "Gemini CLI"; Winget = ""; Choco = "gemini-cli"; Npm = "@google/gemini-cli" }
+            @{ Name = "OpenAI Codex (CLI)"; Winget = "OpenAI.Codex"; Choco = ""; Npm = "@openai/codex" }
+            @{ Name = "GitHub Copilot CLI"; Winget = ""; Choco = ""; Npm = "@github/copilot" }
+
+            # Official desktop assistants
+            @{ Name = "Claude Desktop"; Winget = "Anthropic.Claude"; Choco = "claude" }
+            @{ Name = "ChatGPT Desktop"; Winget = ""; Choco = ""; Msstore = "9NT1R1C2HH7J" }
+            @{ Name = "Microsoft Copilot"; Winget = ""; Choco = ""; Msstore = "XP9CXNGPPJ97XX" }
+            @{ Name = "Perplexity Desktop"; Winget = "Perplexity.Perplexity"; Choco = "" }
+            @{ Name = "Perplexity Comet (AI browser)"; Winget = "Perplexity.Comet"; Choco = "" }
+
+            # Multi-model clients & local LLM runners
+            @{ Name = "Cherry Studio (multi-model)"; Winget = "kangfenmao.CherryStudio"; Choco = "" }
+            @{ Name = "Chatbox (multi-model)"; Winget = "Bin-Huang.Chatbox"; Choco = "" }
+            @{ Name = "Msty (local LLMs)"; Winget = "CloudStack.Msty"; Choco = "" }
+            @{ Name = "Ollama (local LLMs)"; Winget = "Ollama.Ollama"; Choco = "ollama" }
+            @{ Name = "LM Studio"; Winget = "ElementLabs.LMStudio"; Choco = "lm-studio" }
+            @{ Name = "Jan"; Winget = "Jan.Jan"; Choco = "" }
+            @{ Name = "GPT4All"; Winget = ""; Choco = "gpt4all" }
         )
     }
 }
@@ -370,6 +474,58 @@ function Get-WinDebloat7EssentialsList {
 #endregion
 
 #region Installation Functions
+
+<#
+.SYNOPSIS
+    Runs a single package install via Winget or Chocolatey. (Internal helper)
+
+.OUTPUTS
+    [int] The installer process exit code (0 = success).
+#>
+function Invoke-WD7PackageInstall {
+    [CmdletBinding()]
+    [OutputType([int])]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet("Winget", "Chocolatey", "Npm", "Msstore")]
+        [string]$Provider,
+
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$PackageId,
+
+        [switch]$Quiet
+    )
+
+    switch ($Provider) {
+        "Winget" {
+            $exe = "winget"
+            $cmdArgs = @("install", "--id", $PackageId, "--source", "winget", "--accept-source-agreements", "--accept-package-agreements", "--disable-interactivity")
+            if ($Quiet) { $cmdArgs += "--silent" }
+        }
+        "Chocolatey" {
+            $exe = "choco"
+            $cmdArgs = @("install", $PackageId, "-y")
+            if ($Quiet) { $cmdArgs += "--no-progress" }
+        }
+        "Npm" {
+            # Resolve npm even when PATH is stale right after a Node.js install
+            $npmCmd = Get-Command npm -ErrorAction SilentlyContinue
+            $exe = if ($npmCmd) { $npmCmd.Source } else { Join-Path $env:ProgramFiles "nodejs\npm.cmd" }
+            $cmdArgs = @("install", "--global", $PackageId)
+            if ($Quiet) { $cmdArgs += "--no-fund", "--no-audit" }
+        }
+        "Msstore" {
+            # Official Microsoft Store channel via winget (free apps install
+            # without a Microsoft account)
+            $exe = "winget"
+            $cmdArgs = @("install", "--id", $PackageId, "--source", "msstore", "--accept-source-agreements", "--accept-package-agreements", "--disable-interactivity")
+        }
+    }
+
+    $p = Start-Process -FilePath $exe -ArgumentList $cmdArgs -NoNewWindow -Wait -PassThru
+    return $p.ExitCode
+}
 
 <#
 .SYNOPSIS
@@ -429,85 +585,62 @@ function Install-WinDebloat7Software {
         }
     }
     
-    # helper to normalize input into a list of objects: { Name, ID, FallbackID, FallbackProvider }
-    $itemsToProcess = @()
+    # Normalize input into a list of objects: { Name, PrimaryID, PrimaryProvider, FallbackID, FallbackProvider }
+    $itemsToProcess = [List[psobject]]::new()
 
     if ($PSCmdlet.ParameterSetName -eq "ById") {
         foreach ($p in $Packages) {
-            $itemsToProcess += [PSCustomObject]@{
-                Name             = $p
-                PrimaryID        = $p
-                FallbackID       = $null
-                FallbackProvider = $null
-            }
+            $itemsToProcess.Add([PSCustomObject]@{
+                    Name             = $p
+                    PrimaryID        = $p
+                    PrimaryProvider  = $PackageManager
+                    FallbackID       = $null
+                    FallbackProvider = $null
+                })
         }
     }
     else {
-        # ByObject
+        # ByObject: each app hashtable carries provider IDs (keys: Winget / Choco /
+        # Msstore / Npm). Candidates are ordered by session preference; the Microsoft
+        # Store (official channel for apps like ChatGPT) and npm (AI CLIs published
+        # only to the registry) act as last resorts in that order.
         foreach ($app in $Apps) {
-            # Determine Primary and Fallback based on $PackageManager
-            $primaryPkgId = $null
-            $fbId = $null
-            $fbProv = $null
-            
+            $wingetId = [string]$app["Winget"]
+            $chocoId = [string]$app["Choco"]
+            $msstoreId = [string]$app["Msstore"]
+            $npmId = [string]$app["Npm"]
+
+            $candidates = [List[object]]::new()
             if ($PackageManager -eq "Winget") {
-                $primaryPkgId = $app["Winget"]
-                if ($app.ContainsKey("Choco") -and $app["Choco"]) {
-                    $fbId = $app["Choco"]
-                    $fbProv = "Chocolatey"
-                }
+                if (-not [string]::IsNullOrWhiteSpace($wingetId)) { $candidates.Add(@("Winget", $wingetId)) }
+                if (-not [string]::IsNullOrWhiteSpace($chocoId)) { $candidates.Add(@("Chocolatey", $chocoId)) }
             }
             else {
-                # Chocolatey
-                $primaryPkgId = $app["Choco"]
-                if ($PackageManager -eq "Chocolatey" -and $app.ContainsKey("Winget") -and $app["Winget"]) {
-                    $fbId = $app["Winget"]
-                    $fbProv = "Winget"
-                }
+                if (-not [string]::IsNullOrWhiteSpace($chocoId)) { $candidates.Add(@("Chocolatey", $chocoId)) }
+                if (-not [string]::IsNullOrWhiteSpace($wingetId)) { $candidates.Add(@("Winget", $wingetId)) }
             }
-            
-            # Smart switching: If Primary is missing but Fallback exists, promote Fallback to Primary
-            if ([string]::IsNullOrWhiteSpace($primaryPkgId) -and -not [string]::IsNullOrWhiteSpace($fbId)) {
-                $primaryPkgId = $fbId
-                # $PackageManager effectively becomes the fallback provider for this specific item, 
-                # but we need to track that.
-                # Actually, simpler to just map it as a Primary install using the other provider.
-                # But our outer loop uses $PackageManager var which is fixed for the whole run generally, 
-                # causing issues if we try to switch provider per-item in logic below?
-                # No, the loop logic calls Invoke-InstallCommand with $PackageManager.
-                # We need to store Provider per item!
-                
-                # Let's adjust $itemsToProcess logic to include 'Provider'
-            }
-            
-            # We need to restructure itemsToProcess to include the Provider for the primary attempt
-            # to handle mixed-provider installs nicely.
-            
-            if (-not [string]::IsNullOrWhiteSpace($primaryPkgId)) {
-                # If we swapped, we need to know which provider to use.
-                # If we didn't swap, use $PackageManager.
-                # Actually, if we swapped because Primary was empty, we are using $fbProv.
-                 
-                $useProv = $PackageManager
-                if ([string]::IsNullOrWhiteSpace($app[$PackageManager]) -and -not [string]::IsNullOrWhiteSpace($fbId)) {
-                    $useProv = $fbProv
-                }
+            if (-not [string]::IsNullOrWhiteSpace($msstoreId)) { $candidates.Add(@("Msstore", $msstoreId)) }
+            if (-not [string]::IsNullOrWhiteSpace($npmId)) { $candidates.Add(@("Npm", $npmId)) }
 
-                $itemsToProcess += [PSCustomObject]@{
-                    Name             = $app["Name"]
-                    PrimaryID        = $primaryPkgId
-                    PrimaryProvider  = $useProv
-                    FallbackID       = $fbId
-                    FallbackProvider = $fbProv
-                }
+            if ($candidates.Count -eq 0) {
+                Write-Log -Message "Skipping '$($app["Name"])': no package ID for any provider." -Level Warning
+                continue
             }
+
+            $itemsToProcess.Add([PSCustomObject]@{
+                    Name             = $app["Name"]
+                    PrimaryID        = $candidates[0][1]
+                    PrimaryProvider  = $candidates[0][0]
+                    FallbackID       = if ($candidates.Count -gt 1) { $candidates[1][1] } else { $null }
+                    FallbackProvider = if ($candidates.Count -gt 1) { $candidates[1][0] } else { $null }
+                })
         }
     }
 
     Write-Log -Message "Installing $($itemsToProcess.Count) packages..." -Level Info
     
     $results = @{
-        PackageManager = $PackageManager # Note: this might be mixed now, but nominally what was requested
+        PackageManager = $PackageManager # Preferred provider; individual items may fall back to the other
         TotalRequested = $itemsToProcess.Count
         Successful     = 0
         Failed         = 0
@@ -519,72 +652,39 @@ function Install-WinDebloat7Software {
     foreach ($item in $itemsToProcess) {
         $current++
         $percent = [math]::Round(($current / $itemsToProcess.Count) * 100)
-        
+
         $pkgName = $item.Name
         $pkgId = $item.PrimaryID
         $currentProv = $item.PrimaryProvider
-        
-        if ([string]::IsNullOrWhiteSpace($currentProv)) { $currentProv = $PackageManager } # Default for ById case
-        
+
         Write-Progress -Activity "Installing Software" -Status "[$current/$($itemsToProcess.Count)] $pkgName ($pkgId)" -PercentComplete $percent
-        
+
         try {
             if ($PSCmdlet.ShouldProcess($pkgName, "Install via $currentProv")) {
-                
-                # --- Helper Inner Function to Run Install ---
-                # (Assuming Invoke-InstallCommand is defined or we inline it again - I verify below)
-                # It was removed in previous step? No, I verified I removed internal function definition if I pasted inline.
-                # checking previous Step 29/33 output... I removed the inner function definition in Step 33.
-                
-                $attemptExitCode = -1
-                
-                # --- Primary Attempt ---
-                if ($currentProv -eq "Winget") {
-                    $cmdArgs = @("install", "--id", $pkgId, "--source", "winget", "--accept-source-agreements", "--accept-package-agreements", "--disable-interactivity")
-                    if ($Quiet) { $cmdArgs += "--silent" }
-                    $p = Start-Process -FilePath "winget" -ArgumentList $cmdArgs -NoNewWindow -Wait -PassThru
-                    $attemptExitCode = $p.ExitCode
+
+                # The per-item provider may differ from the session default
+                # (e.g. Chocolatey-only apps under a Winget-preferred run)
+                if (-not (Test-PackageManager -Name $currentProv)) {
+                    $null = Install-PackageManager -Name $currentProv -Force
                 }
-                elseif ($currentProv -eq "Chocolatey") {
-                    $cmdArgs = @("install", $pkgId, "-y")
-                    if ($Quiet) { $cmdArgs += "--no-progress" }
-                    $p = Start-Process -FilePath "choco" -ArgumentList $cmdArgs -NoNewWindow -Wait -PassThru
-                    $attemptExitCode = $p.ExitCode
-                }
+
+                $attemptExitCode = Invoke-WD7PackageInstall -Provider $currentProv -PackageId $pkgId -Quiet:$Quiet
 
                 if ($attemptExitCode -eq 0) {
                     Write-Log -Message "Installed: $pkgName ($pkgId)" -Level Success
                     $results.Successful++
                     $results.Details += @{ Package = $pkgName; Id = $pkgId; Status = "Success"; Provider = $currentProv }
                 }
-                # Fallback Logic
-                # Only fallback if the Primary attempt WAS NOT the fallback provider already (avoid loops)
-                # AND if we have a fallback ID different from primary?
-                # Actually, if we swapped above, PrimaryID IS the fallback ID. So FallbackID might be same or null?
-                # If we swapped, we used the "other" provider as primary. We shouldn't fallback "back" to the empty one.
-                # So verify:
                 elseif ($item.FallbackID -and $item.FallbackProvider -and $item.FallbackProvider -ne $currentProv) {
                     Write-Log -Message "Failed to install '$pkgName' via $currentProv (Exit: $attemptExitCode). Attempting fallback to $($item.FallbackProvider)..." -Level Warning
-                    
-                    # Ensure fallback provider installed
+
+                    # Ensure fallback provider is installed
                     if (-not (Test-PackageManager -Name $item.FallbackProvider)) {
                         $null = Install-PackageManager -Name $item.FallbackProvider -Force
                     }
 
                     if (Test-PackageManager -Name $item.FallbackProvider) {
-                        $fbExitCode = -1
-                        if ($item.FallbackProvider -eq "Winget") {
-                            $cmdArgs = @("install", "--id", $item.FallbackID, "--source", "winget", "--accept-source-agreements", "--accept-package-agreements", "--disable-interactivity")
-                            if ($Quiet) { $cmdArgs += "--silent" }
-                            $p = Start-Process -FilePath "winget" -ArgumentList $cmdArgs -NoNewWindow -Wait -PassThru
-                            $fbExitCode = $p.ExitCode
-                        }
-                        elseif ($item.FallbackProvider -eq "Chocolatey") {
-                            $cmdArgs = @("install", $item.FallbackID, "-y")
-                            if ($Quiet) { $cmdArgs += "--no-progress" }
-                            $p = Start-Process -FilePath "choco" -ArgumentList $cmdArgs -NoNewWindow -Wait -PassThru
-                            $fbExitCode = $p.ExitCode
-                        }
+                        $fbExitCode = Invoke-WD7PackageInstall -Provider $item.FallbackProvider -PackageId $item.FallbackID -Quiet:$Quiet
 
                         if ($fbExitCode -eq 0) {
                             Write-Log -Message "Installed: $pkgName ($($item.FallbackID)) via $($item.FallbackProvider)" -Level Success
@@ -647,8 +747,8 @@ function Install-WinDebloat7Essentials {
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([void])]
     param(
-        [ValidateSet("Browsers", "Runtimes", "Utilities", "Media", "Communication", 
-            "Security", "DevTools", "Gaming", "Productivity", "Network", "Drivers")]
+        [ValidateSet("Browsers", "Runtimes", "Utilities", "Media", "Communication",
+            "Security", "DevTools", "Gaming", "Productivity", "Network", "Drivers", "AITools")]
         [string[]]$Categories,
         
         [ValidateSet("Winget", "Chocolatey", "Auto")]
@@ -693,7 +793,7 @@ function Install-WinDebloat7Essentials {
             $Categories = @()
             foreach ($num in ($selection -split ',')) {
                 $num = $num.Trim()
-                if ($categoryMap.ContainsKey([int]$num)) {
+                if ($num -match '^\d+$' -and $categoryMap.ContainsKey([int]$num)) {
                     $Categories += $categoryMap[[int]$num]
                 }
             }
@@ -743,7 +843,7 @@ function Install-WinDebloat7Essentials {
             else {
                 foreach ($num in ($appSel -split ',')) {
                     $num = $num.Trim()
-                    if ($appMap.ContainsKey([int]$num)) {
+                    if ($num -match '^\d+$' -and $appMap.ContainsKey([int]$num)) {
                         $appsToInstall += $appMap[[int]$num]
                     }
                 }
@@ -787,17 +887,43 @@ function Install-WinDebloat7ProfileSoftware {
         Write-Log -Message "No software configuration in profile." -Level Info
         return
     }
-    
+
     $pkgMgr = $Config.software.package_manager ?? "Winget"
-    $installList = $Config.software.install_list ?? @()
-    
-    if ($installList.Count -eq 0) {
-        Write-Log -Message "No packages specified in profile install_list." -Level Info
+    $installList = @($Config.software.install_list ?? @())
+    $uninstallList = @($Config.software.uninstall_list ?? @())
+
+    if ($installList.Count -eq 0 -and $uninstallList.Count -eq 0) {
+        Write-Log -Message "No packages specified in profile install_list/uninstall_list." -Level Info
         return
     }
-    
-    Write-Log -Message "Installing profile software via $pkgMgr..." -Level Info
-    Install-WinDebloat7Software -Packages $installList -PackageManager $pkgMgr
+
+    if ($installList.Count -gt 0) {
+        Write-Log -Message "Installing profile software via $pkgMgr..." -Level Info
+        Install-WinDebloat7Software -Packages $installList -PackageManager $pkgMgr
+    }
+
+    foreach ($pkg in $uninstallList) {
+        if ($PSCmdlet.ShouldProcess($pkg, "Uninstall via $pkgMgr")) {
+            try {
+                if ($pkgMgr -eq "Chocolatey") {
+                    $p = Start-Process -FilePath "choco" -ArgumentList @("uninstall", $pkg, "-y") -NoNewWindow -Wait -PassThru
+                }
+                else {
+                    $p = Start-Process -FilePath "winget" -ArgumentList @("uninstall", "--id", $pkg, "--silent", "--accept-source-agreements", "--disable-interactivity") -NoNewWindow -Wait -PassThru
+                }
+
+                if ($p.ExitCode -eq 0) {
+                    Write-Log -Message "Uninstalled: $pkg" -Level Success
+                }
+                else {
+                    Write-Log -Message "Uninstall skipped or failed for '$pkg' (Exit: $($p.ExitCode) - may not be installed)" -Level Warning
+                }
+            }
+            catch {
+                Write-Log -Message "Uninstall error for '$pkg': $($_.Exception.Message)" -Level Warning
+            }
+        }
+    }
 }
 
 #endregion

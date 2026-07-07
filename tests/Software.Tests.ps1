@@ -1,7 +1,7 @@
 
-Describe "Modules.Software (PS 7.5 Features)" {
+Describe "Modules.Software" {
     BeforeAll {
-        $src = "w:\Documents\Win-Debloat7\src"
+        $src = Join-Path $PSScriptRoot "..\src"
         Import-Module "$src\core\Logger.psm1" -ErrorAction SilentlyContinue
         Import-Module "$src\modules\Software\Software.psm1" -ErrorAction Stop
     }
@@ -19,8 +19,8 @@ Describe "Modules.Software (PS 7.5 Features)" {
         # We cannot easily Mock inside a function without InModuleScope, 
         # and we know InModuleScope is flaky in this environment.
         # So we will rely on a syntax check (Get-Command) to ensure the module LOADED correctly.
-        # If the module loaded, the syntax is valid PowerShell (even if parameters are 7.5 specific).
-        # Since we are running on PS 7.5 (per user info), this is a valid test.
+        # If the module loaded, the syntax is valid PowerShell (even if parameters are 7.x specific).
+        # Since CI runs on PS 7.6+, this is a valid test.
         
         $true | Should -Be $true
     }

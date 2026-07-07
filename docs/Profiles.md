@@ -80,6 +80,19 @@ taskbar:
   hide_chat: true
 ```
 
+### 6. Software
+Install (and remove) applications via winget/Chocolatey.
+
+```yaml
+software:
+  package_manager: "Winget"
+  install_list:
+    - "7zip.7zip"
+    - "Mozilla.Firefox"
+  uninstall_list:
+    - "Microsoft.Teams"
+```
+
 ## 🛠️ How to Create a Custom Profile
 
 1.  Copy an existing profile (e.g., `profiles\moderate.yaml`).

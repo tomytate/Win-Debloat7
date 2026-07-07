@@ -1,6 +1,6 @@
 # Welcome to the Win-Debloat7 Wiki!
 
-**Win-Debloat7** is a professional-grade Windows 10/11 optimization framework tailored for power users, gamers, and system administrators. Built on **PowerShell 7.5+**, it prioritizes safety, reversibility, and modular configuration.
+**Win-Debloat7** is a professional-grade Windows 10/11 optimization framework tailored for power users, gamers, and system administrators. Built on **PowerShell 7.6+**, it prioritizes safety, reversibility, and modular configuration.
 
 ## 🚀 Key Differences
 
@@ -16,7 +16,7 @@ Unlike other debloaters, Win-Debloat7 focuses on:
 
 *   **[Installation Guide](Installation)** — Getting started (4 methods: Script, Chocolatey, EXE, Source).
 *   **[Features & Capabilities](Features)** — Deep dive into all 9 feature areas.
-*   **[Modules Reference](Modules)** — Complete reference for all 28 modules and 92 functions.
+*   **[Modules Reference](Modules)** — Complete reference for all 29 modules and 115 functions.
 *   **[Profiles Explained](Profiles)** — How to customize, create, and share `.yaml` configurations.
 *   **[About](About)** — Philosophy, tech stack, and team.
 *   **[Troubleshooting](Troubleshooting)** — Restore points, logs, common fixes.

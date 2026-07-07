@@ -16,24 +16,34 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Install PowerShell 7.5 (Preview)
+
+    # The project requires PowerShell 7.6+ (#Requires -Version 7.6). The runner
+    # image may ship an older pwsh, so install the latest stable as a dotnet
+    # global tool and run everything through it.
+    - name: Install PowerShell 7.6+ (dotnet tool)
       shell: pwsh
       run: |
-        # Use simple Zip install (default) preventing MSI parameter issues
-        & { $(irm https://aka.ms/install-powershell.ps1) } -Preview
+        dotnet tool install --global PowerShell
+        $pwsh76 = Join-Path $env:USERPROFILE '.dotnet\tools\pwsh.exe'
+        & $pwsh76 -NoProfile -Command '$PSVersionTable.PSVersion.ToString()'
 
     - name: Run Pester Tests
       shell: pwsh
       run: |
-        Invoke-Pester -Path tests/Unit -Output Detailed -ErrorAction SilentlyContinue
+        $pwsh76 = Join-Path $env:USERPROFILE '.dotnet\tools\pwsh.exe'
+        & $pwsh76 -NoProfile -Command 'if (-not (Get-Module -ListAvailable Pester | Where-Object { $_.Version -ge [version]"5.0" })) { Install-Module Pester -Force -SkipPublisherCheck -Scope CurrentUser }; $r = Invoke-Pester -Path tests/Unit -PassThru -Output Detailed; if ($r.FailedCount -gt 0) { exit 1 }'
+        exit $LASTEXITCODE
 
     - name: Verify Build Process
       shell: pwsh
       run: |
-        ./build/Build-DualRelease.ps1 -Version "0.0.0-CI" -OutputDir dist
-        if (-not (Test-Path "dist/Win-Debloat7-v0.0.0-CI-Standard.zip")) {
-            Write-Error "Build verification failed: Standard artifact missing."
+        $pwsh76 = Join-Path $env:USERPROFILE '.dotnet\tools\pwsh.exe'
+        & $pwsh76 -NoProfile -File ./build/Build-DualRelease.ps1 -Version "0.0.0-CI" -OutputDir dist
+        if (-not (Test-Path "dist/Win-Debloat7.exe")) {
+            Write-Error "Build verification failed: Standard executable missing."
+        }
+        if (-not (Test-Path "dist/Win-Debloat7-Extras.exe")) {
+            Write-Error "Build verification failed: Extras executable missing."
         }
 
   lint:
@@ -41,18 +51,21 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install PSScriptAnalyzer
       shell: pwsh
       run: |
         Set-PSRepository PSGallery -InstallationPolicy Trusted
         Install-Module PSScriptAnalyzer -ErrorAction Stop
-        
+
     - name: Invoke-ScriptAnalyzer
       shell: pwsh
       run: |
-        $results = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error
-        if ($results) {
+        # Scope to first-party code (vendored powershell-yaml is excluded)
+        $results = @(Invoke-ScriptAnalyzer -Path src -Recurse -Severity Error |
+            Where-Object { $_.ScriptPath -notlike '*\Vendor\*' })
+        $results += @(Invoke-ScriptAnalyzer -Path Win-Debloat7.ps1 -Severity Error)
+        if ($results.Count -gt 0) {
             $results | Format-Table
             exit 1
         }

@@ -60,7 +60,7 @@ If the GUI is inaccessible:
 Get-WinDebloat7Snapshot
 
 # Restore a specific snapshot
-Restore-WinDebloat7Snapshot -Name "Pre-Debloat-2026-02-13"
+Restore-WinDebloat7Snapshot -SnapshotId "<Id from Get-WinDebloat7Snapshot>"
 ```
 
 ---

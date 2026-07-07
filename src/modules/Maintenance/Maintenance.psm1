@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Maintenance
-    Version: 1.3.0
+    Version: 1.3.1
 #>
 
 #Requires -Version 7.6
@@ -43,7 +43,8 @@ function Register-WinDebloat7Maintenance {
         throw "Could not locate Win-Debloat7.ps1 at $scriptPath"
     }
     
-    $action = New-ScheduledTaskAction -Execute "pwsh.exe" -Argument "-Command `"$scriptPath -Maintenance -Unattended`""
+    # Use -File with a quoted path so install locations containing spaces work
+    $action = New-ScheduledTaskAction -Execute "pwsh.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`" -Maintenance -Unattended"
     $trigger = if ($Daily) { New-ScheduledTaskTrigger -Daily -At 3am } else { New-ScheduledTaskTrigger -Weekly -At 3am -DaysOfWeek Sunday }
     $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
     $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries:$false -DontStopIfGoingOnBatteries:$false -StartWhenAvailable -RunOnlyIfNetworkAvailable

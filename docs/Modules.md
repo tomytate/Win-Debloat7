@@ -1,6 +1,6 @@
 # Modules Reference
 
-Win-Debloat7 is built on a modular architecture. Each feature is encapsulated in a standalone PowerShell Module (`.psm1`) located in `src/modules`. The manifest registers **28 modules** exporting **92 functions**.
+Win-Debloat7 is built on a modular architecture. Each feature is encapsulated in a standalone PowerShell Module (`.psm1`) located in `src/modules`. The manifest registers **29 modules** exporting **115 functions**.
 
 ## 🧩 Feature Modules
 
@@ -11,7 +11,7 @@ Identifies and removes pre-installed Appx packages.
 - **Logic:** O(N) regex-based matching against an internal database of 80+ known bloatware packages.
 
 ### **Privacy** (`src/modules/Privacy`)
-Hardens system privacy via Registry, Group Policy, and Hosts blocking.
+Hardens system privacy via Registry, Group Policy, and Windows Firewall blocking.
 - **Key Functions:** `Set-WinDebloat7Privacy`, `Disable-WinDebloat7TelemetryTasks`
 - **Firewall Blocking:** `Add-WinDebloat7FirewallBlock`, `Get-WinDebloat7TelemetryDomains`
 - **Features:** Disables DiagTrack, blocks telemetry domains, disables Copilot/Recall.
@@ -25,7 +25,7 @@ Tunes system responsiveness and power management.
 ### **Services** (`src/modules/Performance/Services.psm1`)
 JSON-driven service optimization with intelligent presets.
 - **Key Functions:** `Set-WinDebloat7Services`, `Get-WinDebloat7ServicePresets`
-- **Presets:** Privacy, Performance, Security, Minimal
+- **Presets:** Privacy, Performance, Security, Minimal, Gaming
 - **Database:** `config/services.json` — fully customizable.
 
 ### **Tweaks** (`src/modules/Performance/Tweaks.psm1`)
@@ -103,6 +103,6 @@ These modules power the framework itself:
 | Module | Purpose |
 |--------|---------|
 | **GUI.psm1** | WPF Dashboard controller (async bloatware scanning, theme toggling) |
-| **Menu.psm1** | Interactive TUI menu system with 9 options |
+| **Menu.psm1** | Interactive TUI menu system (profiles, services, repair, tweaks, integrations) |
 | **Colors.psm1** | TrueColor terminal rendering engine (Cyan/Purple theme) |
 | **MainWindow.xaml** | WPF visual layout (Neon dark theme, 5-tab navigation) |

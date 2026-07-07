@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Premium color scheme and branding for Win-Debloat7 TUI (Cyber-Minimalist Edition)
     
@@ -7,7 +7,7 @@
     
 .NOTES
     Module: Win-Debloat7.UI.Colors
-    Version: 1.3.0
+    Version: 1.3.1
 #>
 
 #Requires -Version 7.6
@@ -50,8 +50,8 @@ $Script:WD7Header = @"
 ║  ╚███╔███╔╝██║██║ ╚████║      ██████╔╝███████╗██████╔╝███████╗╚██████╔╝██║  ██║   ██║      ██║  ║
 ║   ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝      ╚═╝  ║
 ║                                                                                                 ║
-║                          Ultimate System Optimizer v1.3.0                                       ║
-║                       PowerShell 7.5+ | Windows 11 25H2 Ready                                   ║
+║                          Ultimate System Optimizer v1.3.1                                       ║
+║                       PowerShell 7.6+ | Windows 11 25H2 Ready                                   ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════╝
 "@
 
@@ -65,7 +65,7 @@ $Script:WD7HeaderCompact = @"
 function Get-WD7AnsiColor {
     param([string]$Hex)
     
-    if (-not $Hex -match "^#([0-9a-fA-F]{6})$") { return "" }
+    if ($Hex -notmatch "^#([0-9a-fA-F]{6})$") { return "" }
     
     $r = [Convert]::ToByte($Hex.Substring(1, 2), 16)
     $g = [Convert]::ToByte($Hex.Substring(3, 2), 16)

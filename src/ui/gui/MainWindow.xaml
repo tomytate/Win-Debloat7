@@ -294,7 +294,7 @@
                 <!-- Footer -->
                 <Border Grid.Row="2" Background="#151525" Padding="16" CornerRadius="12" Margin="12,0,12,16">
                     <StackPanel>
-                        <TextBlock Text="v1.3.0 | PowerShell 7.5+" FontSize="11" 
+                        <TextBlock Text="v1.3.1 | PowerShell 7.6+" FontSize="11" 
                                    Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                         <TextBlock Text="Windows 11 25H2 Ready" FontSize="10" 
                                    Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
@@ -324,22 +324,27 @@
                             <!-- OS Card -->
                             <Border Style="{StaticResource NeonCardStyle}" Margin="0,0,8,0">
                                 <StackPanel>
-                                    <TextBlock Text="v1.3.0" Foreground="#888888" VerticalAlignment="Bottom" Margin="10,0,0,5" FontSize="12"/>
+                                    <TextBlock Text="v1.3.1" Foreground="#888888" VerticalAlignment="Bottom" Margin="10,0,0,5" FontSize="12"/>
                                     <TextBlock Name="txtOSName" Text="Windows 11" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
                                     <TextBlock Name="txtOSVersion" Text="Detecting..." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
                             </Border>
-                            <!-- Privacy Score -->
+                            <!-- Privacy Score (hover for the point breakdown) -->
                             <Border Style="{StaticResource NeonCardStyle}" Margin="4,0">
                                 <StackPanel>
-                                    <TextBlock Text="🔒" FontSize="24" Margin="0,0,0,12"/>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Name="txtPrivacyScore" Text="--" FontSize="28" FontWeight="Bold" 
+                                        <TextBlock Text="🔒" FontSize="24" Margin="0,0,0,12"/>
+                                        <TextBlock Name="txtPrivacyGrade" Text="" FontSize="13" FontWeight="Bold"
+                                                   Foreground="{StaticResource SuccessBrush}" VerticalAlignment="Center"
+                                                   Margin="10,0,0,12"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Name="txtPrivacyScore" Text="--" FontSize="28" FontWeight="Bold"
                                                    Foreground="{StaticResource SuccessBrush}"/>
-                                        <TextBlock Text="/100" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" 
+                                        <TextBlock Text="/100" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
                                                    VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                                     </StackPanel>
-                                    <TextBlock Text="Privacy Score" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Name="txtPrivacyLabel" Text="Privacy Score" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
                             </Border>
                             <!-- Bloatware -->
@@ -350,14 +355,16 @@
                                     <TextBlock Text="Bloatware Detected" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
                             </Border>
-                            <!-- RAM -->
+                            <!-- RAM (live usage) -->
                             <Border Style="{StaticResource NeonCardStyle}" Margin="8,0,0,0">
                                 <StackPanel>
                                     <TextBlock Text="🧠" FontSize="24" Margin="0,0,0,12"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Name="txtRAM" Text="--" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock Text="%" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                                     </StackPanel>
-                                    <TextBlock Text="System RAM" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Name="txtRAMDetail" Text="System RAM" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
                             </Border>
                         </UniformGrid>
@@ -489,11 +496,17 @@
                                     <Border Style="{StaticResource NeonCardStyle}">
                                         <StackPanel>
                                             <TextBlock Text="Telemetry Controls" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
-                                            <CheckBox Name="chkTelemetry" Content=" Telemetry Collection" Foreground="White" Margin="0,8,0,16"/>
+                                            <CheckBox Name="chkTelemetry" Content=" Telemetry Collection" Foreground="White" Margin="0,8,0,4"/>
+                                            <TextBlock Text="Uncheck to restrict telemetry to Security level (applied via General → Apply General Tweaks)"
+                                                       FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,16"/>
                                             
-                                            <Button Name="btnBlockTelemetry" Content="🔒 Block Telemetry Domains" Style="{StaticResource PrimaryButtonStyle}" 
+                                            <Button Name="btnBlockTelemetry" Content="🔒 Block Telemetry Domains" Style="{StaticResource PrimaryButtonStyle}"
                                                     HorizontalAlignment="Left" Margin="0,8"/>
-                                            <Button Name="btnDisableTasks" Content="✓ Disable Tasks (Safe)" Style="{StaticResource SecondaryButtonStyle}" 
+                                            <Button Name="btnDebloatSearch" Content="🔍 Debloat Search (Bing / Highlights / History)" Style="{StaticResource SecondaryButtonStyle}"
+                                                    HorizontalAlignment="Left" Margin="0,8"/>
+                                            <Button Name="btnDisableSuggestions" Content="🧹 Disable Suggestions &amp; Ads (Start, Settings, Lock Screen)" Style="{StaticResource SecondaryButtonStyle}"
+                                                    HorizontalAlignment="Left" Margin="0,8"/>
+                                            <Button Name="btnDisableTasks" Content="✓ Disable Tasks (Safe)" Style="{StaticResource SecondaryButtonStyle}"
                                                     HorizontalAlignment="Left" Margin="0,8"/>
                                             <Button Name="btnAggressiveTasks" Content="⚠ Disable Tasks (Aggressive)" Style="{StaticResource SecondaryButtonStyle}" 
                                                     Foreground="{StaticResource ErrorBrush}" BorderBrush="{StaticResource ErrorBrush}"
@@ -514,12 +527,27 @@
                                     <Border Grid.Column="0" Style="{StaticResource NeonCardStyle}" Margin="0,0,8,0">
                                         <StackPanel>
                                             <TextBlock Text="Power Plan" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
-                                            <RadioButton Name="radBalanced" Content=" Balanced" GroupName="power" IsChecked="True" 
+                                            <RadioButton Name="radBalanced" Content=" Balanced" GroupName="power" IsChecked="True"
                                                          Foreground="White" Margin="0,8"/>
-                                            <RadioButton Name="radHighPerf" Content=" High Performance" GroupName="power" 
+                                            <RadioButton Name="radHighPerf" Content=" High Performance" GroupName="power"
                                                          Foreground="White" Margin="0,8"/>
-                                            <RadioButton Name="radUltimate" Content=" Ultimate Performance" GroupName="power" 
+                                            <RadioButton Name="radUltimate" Content=" Ultimate Performance" GroupName="power"
                                                          Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold" Margin="0,8"/>
+
+                                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16"/>
+
+                                            <TextBlock Text="Service Optimizer" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4"/>
+                                            <TextBlock Text="Preset-based service tuning (config/services.json)" FontSize="11"
+                                                       Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,12"/>
+                                            <ComboBox Name="cmbServicePreset" Width="220" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                                <ComboBoxItem Content="Privacy" IsSelected="True"/>
+                                                <ComboBoxItem Content="Performance"/>
+                                                <ComboBoxItem Content="Security"/>
+                                                <ComboBoxItem Content="Minimal"/>
+                                                <ComboBoxItem Content="Gaming"/>
+                                            </ComboBox>
+                                            <Button Name="btnApplyServices" Content="🔧 Apply Service Preset" Style="{StaticResource SecondaryButtonStyle}"
+                                                    HorizontalAlignment="Left"/>
                                         </StackPanel>
                                     </Border>
                                     
@@ -556,11 +584,56 @@
                                             
                                             <CheckBox Name="chkDisableIPv6" Content=" Disable IPv6" Foreground="White" Margin="0,8"/>
                                             
-                                            <Button Name="btnApplyDNS" Content="🌐 Apply DNS" Style="{StaticResource PrimaryButtonStyle}" 
+                                            <Button Name="btnApplyDNS" Content="🌐 Apply DNS" Style="{StaticResource PrimaryButtonStyle}"
                                                     HorizontalAlignment="Left" Margin="0,16,0,0"/>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
+                            </TabItem>
+
+                            <!-- TAB 5: SYSTEM QOL -->
+                            <TabItem Header="System QoL" Style="{StaticResource TweaksTabItem}">
+                                <Grid Margin="12,0,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Boot / Storage / Updates -->
+                                    <Border Grid.Column="0" Style="{StaticResource NeonCardStyle}" Margin="0,0,8,0">
+                                        <StackPanel>
+                                            <TextBlock Text="Boot, Storage &amp; Updates" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                            <CheckBox Name="chkQolFastStartup" Content=" Disable Fast Startup" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolBitlocker" Content=" Prevent auto BitLocker (24H2+)" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolDeliveryOpt" Content=" Disable Delivery Optimization (P2P)" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolStorageSense" Content=" Disable Storage Sense" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolNoAutoReboot" Content=" No auto-reboot after updates" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolNoEarlyUpdates" Content=" Don't get updates ASAP" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolModernStandby" Content=" Disable Modern Standby networking" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolFindMyDevice" Content=" Disable Find My Device" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolStickyKeys" Content=" Disable Sticky Keys shortcut" Foreground="White" Margin="0,6"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Shell / Explorer cleanup -->
+                                    <Border Grid.Column="1" Style="{StaticResource NeonCardStyle}" Margin="8,0,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="Shell &amp; Explorer Cleanup" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                                            <CheckBox Name="chkQolWidgets" Content=" Disable taskbar Widgets" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolChat" Content=" Hide Chat / Meet Now icon" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolTransparency" Content=" Disable transparency effects" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolSnapAssist" Content=" Disable Snap Assist / layouts" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolStartAllApps" Content=" Hide Start 'All Apps' list" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolFileExt" Content=" Show file extensions" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolHiddenFiles" Content=" Show hidden files" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolHideOneDrive" Content=" Hide OneDrive from nav pane" Foreground="White" Margin="0,6"/>
+                                            <CheckBox Name="chkQolContextClean" Content=" Clean context menu (Share/Access)" Foreground="White" Margin="0,6"/>
+
+                                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,14"/>
+                                            <Button Name="btnApplyQoL" Content="🧰 Apply System QoL Tweaks" Style="{StaticResource PrimaryButtonStyle}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
                             </TabItem>
                         </TabControl>
                     </StackPanel>
@@ -574,9 +647,13 @@
                         <Border Style="{StaticResource NeonCardStyle}">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                    <Button Name="btnSelectAllApps" Content="Select All" Style="{StaticResource SecondaryButtonStyle}" 
-                                            Padding="16,8"/>
-                                    <Button Name="btnDeselectAllApps" Content="Deselect All" Style="{StaticResource SecondaryButtonStyle}" 
+                                    <TextBlock Text="🔎" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBox Name="txtSoftwareSearch" Width="280" VerticalAlignment="Center"
+                                             Background="#12122A" Foreground="White" BorderBrush="{StaticResource BorderBrush}"
+                                             Padding="8,6" ToolTip="Type to filter apps by name"/>
+                                    <Button Name="btnSelectAllApps" Content="Select All" Style="{StaticResource SecondaryButtonStyle}"
+                                            Padding="16,8" Margin="16,0,0,0"/>
+                                    <Button Name="btnDeselectAllApps" Content="Deselect All" Style="{StaticResource SecondaryButtonStyle}"
                                             Padding="16,8" Margin="8,0,0,0"/>
                                 </StackPanel>
                                 
@@ -672,7 +749,10 @@
                                 <StackPanel>
                                     <TextBlock Text="🛠️ Maintenance" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
                                     
-                                    <Button Name="btnUpdateDrivers" Content="🔄 Update Drivers" Style="{StaticResource SecondaryButtonStyle}" 
+                                    <Button Name="btnRestartExplorer" Content="🔁 Restart Explorer" Style="{StaticResource SecondaryButtonStyle}"
+                                            Padding="16,10" Margin="0,0,0,12"/>
+
+                                    <Button Name="btnUpdateDrivers" Content="🔄 Update Drivers" Style="{StaticResource SecondaryButtonStyle}"
                                             Padding="16,10" Margin="0,0,0,12"/>
                                     
                                     <Button Name="btnRepairSystem" Content="🛡️ Repair System (SFC)" Style="{StaticResource SecondaryButtonStyle}" 
@@ -718,10 +798,10 @@
                                 <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20"/>
                                 
                                 <TextBlock Text="About" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
-                                <TextBlock Text="Win-Debloat7 v1.3.0" FontSize="14" Foreground="White" Margin="0,4"/>
+                                <TextBlock Text="Win-Debloat7 v1.3.1" FontSize="14" Foreground="White" Margin="0,4"/>
                                 <TextBlock Text="Created by Tomy Tolledo" FontSize="13" 
                                            Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4"/>
-                                <TextBlock Text="PowerShell 7.5+ | Windows 11 25H2 Ready" FontSize="12" 
+                                <TextBlock Text="PowerShell 7.6+ | Windows 11 25H2 Ready" FontSize="12" 
                                            Foreground="{StaticResource AccentBrush}" Margin="0,8"/>
                             </StackPanel>
                         </Border>
