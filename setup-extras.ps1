@@ -1,9 +1,9 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 
-Write-Host "⚠️  Win-Debloat7 Installer (EXTRAS EDITION)" -ForegroundColor Yellow
-Write-Host "========================================" -ForegroundColor Yellow
-Write-Host "NOTE: This edition includes tools that MAY trigger Antivirus alerts." -ForegroundColor Red
-Write-Host "      Please disable Real-Time Protection locally if installation fails." -ForegroundColor Gray
+Write-Host "== Win-Debloat7 Installer (EXTRAS EDITION) ==" -ForegroundColor Yellow
+Write-Host "=============================================" -ForegroundColor Yellow
+Write-Host "[!] NOTE: This edition includes tools that MAY trigger Antivirus alerts." -ForegroundColor Red
+Write-Host "    Please disable Real-Time Protection locally if installation fails." -ForegroundColor Gray
 Start-Sleep -Seconds 3
 
 # 1. Get Latest Release Info from GitHub API
@@ -17,14 +17,14 @@ try {
 }
 catch {
     Write-Host " [ERROR]" -ForegroundColor Red
-    Write-Error "Failed to fetch release info. Check your internet connection."
+    throw "Failed to fetch release info. Check your internet connection."
 }
 
 # 2. Find the Extras Edition Asset
 $Asset = $Release.assets | Where-Object { $_.name -eq "Win-Debloat7-Extras.exe" } | Select-Object -First 1
 
 if (-not $Asset) {
-    Write-Error "Could not find a valid release asset for Extras Edition."
+    throw "Could not find a valid release asset for Extras Edition."
 }
 
 # 3. Download to Temp
@@ -46,7 +46,7 @@ if ($ZipPath.EndsWith(".exe")) {
 else {
     Write-Host " -> Extracting..." -ForegroundColor Yellow
     Expand-Archive -Path $ZipPath -DestinationPath "$env:ProgramFiles\Win-Debloat7-Extras" -Force
-    
+
     $Launcher = "$env:ProgramFiles\Win-Debloat7-Extras\Win-Debloat7.ps1"
     if (Test-Path $Launcher) {
         Write-Host " -> Installation Complete. Running..." -ForegroundColor Green

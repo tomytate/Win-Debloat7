@@ -1,7 +1,7 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 
-Write-Host "🚀 Win-Debloat7 Installer (Standard Edition)" -ForegroundColor Cyan
-Write-Host "==========================================" -ForegroundColor Cyan
+Write-Host "== Win-Debloat7 Installer (Standard Edition) ==" -ForegroundColor Cyan
+Write-Host "===============================================" -ForegroundColor Cyan
 
 # 1. Get Latest Release Info from GitHub API
 $Repo = "tomytate/Win-Debloat7"
@@ -14,14 +14,14 @@ try {
 }
 catch {
     Write-Host " [ERROR]" -ForegroundColor Red
-    Write-Error "Failed to fetch release info. Check your internet connection."
+    throw "Failed to fetch release info. Check your internet connection."
 }
 
 # 2. Find the Standard Edition Asset (Single-File EXE)
 $Asset = $Release.assets | Where-Object { $_.name -eq "Win-Debloat7.exe" } | Select-Object -First 1
 
 if (-not $Asset) {
-    Write-Error "Could not find a valid release asset for Standard Edition."
+    throw "Could not find a valid release asset for Standard Edition."
 }
 
 # 3. Download to Temp
@@ -39,17 +39,17 @@ Invoke-WebRequest -Uri $DownloadUrl -OutFile $ZipPath
 try {
     Write-Host " -> Verifying Integrity..." -NoNewline
     $SumsAsset = $Release.assets | Where-Object { $_.name -eq "SHA256SUMS.txt" } | Select-Object -First 1
-    
+
     if ($SumsAsset) {
         $SumsContent = (Invoke-RestMethod -Uri $SumsAsset.browser_download_url).Trim()
         $FileHash = (Get-FileHash -Path $ZipPath -Algorithm SHA256).Hash
-        
+
         if ($SumsContent -match "$FileHash\s+$($Asset.name)") {
             Write-Host " [VALID]" -ForegroundColor Green
         }
         else {
             Write-Host " [INVALID]" -ForegroundColor Red
-            Write-Error "Hash mismatch! The file may be corrupted or tampered with."
+            throw "Hash mismatch! The file may be corrupted or tampered with."
         }
     }
     else {
@@ -68,7 +68,7 @@ if ($ZipPath.EndsWith(".exe")) {
 else {
     Write-Host " -> Extracting..." -ForegroundColor Yellow
     Expand-Archive -Path $ZipPath -DestinationPath "$env:ProgramFiles\Win-Debloat7" -Force
-    
+
     $Launcher = "$env:ProgramFiles\Win-Debloat7\Win-Debloat7.ps1"
     if (Test-Path $Launcher) {
         Write-Host " -> Installation Complete. Running..." -ForegroundColor Green
