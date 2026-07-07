@@ -31,7 +31,9 @@
 ---
 
 <p align="center">
-  <img src="assets/ss-dashboard.png" alt="Win-Debloat7 WPF Dashboard — Dark theme GUI for Windows debloating and optimization" width="850">
+  <img src="assets/gui-dashboard.png" alt="Win-Debloat7 WPF Dashboard — Dark theme GUI showing Windows version, privacy score, and live RAM usage" width="850">
+  <br>
+  <sub><i>The Win-Debloat7 dashboard — live Windows version, graded privacy score, and real-time RAM usage.</i></sub>
 </p>
 
 ---
@@ -39,6 +41,7 @@
 ## 📋 Table of Contents
 
 - [What is Win-Debloat7?](#-what-is-win-debloat7)
+- [Screenshots](#-screenshots)
 - [Quick Install](#-quick-install)
 - [Editions: Standard vs Extras](#-editions-standard-vs-extras)
 - [Features Overview](#-features-overview)
@@ -76,6 +79,23 @@ Unlike legacy debloat scripts that blindly delete registry keys, Win-Debloat7 tr
 | **Service Presets** | 5 intelligent profiles |
 | **Test Coverage** | Full Pester suite + PSScriptAnalyzer on every push (CI) |
 | **PSScriptAnalyzer** | 0 errors |
+
+---
+
+## 📸 Screenshots
+
+<table>
+<tr>
+<td width="50%" align="center" valign="top">
+<img src="assets/gui-software.png" alt="Win-Debloat7 GUI — Software installer with 175 curated apps and AI CLIs across categories" width="100%">
+<br><sub><b>🖥️ GUI — Software Installer (175 apps + AI tools)</b></sub>
+</td>
+<td width="50%" align="center" valign="top">
+<img src="assets/tui-extras.png" alt="Win-Debloat7 TUI — terminal menu with the Extras edition tools (Defender Remover, Activation)" width="100%">
+<br><sub><b>⌨️ TUI — Terminal Menu (Extras Edition)</b></sub>
+</td>
+</tr>
+</table>
 
 ---
 
