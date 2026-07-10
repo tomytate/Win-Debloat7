@@ -9,7 +9,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Performance.Gaming
-    Version: 1.3.1
+    Version: 1.4.0
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>

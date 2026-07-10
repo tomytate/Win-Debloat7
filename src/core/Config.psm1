@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.Config
-    Version: 1.3.1
+    Version: 1.4.0
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
@@ -294,4 +294,123 @@ function Get-WinDebloat7RecommendedProfile {
     }
 }
 
-Export-ModuleMember -Function Import-WinDebloat7Config, Test-WinDebloat7Config, Get-WinDebloat7RecommendedProfile
+<#
+.SYNOPSIS
+    Builds a read-only "what would this profile do" action plan (v1.4 preview).
+
+.DESCRIPTION
+    Derives every action a profile would take purely from its configuration -
+    nothing on the system is touched or even queried for state. Each row is a
+    [pscustomobject] with Section and Action, ready for the TUI/GUI to render
+    before the user commits to applying.
+
+.PARAMETER Config
+    The configuration object loaded from a YAML profile.
+
+.OUTPUTS
+    [pscustomobject[]] Planned actions grouped by section.
+
+.EXAMPLE
+    Get-WinDebloat7ProfilePlan -Config $config | Format-Table -GroupBy Section
+#>
+function Get-WinDebloat7ProfilePlan {
+    [CmdletBinding()]
+    [OutputType([pscustomobject[]])]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNull()]
+        [psobject]$Config
+    )
+
+    $plan = [System.Collections.Generic.List[pscustomobject]]::new()
+    $add = { param($Section, $Action) $plan.Add([pscustomobject]@{ Section = $Section; Action = $Action }) }
+
+    # ── Bloatware ───────────────────────────────────────────────────────
+    if ($Config.bloatware -and $Config.bloatware.removal_mode -and $Config.bloatware.removal_mode -ne 'None') {
+        $mode = $Config.bloatware.removal_mode
+        $apps = if ($Config.bloatware.custom_list -and $Config.bloatware.custom_list.Count -gt 0) {
+            $Config.bloatware.custom_list
+        }
+        else {
+            # Resolve the built-in tier list if the Bloatware module is loaded
+            $listCmd = Get-Command Get-WinDebloat7BloatwareList -ErrorAction SilentlyContinue
+            if ($listCmd) { & $listCmd -Mode $(if ($mode -in 'Conservative', 'Moderate', 'Aggressive') { $mode } else { 'Moderate' }) } else { $null }
+        }
+        $excluded = @($Config.bloatware.exclude_list).Count
+        $desc = if ($apps) { "Remove $(@($apps).Count) bloatware app(s) [$mode]" } else { "Remove bloatware [$mode]" }
+        if ($excluded) { $desc += " - $excluded app(s) preserved via exclude_list" }
+        & $add 'Bloatware' $desc
+    }
+
+    # ── Privacy ─────────────────────────────────────────────────────────
+    if ($Config.privacy) {
+        $p = $Config.privacy
+        if ($p.telemetry_level) { & $add 'Privacy' "Restrict telemetry to '$($p.telemetry_level)' level" }
+        if ($p.disable_advertising_id) { & $add 'Privacy' 'Disable advertising ID & tailored experiences' }
+        if ($p.disable_activity_history) { & $add 'Privacy' 'Disable activity history publishing/upload' }
+        if ($p.disable_location_tracking) { & $add 'Privacy' 'Disable location tracking' }
+        if ($p.disable_copilot) { & $add 'Privacy' 'Disable Windows Copilot' }
+        if ($p.disable_recall) { & $add 'Privacy' 'Disable Windows Recall snapshots' }
+    }
+
+    # ── Performance ─────────────────────────────────────────────────────
+    if ($Config.performance) {
+        $perf = $Config.performance
+        if ($perf.power_plan) { & $add 'Performance' "Set power plan to '$($perf.power_plan)'" }
+        if ($perf.visual_effects) { & $add 'Performance' "Set visual effects to '$($perf.visual_effects)'" }
+        if ($perf.disable_game_bar) { & $add 'Performance' 'Disable Xbox Game Bar' }
+        if ($perf.disable_background_apps) { & $add 'Performance' 'Restrict background apps' }
+    }
+
+    # ── Network ─────────────────────────────────────────────────────────
+    if ($Config.network) {
+        if ($Config.network.dns_servers) { & $add 'Network' "Set DNS servers to $($Config.network.dns_servers -join ', ')" }
+        if ($Config.network.disable_ipv6) { & $add 'Network' 'Disable IPv6 bindings' }
+    }
+
+    # ── System & QoL (v1.4) ─────────────────────────────────────────────
+    if ($Config.system) {
+        $sysMap = [ordered]@{
+            disable_fast_startup              = 'Disable Fast Startup (clean full shutdowns)'
+            prevent_auto_bitlocker            = 'Prevent automatic BitLocker device encryption'
+            disable_delivery_optimization     = 'Disable Delivery Optimization (P2P updates)'
+            disable_storage_sense             = 'Disable Storage Sense'
+            no_auto_reboot_updates            = 'Prevent auto-reboot after updates while signed in'
+            no_early_updates                  = "Turn off 'get latest updates as soon as available'"
+            disable_sticky_keys_shortcut      = 'Disable Sticky Keys shortcut (5x Shift)'
+            disable_share_drag_tray           = 'Disable drag-to-share tray'
+            disable_find_my_device            = 'Disable Find My Device'
+            disable_modern_standby_networking = 'Disable Modern Standby networking'
+            disable_widgets                   = 'Disable taskbar Widgets'
+            hide_chat_taskbar                 = 'Hide Chat / Meet Now taskbar icon'
+            disable_transparency              = 'Disable transparency effects'
+            disable_snap_assist               = 'Disable Snap Assist suggestions'
+            hide_start_all_apps               = "Hide Start menu 'All Apps' list"
+            disable_suggestions               = 'Disable ALL Windows suggestions & ads'
+            hide_settings_home                = "Hide the Settings 'Home' page"
+            hide_phone_link_start             = 'Hide Phone Link panel in Start'
+            debloat_search                    = 'Debloat Search (Bing results, highlights, history)'
+        }
+        foreach ($key in $sysMap.Keys) {
+            if ($Config.system.$key) { & $add 'System QoL' $sysMap[$key] }
+        }
+    }
+
+    # ── Software ────────────────────────────────────────────────────────
+    if ($Config.software) {
+        $sw = $Config.software
+        if ($sw.install_list -and @($sw.install_list).Count -gt 0) {
+            & $add 'Software' "Install $(@($sw.install_list).Count) app(s): $($sw.install_list -join ', ')"
+        }
+        if ($sw.uninstall_list -and @($sw.uninstall_list).Count -gt 0) {
+            & $add 'Software' "Uninstall $(@($sw.uninstall_list).Count) app(s): $($sw.uninstall_list -join ', ')"
+        }
+    }
+
+    # A safety snapshot always precedes changes
+    & $add 'Safety' 'Create encrypted registry snapshot before any change (restorable from Snapshots menu)'
+
+    return $plan.ToArray()
+}
+
+Export-ModuleMember -Function Import-WinDebloat7Config, Test-WinDebloat7Config, Get-WinDebloat7RecommendedProfile, Get-WinDebloat7ProfilePlan

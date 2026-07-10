@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Tweaks.UI
-    Version: 1.3.1
+    Version: 1.4.0
 #>
 
 #Requires -Version 7.6
@@ -131,6 +131,27 @@ function Set-WinDebloat7ContextMenu {
 
 .PARAMETER HideMusic
     Hides the "Music" folder under "This PC".
+
+.PARAMETER ShowGallery
+    Reverts HideGallery: removes the navigation-pane pin override.
+
+.PARAMETER ShowHome
+    Reverts HideHome.
+
+.PARAMETER HideFileExtensions
+    Reverts ShowFileExtensions (the Windows default hides known extensions).
+
+.PARAMETER HideHiddenFiles
+    Reverts ShowHiddenFiles (the Windows default).
+
+.PARAMETER ShowOneDrive
+    Reverts HideOneDrive: re-pins OneDrive to the navigation pane.
+
+.PARAMETER Show3DObjects
+    Reverts Hide3DObjects: recreates the "This PC" folder entry.
+
+.PARAMETER ShowMusic
+    Reverts HideMusic: recreates the "This PC" folder entry.
 #>
 function Set-WinDebloat7Explorer {
     [CmdletBinding(SupportsShouldProcess)]
@@ -144,7 +165,14 @@ function Set-WinDebloat7Explorer {
         [string]$LaunchTo,
         [switch]$HideOneDrive,
         [switch]$Hide3DObjects,
-        [switch]$HideMusic
+        [switch]$HideMusic,
+        [switch]$ShowGallery,
+        [switch]$ShowHome,
+        [switch]$HideFileExtensions,
+        [switch]$HideHiddenFiles,
+        [switch]$ShowOneDrive,
+        [switch]$Show3DObjects,
+        [switch]$ShowMusic
     )
     
     Write-Log -Message "Applying File Explorer tweaks..." -Level Info
@@ -244,6 +272,69 @@ function Set-WinDebloat7Explorer {
         }
     }
     if ($thisPcFolders.Count -gt 0) { Write-Log -Message "Hid $($thisPcFolders.Count) folder(s) from This PC." -Level Success }
+
+    # ── Reverts ─────────────────────────────────────────────────────────
+
+    # Show Gallery again (remove the pin override we set on both hives)
+    if ($ShowGallery) {
+        if ($PSCmdlet.ShouldProcess("Explorer", "Show Gallery")) {
+            $clsid = "{e88865ea-0e1c-4e20-9aa6-ed25316e9424}"
+            $ok = (Remove-RegistryKey -Path "HKCU:\Software\Classes\CLSID\$clsid" -Name "System.IsPinnedToNameSpaceTree") -and
+                  (Remove-RegistryKey -Path "HKLM:\SOFTWARE\Classes\CLSID\$clsid" -Name "System.IsPinnedToNameSpaceTree")
+            if ($ok) { Write-Log -Message "Gallery restored in Explorer." -Level Success }
+        }
+    }
+
+    # Show Home again
+    if ($ShowHome) {
+        if ($PSCmdlet.ShouldProcess("Explorer", "Show Home")) {
+            if (Remove-RegistryKey -Path "HKLM:\SOFTWARE\Classes\CLSID\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}" -Name "System.IsPinnedToNameSpaceTree") {
+                Write-Log -Message "Home restored in Explorer." -Level Success
+            }
+        }
+    }
+
+    # Hide extensions for known file types (Windows default)
+    if ($HideFileExtensions) {
+        if ($PSCmdlet.ShouldProcess("Explorer", "Hide file extensions")) {
+            if (Set-RegistryKey -Path $advanced -Name "HideFileExt" -Value 1 -Type DWord) {
+                Write-Log -Message "File extensions hidden for known file types (Windows default)." -Level Success
+            }
+        }
+    }
+
+    # Hide hidden files again (Windows default is 2, not 0)
+    if ($HideHiddenFiles) {
+        if ($PSCmdlet.ShouldProcess("Explorer", "Hide hidden files")) {
+            if (Set-RegistryKey -Path $advanced -Name "Hidden" -Value 2 -Type DWord) {
+                Write-Log -Message "Hidden files and folders hidden again (Windows default)." -Level Success
+            }
+        }
+    }
+
+    # Re-pin OneDrive to the navigation pane
+    if ($ShowOneDrive) {
+        if ($PSCmdlet.ShouldProcess("Explorer", "Show OneDrive in navigation pane")) {
+            if (Set-RegistryKey -Path "HKCU:\Software\Classes\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Name "System.IsPinnedToNameSpaceTree" -Value 1 -Type DWord) {
+                Write-Log -Message "OneDrive restored in Explorer navigation pane." -Level Success
+            }
+        }
+    }
+
+    # Restore "3D Objects" / "Music" under This PC (the NameSpace key's existence
+    # is what lists the folder - recreating the empty key restores it)
+    $restoreFolders = @()
+    if ($Show3DObjects) { $restoreFolders += "{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}" }
+    if ($ShowMusic) { $restoreFolders += "{3dfdf296-dbec-4fb4-81d1-6a3438bcf4de}" }
+    foreach ($clsid in $restoreFolders) {
+        if ($PSCmdlet.ShouldProcess("This PC folder $clsid", "Restore")) {
+            foreach ($hive in @("HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\$clsid",
+                    "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\$clsid")) {
+                if (-not (Test-Path $hive)) { New-Item -Path $hive -Force -ErrorAction SilentlyContinue | Out-Null }
+            }
+        }
+    }
+    if ($restoreFolders.Count -gt 0) { Write-Log -Message "Restored $($restoreFolders.Count) folder(s) under This PC." -Level Success }
 }
 
 <#
@@ -258,6 +349,12 @@ function Set-WinDebloat7Explorer {
 
 .PARAMETER HideIncludeInLibrary
     Removes the "Include in library" item.
+
+.NOTES
+    These handler keys are deleted outright, so there is no toggle-back switch.
+    All of them are in the snapshot catalog (Get-WinDebloat7RegistryTargets) and
+    snapshots capture their default-value CLSIDs - restoring a snapshot taken
+    before this tweak recreates the handlers exactly.
 #>
 function Set-WinDebloat7ContextMenuItems {
     [CmdletBinding(SupportsShouldProcess)]
@@ -312,7 +409,7 @@ function Set-WinDebloat7ContextMenuItems {
 
 <#
 .SYNOPSIS
-    Debloats Windows Search.
+    Debloats (or restores) Windows Search.
 
 .PARAMETER DisableBingSearch
     Removes Bing web results and Cortana from Start menu search (local results only).
@@ -322,6 +419,16 @@ function Set-WinDebloat7ContextMenuItems {
 
 .PARAMETER DisableSearchHistory
     Stops Windows from storing device search history.
+
+.PARAMETER EnableBingSearch
+    Reverts DisableBingSearch: removes the policy overrides so Bing web
+    results and Cortana behave per Windows/user defaults again.
+
+.PARAMETER EnableSearchHighlights
+    Reverts DisableSearchHighlights.
+
+.PARAMETER EnableSearchHistory
+    Reverts DisableSearchHistory.
 #>
 function Set-WinDebloat7Search {
     [CmdletBinding(SupportsShouldProcess)]
@@ -329,7 +436,10 @@ function Set-WinDebloat7Search {
     param(
         [switch]$DisableBingSearch,
         [switch]$DisableSearchHighlights,
-        [switch]$DisableSearchHistory
+        [switch]$DisableSearchHistory,
+        [switch]$EnableBingSearch,
+        [switch]$EnableSearchHighlights,
+        [switch]$EnableSearchHistory
     )
 
     $searchSettings = "HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings"
@@ -355,6 +465,31 @@ function Set-WinDebloat7Search {
         if ($PSCmdlet.ShouldProcess("Windows Search", "Disable search history")) {
             if (Set-RegistryKey -Path $searchSettings -Name "IsDeviceSearchHistoryEnabled" -Value 0 -Type DWord) {
                 Write-Log -Message "Device search history disabled." -Level Success
+            }
+        }
+    }
+
+    if ($EnableBingSearch) {
+        if ($PSCmdlet.ShouldProcess("Windows Search", "Restore Bing web results & Cortana defaults")) {
+            $ok = (Remove-RegistryKey -Path "HKCU:\Software\Policies\Microsoft\Windows\Explorer" -Name "DisableSearchBoxSuggestions") -and
+                  (Remove-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortana") -and
+                  (Remove-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "CortanaConsent")
+            if ($ok) { Write-Log -Message "Bing/Cortana search policy overrides removed." -Level Success }
+        }
+    }
+
+    if ($EnableSearchHighlights) {
+        if ($PSCmdlet.ShouldProcess("Windows Search", "Enable Search Highlights")) {
+            if (Set-RegistryKey -Path $searchSettings -Name "IsDynamicSearchBoxEnabled" -Value 1 -Type DWord) {
+                Write-Log -Message "Search Highlights re-enabled." -Level Success
+            }
+        }
+    }
+
+    if ($EnableSearchHistory) {
+        if ($PSCmdlet.ShouldProcess("Windows Search", "Enable search history")) {
+            if (Set-RegistryKey -Path $searchSettings -Name "IsDeviceSearchHistoryEnabled" -Value 1 -Type DWord) {
+                Write-Log -Message "Device search history re-enabled." -Level Success
             }
         }
     }
@@ -385,7 +520,10 @@ function Set-WinDebloat7TaskbarTweaks {
         [string]$SearchMode,
         [switch]$HideTaskView,
         [switch]$EnableEndTask,
-        [switch]$EnableLastActiveClick
+        [switch]$EnableLastActiveClick,
+        [switch]$ShowTaskView,
+        [switch]$DisableEndTask,
+        [switch]$DisableLastActiveClick
     )
 
     $advanced = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
@@ -424,6 +562,32 @@ function Set-WinDebloat7TaskbarTweaks {
         if ($PSCmdlet.ShouldProcess("Taskbar", "Enable last-active-window click")) {
             if (Set-RegistryKey -Path $advanced -Name "LastActiveClick" -Value 1 -Type DWord) {
                 Write-Log -Message "Taskbar icon clicks now focus the last active window." -Level Success
+            }
+        }
+    }
+
+    # ── Reverts ─────────────────────────────────────────────────────────
+
+    if ($ShowTaskView) {
+        if ($PSCmdlet.ShouldProcess("Taskbar", "Show Task View button")) {
+            if (Set-RegistryKey -Path $advanced -Name "ShowTaskViewButton" -Value 1 -Type DWord) {
+                Write-Log -Message "Task View button restored." -Level Success
+            }
+        }
+    }
+
+    if ($DisableEndTask) {
+        if ($PSCmdlet.ShouldProcess("Taskbar", "Disable End Task in right-click menu")) {
+            if (Set-RegistryKey -Path "$advanced\TaskbarDeveloperSettings" -Name "TaskbarEndTask" -Value 0 -Type DWord) {
+                Write-Log -Message "'End Task' removed from taskbar right-click menu (Windows default)." -Level Success
+            }
+        }
+    }
+
+    if ($DisableLastActiveClick) {
+        if ($PSCmdlet.ShouldProcess("Taskbar", "Disable last-active-window click")) {
+            if (Set-RegistryKey -Path $advanced -Name "LastActiveClick" -Value 0 -Type DWord) {
+                Write-Log -Message "Taskbar icon click behavior restored to Windows default." -Level Success
             }
         }
     }
@@ -468,17 +632,22 @@ function Restart-WinDebloat7Explorer {
 <#
 .SYNOPSIS
     Configures Start Menu options.
-    
+
 .PARAMETER DisableRecommended
     Removes the "Recommended" section (or minimizes it) in Start Menu.
+
+.PARAMETER EnableRecommended
+    Reverts DisableRecommended: removes the policy override so the
+    Recommended section reappears.
 #>
 function Set-WinDebloat7StartMenu {
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([void])]
     param(
-        [switch]$DisableRecommended
+        [switch]$DisableRecommended,
+        [switch]$EnableRecommended
     )
-    
+
     if ($DisableRecommended) {
         if ($PSCmdlet.ShouldProcess("Start Menu", "Disable Recommended Section")) {
             $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
@@ -487,6 +656,14 @@ function Set-WinDebloat7StartMenu {
             }
             else {
                 Write-Log -Message "Failed to disable Recommended section." -Level Error
+            }
+        }
+    }
+
+    if ($EnableRecommended) {
+        if ($PSCmdlet.ShouldProcess("Start Menu", "Enable Recommended Section")) {
+            if (Remove-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "HideRecommendedSection") {
+                Write-Log -Message "Recommended section restored in Start Menu." -Level Success
             }
         }
     }

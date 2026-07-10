@@ -32,6 +32,29 @@ network:
   dns_servers: list<string>
   disable_ipv6: boolean
 
+# System & QoL tweaks (v1.4). All keys are opt-in booleans; omit to skip.
+# Every tweak has an Enable-*/revert counterpart for per-tweak undo.
+system:
+  disable_fast_startup: boolean
+  prevent_auto_bitlocker: boolean
+  disable_delivery_optimization: boolean
+  disable_storage_sense: boolean
+  no_auto_reboot_updates: boolean
+  no_early_updates: boolean
+  disable_sticky_keys_shortcut: boolean
+  disable_share_drag_tray: boolean
+  disable_find_my_device: boolean
+  disable_modern_standby_networking: boolean
+  disable_widgets: boolean
+  hide_chat_taskbar: boolean
+  disable_transparency: boolean
+  disable_snap_assist: boolean
+  hide_start_all_apps: boolean
+  disable_suggestions: boolean
+  hide_settings_home: boolean
+  hide_phone_link_start: boolean
+  debloat_search: boolean
+
 software:
   package_manager: [ "Winget", "Chocolatey" ]
   install_list: list<string>

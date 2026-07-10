@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Modules.Integrations
-    Version: 1.3.1
+    Version: 1.4.0
 #>
 
 function Invoke-WinDebloat7ShutUp10 {

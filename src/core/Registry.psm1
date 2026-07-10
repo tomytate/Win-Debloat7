@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.Registry
-    Version: 1.3.1
+    Version: 1.4.0
 .LINK
     https://learn.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-76
 #>
@@ -275,4 +275,88 @@ function Export-RegistryKey {
     }
 }
 
-Export-ModuleMember -Function Set-RegistryKey, Get-RegistryKey, Test-RegistryKey, Export-RegistryKey
+<#
+.SYNOPSIS
+    Removes a registry value, or an entire registry key, with proper error
+    handling.
+
+.DESCRIPTION
+    Used by "Enable-*" / revert functions to undo policy overrides where the
+    Windows default is "value absent" rather than a specific opposite value
+    (e.g. removing a Group Policy override lets the OS's own built-in default
+    behavior apply again, which is usually more correct than guessing a
+    hardcoded "default" value that can vary by SKU/build).
+
+.PARAMETER Path
+    The full registry path (e.g. HKLM:\SOFTWARE\MyApp)
+
+.PARAMETER Name
+    The registry value name to remove. Omit with -WholeKey to remove the key itself.
+
+.PARAMETER WholeKey
+    Removes the entire key (and its subkeys) instead of a single value.
+
+.OUTPUTS
+    [bool] Returns $true if the value/key was removed or already absent, $false on error.
+
+.EXAMPLE
+    Remove-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\FindMyDevice" -Name "AllowFindMyDevice"
+
+.EXAMPLE
+    Remove-RegistryKey -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\{guid}" -WholeKey
+#>
+function Remove-RegistryKey {
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({
+                if ($_ -notmatch '^HK(LM|CU|CR|U|CC):\\') {
+                    throw "Invalid registry path '$_'. Must start with a valid hive (e.g. HKLM:\)"
+                }
+                $true
+            })]
+        [string]$Path,
+
+        [string]$Name,
+
+        [switch]$WholeKey
+    )
+
+    if (-not $WholeKey -and [string]::IsNullOrEmpty($Name)) {
+        throw "Remove-RegistryKey requires either -Name or -WholeKey."
+    }
+
+    try {
+        if (-not (Test-Path $Path)) {
+            # Nothing to remove - already in the desired (absent) state
+            return $true
+        }
+
+        if ($WholeKey) {
+            if ($PSCmdlet.ShouldProcess($Path, "Remove Registry Key")) {
+                Remove-Item -Path $Path -Recurse -Force -ErrorAction Stop
+                Write-Log -Message "Removed registry key: $Path" -Level Debug
+            }
+            return $true
+        }
+
+        if (-not (Test-RegistryKey -Path $Path -Name $Name)) {
+            return $true
+        }
+
+        if ($PSCmdlet.ShouldProcess("$Path\$Name", "Remove Registry Value")) {
+            Remove-ItemProperty -Path $Path -Name $Name -Force -ErrorAction Stop
+            Write-Log -Message "Removed registry value: $Path\$Name" -Level Debug
+        }
+        return $true
+    }
+    catch {
+        $target = if ($Name) { "$Path\$Name" } else { $Path }
+        Write-Log -Message "Failed to remove registry '$target': $($_.Exception.Message)" -Level Error
+        return $false
+    }
+}
+
+Export-ModuleMember -Function Set-RegistryKey, Get-RegistryKey, Test-RegistryKey, Export-RegistryKey, Remove-RegistryKey

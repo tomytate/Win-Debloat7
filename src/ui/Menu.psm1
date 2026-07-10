@@ -7,7 +7,7 @@
     
 .NOTES
     Module: Win-Debloat7.UI.Menu
-    Version: 1.3.1
+    Version: 1.4.0
 #>
 
 #Requires -Version 7.6
@@ -169,6 +169,7 @@ function Show-UICustomizationMenu {
     Write-Host "  [22] Disable transparency / [23] Disable Snap Assist" -ForegroundColor White
     Write-Host "  [24] Start: hide 'All Apps' list" -ForegroundColor White
     Write-WD7Host "  [R] Restart Explorer (apply pending UI changes)" -Color Primary
+    Write-WD7Host "  Undo: prefix a number with U to revert it (e.g. U16 restores Widgets)" -Color Dark
 
     $sel = Read-Host "`nSelect tweak to apply (or Enter to cancel)"
 
@@ -198,6 +199,30 @@ function Show-UICustomizationMenu {
         "23" { Disable-WinDebloat7SnapAssist }
         "24" { Disable-WinDebloat7StartAllApps }
         "R" { Restart-WinDebloat7Explorer }
+        # 1-4 are two-way pairs already; 10-12 revert to the Windows default below
+        "U5" { Set-WinDebloat7Explorer -ShowGallery }
+        "U6" { Set-WinDebloat7Explorer -ShowHome }
+        "U7" { Set-WinDebloat7StartMenu -EnableRecommended }
+        "U8" { Set-WinDebloat7Explorer -HideFileExtensions }
+        "U9" { Set-WinDebloat7Explorer -HideHiddenFiles }
+        "U10" { Set-WinDebloat7Explorer -LaunchTo Home }
+        "U11" { Set-WinDebloat7TaskbarTweaks -SearchMode Box }
+        "U12" { Set-WinDebloat7TaskbarTweaks -SearchMode Box }
+        "U13" { Set-WinDebloat7TaskbarTweaks -ShowTaskView }
+        "U14" { Set-WinDebloat7TaskbarTweaks -DisableEndTask }
+        "U15" { Set-WinDebloat7TaskbarTweaks -DisableLastActiveClick }
+        "U16" { Enable-WinDebloat7Widgets }
+        "U17" { Enable-WinDebloat7ChatTaskbar }
+        "U18" { Set-WinDebloat7Explorer -ShowOneDrive }
+        "U19" { Set-WinDebloat7Explorer -Show3DObjects }
+        "U20" { Set-WinDebloat7Explorer -ShowMusic }
+        "U21" {
+            Write-WD7Host "  Context-menu handlers are deleted keys - restore them from a" -Color Warning
+            Write-WD7Host "  snapshot taken before the tweak (Main menu > Restore Snapshot)." -Color Warning
+        }
+        "U22" { Enable-WinDebloat7Transparency }
+        "U23" { Enable-WinDebloat7SnapAssist }
+        "U24" { Enable-WinDebloat7StartAllApps }
     }
     if ($sel) { Read-Host "Press Enter..." }
 }
@@ -214,6 +239,7 @@ function Show-SearchSuggestionsMenu {
     Write-Host "  [5] Hide the Settings 'Home' page" -ForegroundColor White
     Write-Host "  [6] Hide Phone Link panel in Start" -ForegroundColor White
     Write-Host "  [A] Apply all of the above" -ForegroundColor Yellow
+    Write-WD7Host "  Undo: prefix with U (e.g. U4 restores suggestions, UA reverts all)" -Color Dark
 
     $sel = Read-Host "`nSelect tweak to apply (or Enter to cancel)"
 
@@ -229,6 +255,18 @@ function Show-SearchSuggestionsMenu {
             Disable-WinDebloat7WindowsSuggestions
             Disable-WinDebloat7SettingsHome
             Disable-WinDebloat7PhoneLinkStart
+        }
+        "U1" { Set-WinDebloat7Search -EnableBingSearch }
+        "U2" { Set-WinDebloat7Search -EnableSearchHighlights }
+        "U3" { Set-WinDebloat7Search -EnableSearchHistory }
+        "U4" { Enable-WinDebloat7WindowsSuggestions }
+        "U5" { Enable-WinDebloat7SettingsHome }
+        "U6" { Enable-WinDebloat7PhoneLinkStart }
+        "UA" {
+            Set-WinDebloat7Search -EnableBingSearch -EnableSearchHighlights -EnableSearchHistory
+            Enable-WinDebloat7WindowsSuggestions
+            Enable-WinDebloat7SettingsHome
+            Enable-WinDebloat7PhoneLinkStart
         }
     }
     if ($sel) { Read-Host "Press Enter..." }
@@ -248,6 +286,7 @@ function Show-SystemQoLMenu {
     Write-Host "  [8] Disable drag-to-share tray (24H2+)" -ForegroundColor White
     Write-Host "  [9] Disable Find My Device" -ForegroundColor White
     Write-Host "  [10] Disable Modern Standby networking (battery saver)" -ForegroundColor White
+    Write-WD7Host "  Undo: prefix a number with U to revert it (e.g. U1 re-enables Fast Startup)" -Color Dark
 
     $sel = Read-Host "`nSelect tweak to apply (or Enter to cancel)"
 
@@ -262,6 +301,16 @@ function Show-SystemQoLMenu {
         "8" { Disable-WinDebloat7ShareDragTray }
         "9" { Disable-WinDebloat7FindMyDevice }
         "10" { Disable-WinDebloat7ModernStandbyNetworking }
+        "U1" { Enable-WinDebloat7FastStartup }
+        "U2" { Enable-WinDebloat7AutoBitLocker }
+        "U3" { Enable-WinDebloat7DeliveryOptimization }
+        "U4" { Enable-WinDebloat7StorageSense }
+        "U5" { Set-WinDebloat7UpdateBehavior -AllowAutoReboot }
+        "U6" { Set-WinDebloat7UpdateBehavior -AllowEarlyUpdates }
+        "U7" { Enable-WinDebloat7StickyKeysShortcut }
+        "U8" { Enable-WinDebloat7ShareDragTray }
+        "U9" { Enable-WinDebloat7FindMyDevice }
+        "U10" { Enable-WinDebloat7ModernStandbyNetworking }
     }
     if ($sel) { Read-Host "Press Enter..." }
 }
@@ -355,16 +404,44 @@ function Show-ProfileSelection {
     }
 }
 
+function Show-ProfilePreview {
+    param($Config)
+
+    Show-WD7Header
+    Show-WD7Separator -Title "PREVIEW: $($Config.metadata.name)" -Color Secondary
+    Write-WD7Host "  Read-only plan - nothing has been changed yet.`n" -Color Info
+
+    $plan = Get-WinDebloat7ProfilePlan -Config $Config
+    $lastSection = $null
+    foreach ($row in $plan) {
+        if ($row.Section -ne $lastSection) {
+            Write-WD7Host "  $($row.Section)" -Color Primary
+            $lastSection = $row.Section
+        }
+        Write-Host "    - $($row.Action)" -ForegroundColor White
+    }
+    Write-Host ""
+}
+
 function Invoke-Profile {
     param($Path)
-    
+
     try {
         Show-WD7Header
         Write-WD7Host "Loading Profile: $Path" -Color Info
         $config = Import-WinDebloat7Config -Path $Path
-        
+
+        # Preview first (v1.4): show the full action plan, then confirm
+        Show-ProfilePreview -Config $config
+        $confirm = Read-Host "Apply this profile now? [Y/N]"
+        if ($confirm -notmatch '^[Yy]') {
+            Write-WD7Host "Nothing was changed." -Color Info
+            Read-Host "Press Enter to return to menu..."
+            return
+        }
+
         Write-WD7Host "`nApplying Configuration..." -Color Primary
-        
+
         # 1. Auto-Snapshot before changes
         Write-WD7Host "Creating safety snapshot..." -Color Info
         New-WinDebloat7Snapshot -Name "Pre-$($config.metadata.name)" -Description "Before applying profile" -Encrypt | Out-Null
@@ -374,11 +451,12 @@ function Invoke-Profile {
         Set-WinDebloat7Privacy -Config $config
         Set-WinDebloat7Performance -Config $config
         Set-WinDebloat7Network -Config $config
+        Set-WinDebloat7SystemTweaks -Config $config
         Install-WinDebloat7ProfileSoftware -Config $config
 
         Write-WD7Host "`n[✓] Optimization Complete!" -Color Success
         Read-Host "Press Enter to return to menu..."
-        
+
     }
     catch {
         Write-WD7Host "Error: $($_.Exception.Message)" -Color Error

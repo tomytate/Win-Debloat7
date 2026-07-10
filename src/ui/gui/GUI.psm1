@@ -8,7 +8,7 @@
 
 .NOTES
     Module: Win-Debloat7.UI.GUI
-    Version: 1.3.1
+    Version: 1.4.0
 #>
 
 #Requires -Version 7.6
@@ -284,10 +284,33 @@ function Show-WinDebloat7GUI {
         # DASHBOARD BUTTONS
         # ═══════════════════════════════════════════════════════════════════════════════
         (& $getCtrl "btnQuickOptimize").Add_Click({
-                $txtStatus.Text = "Creating Safety Snapshot..."
-                & $updateGui
-                [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
                 try {
+                    $profilePath = Join-Path $scriptRoot "..\..\..\profiles\moderate.yaml"
+                    if (-not (Test-Path $profilePath)) {
+                        $txtStatus.Text = "Error: moderate.yaml profile not found."
+                        return
+                    }
+                    $config = Import-WinDebloat7Config -Path $profilePath -SkipDependencyCheck
+
+                    # v1.4 preview: show the read-only action plan before changing anything
+                    $plan = Get-WinDebloat7ProfilePlan -Config $config
+                    $planText = ($plan | Group-Object Section | ForEach-Object {
+                            "$($_.Name):`n" + (($_.Group | ForEach-Object { "  - $($_.Action)" }) -join "`n")
+                        }) -join "`n`n"
+                    $answer = [System.Windows.MessageBox]::Show(
+                        "Quick Optimize will apply the 'Moderate' profile:`n`n$planText`n`nProceed?",
+                        "Preview - Quick Optimize",
+                        [System.Windows.MessageBoxButton]::YesNo,
+                        [System.Windows.MessageBoxImage]::Question)
+                    if ($answer -ne [System.Windows.MessageBoxResult]::Yes) {
+                        $txtStatus.Text = "Quick Optimize cancelled - nothing was changed."
+                        return
+                    }
+
+                    $txtStatus.Text = "Creating Safety Snapshot..."
+                    & $updateGui
+                    [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
+
                     # 1. Safety Snapshot
                     New-WinDebloat7Snapshot -Name "Auto-QuickOptimize" -Description "Created before Quick Optimize" -Encrypt | Out-Null
 
@@ -295,13 +318,10 @@ function Show-WinDebloat7GUI {
                     $txtStatus.Text = "Applying Optimization Profile..."
                     & $updateGui
 
-                    $profilePath = Join-Path $scriptRoot "..\..\..\profiles\moderate.yaml"
-                    if (Test-Path $profilePath) {
-                        $config = Import-WinDebloat7Config -Path $profilePath -SkipDependencyCheck
-                        Remove-WinDebloat7Bloatware -Config $config -Confirm:$false
-                        Set-WinDebloat7Privacy -Config $config -Confirm:$false
-                        Set-WinDebloat7Performance -Config $config -Confirm:$false
-                    }
+                    Remove-WinDebloat7Bloatware -Config $config -Confirm:$false
+                    Set-WinDebloat7Privacy -Config $config -Confirm:$false
+                    Set-WinDebloat7Performance -Config $config -Confirm:$false
+                    Set-WinDebloat7SystemTweaks -Config $config -Confirm:$false
                     $txtStatus.Text = "Quick Optimization Complete!"
                 }
                 catch {
@@ -551,6 +571,49 @@ function Show-WinDebloat7GUI {
                 })
         }
 
+        # System QoL tab — revert the checked tweaks back to Windows defaults (v1.4)
+        $btnRevertQoL = $window.FindName("btnRevertQoL")
+        if ($btnRevertQoL) {
+            $btnRevertQoL.Add_Click({
+                    $txtStatus.Text = "Reverting System QoL tweaks..."
+                    & $updateGui
+                    [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
+                    $reverted = 0
+                    try {
+                        # Same checkbox map as Apply, running each tweak's revert counterpart
+                        if ((& $getCtrl "chkQolFastStartup").IsChecked) { Enable-WinDebloat7FastStartup -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolBitlocker").IsChecked) { Enable-WinDebloat7AutoBitLocker -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolDeliveryOpt").IsChecked) { Enable-WinDebloat7DeliveryOptimization -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolStorageSense").IsChecked) { Enable-WinDebloat7StorageSense -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolNoAutoReboot").IsChecked) { Set-WinDebloat7UpdateBehavior -AllowAutoReboot -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolNoEarlyUpdates").IsChecked) { Set-WinDebloat7UpdateBehavior -AllowEarlyUpdates -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolModernStandby").IsChecked) { Enable-WinDebloat7ModernStandbyNetworking -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolFindMyDevice").IsChecked) { Enable-WinDebloat7FindMyDevice -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolStickyKeys").IsChecked) { Enable-WinDebloat7StickyKeysShortcut -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolWidgets").IsChecked) { Enable-WinDebloat7Widgets -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolChat").IsChecked) { Enable-WinDebloat7ChatTaskbar -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolTransparency").IsChecked) { Enable-WinDebloat7Transparency -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolSnapAssist").IsChecked) { Enable-WinDebloat7SnapAssist -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolStartAllApps").IsChecked) { Enable-WinDebloat7StartAllApps -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolFileExt").IsChecked) { Set-WinDebloat7Explorer -HideFileExtensions -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolHiddenFiles").IsChecked) { Set-WinDebloat7Explorer -HideHiddenFiles -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolHideOneDrive").IsChecked) { Set-WinDebloat7Explorer -ShowOneDrive -Confirm:$false; $reverted++ }
+                        if ((& $getCtrl "chkQolContextClean").IsChecked) {
+                            $txtStatus.Text = "Context-menu handlers must be restored from a snapshot (Snapshots view)."
+                        }
+
+                        if ($reverted -gt 0) { $txtStatus.Text = "$reverted System QoL tweak(s) reverted to Windows defaults! Restart Explorer to see UI changes." }
+                        elseif (-not (& $getCtrl "chkQolContextClean").IsChecked) { $txtStatus.Text = "No QoL tweaks selected to revert." }
+                    }
+                    catch {
+                        $txtStatus.Text = "Error: $($_.Exception.Message)"
+                    }
+                    finally {
+                        [System.Windows.Input.Mouse]::OverrideCursor = $null
+                    }
+                })
+        }
+
         (& $getCtrl "btnDebloatSearch").Add_Click({
                 $txtStatus.Text = "Debloating Windows Search..."
                 & $updateGui
@@ -583,6 +646,28 @@ function Show-WinDebloat7GUI {
                     [System.Windows.Input.Mouse]::OverrideCursor = $null
                 }
             })
+
+        # Restore Search & Suggestions to Windows defaults (v1.4 undo)
+        $btnRestoreSearchSuggestions = $window.FindName("btnRestoreSearchSuggestions")
+        if ($btnRestoreSearchSuggestions) {
+            $btnRestoreSearchSuggestions.Add_Click({
+                    $txtStatus.Text = "Restoring Search & Suggestions defaults..."
+                    & $updateGui
+                    [System.Windows.Input.Mouse]::OverrideCursor = [System.Windows.Input.Cursors]::Wait
+                    try {
+                        Set-WinDebloat7Search -EnableBingSearch -EnableSearchHighlights -EnableSearchHistory -Confirm:$false
+                        Enable-WinDebloat7WindowsSuggestions -Confirm:$false
+                        Enable-WinDebloat7SettingsHome -Confirm:$false
+                        $txtStatus.Text = "Search and suggestion surfaces restored to Windows defaults!"
+                    }
+                    catch {
+                        $txtStatus.Text = "Error: $($_.Exception.Message)"
+                    }
+                    finally {
+                        [System.Windows.Input.Mouse]::OverrideCursor = $null
+                    }
+                })
+        }
 
         (& $getCtrl "btnDisableTasks").Add_Click({
                 $txtStatus.Text = "Disabling Tasks (Safe)..."

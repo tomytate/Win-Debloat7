@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-07-10 — "Trust & Reversibility"
+
+The release theme: **everything Win-Debloat7 does can be previewed before it happens and undone after it happens.**
+
+### ✨ Snapshots that actually roll back
+- **Value-level registry snapshots**: the snapshot catalog (`Get-WinDebloat7RegistryTargets`, ~85 keys) covers every registry key the framework writes — including the HKCR shell-extension handler keys (literal `*` key names) and "This PC" NameSpace keys. Capture stores each key's complete direct value set with types, its **default (unnamed) value**, and whether the key existed.
+- **True restore semantics**: restoring a snapshot reverts changed values with their original types, deletes values the framework added, removes keys the framework created, and recreates deleted handler keys with their CLSID payloads. Legacy (pre-1.4) snapshots still restore via a compatibility path.
+- Fixed two PowerShell 7 provider limitations along the way: default values are deleted through the .NET API (`Remove-ItemProperty -Name '(default)'` throws in PS7), and wildcard-looking paths route through raw `[Microsoft.Win32.Registry]` access so `*` is never globbed.
+
+### ↩️ Per-tweak undo
+- **Every one-way tweak now has a revert counterpart** — 16 new `Enable-*` functions in the System tweaks module, `-AllowAutoReboot`/`-AllowEarlyUpdates` on update behavior, and revert switches across `Set-WinDebloat7Search`, `Set-WinDebloat7Explorer` (incl. restoring 3D Objects/Music under This PC), `Set-WinDebloat7TaskbarTweaks`, and `Set-WinDebloat7StartMenu`.
+- **Undo philosophy**: tweaks that set a Group Policy override revert by *removing the override* (new `Remove-RegistryKey` core function) so the genuine Windows default applies — no guessed "default" values that vary by SKU/build. Simple toggles revert to the documented Windows default (e.g. Sticky Keys `Flags=510`, hidden-files `Hidden=2`).
+- **TUI**: prefix any tweak number with `U` to revert it (`U16` restores Widgets, `UA` reverts the whole suggestions bundle) — every tweak submenu has the legend.
+- **GUI**: "↩️ Revert Selected Tweaks" on the System QoL tab (mirrors the 18-checkbox apply map) and "↩️ Restore Search & Suggestions Defaults" on the Privacy tab.
+- Context-menu handler removal is restored via snapshots (the handlers are deleted keys, not toggles) — documented in the function help and both UIs point at the Snapshots menu.
+
+### 👁️ Preview before apply
+- **`Get-WinDebloat7ProfilePlan`**: builds a read-only action plan from any profile — bloatware count per tier with exclusions, privacy/performance/network/system changes, software installs — without touching or even querying the system.
+- **TUI**: selecting a profile now shows the full grouped plan and asks for confirmation before anything runs.
+- **GUI**: Quick Optimize shows the Moderate-profile plan in a Yes/No dialog before creating the snapshot and applying.
+
+### 📋 Profiles cover System QoL
+- New `system:` profile section (19 opt-in boolean keys — Fast Startup, auto-BitLocker, Delivery Optimization, Storage Sense, update behavior, Sticky Keys, Find My Device, Widgets, Chat, transparency, Snap Assist, suggestions/ads, Settings Home, Phone Link, search debloat...) applied by the new `Set-WinDebloat7SystemTweaks`. Absent keys are skipped, so existing profiles work unchanged.
+- Bundled profiles updated: **Conservative** adds the two zero-risk fixes (suggestions off, no auto-reboot), **Moderate** adds balanced annoyance cleanup (8 keys), **Gaming** adds the full distraction-free set (10 keys incl. Sticky Keys shortcut and transparency).
+
+### 🔧 Under the hood
+- Module exports grew 116 → 135 (`Set-WinDebloat7SystemTweaks`, `Get-WinDebloat7ProfilePlan`, `Remove-RegistryKey`, 16 `Enable-*` + revert functions).
+- All verification gates pass: 0 parse errors, 0 PSScriptAnalyzer errors, manifest/module export parity, all TUI + GUI command references resolve, XAML loads headlessly with the new controls.
+
 ## [1.3.1] - 2026-07-06
 ### 🐛 Bug Fixes (Deep Audit)
 - **TUI**: Letter menu options (X, R, F, T, D, A) no longer execute their handler twice (PowerShell `switch` runs every matching clause; duplicate upper/lowercase cases removed - matching is already case-insensitive).

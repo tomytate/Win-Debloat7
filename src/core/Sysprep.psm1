@@ -8,7 +8,7 @@
     
 .NOTES
     Module: Win-Debloat7.Core.Sysprep
-    Version: 1.3.1
+    Version: 1.4.0
 #>
 
 function Test-WinDebloat7Sysprep {

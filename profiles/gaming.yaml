@@ -32,3 +32,16 @@ performance:
 network:
   dns_servers: [ "1.1.1.1", "1.0.0.1" ]
   disable_ipv6: false
+
+# System QoL (v1.4): performance + distraction-free gaming
+system:
+  disable_fast_startup: true            # clean driver state every boot
+  disable_delivery_optimization: true   # no P2P upload while gaming
+  no_auto_reboot_updates: true          # never reboot mid-session
+  disable_sticky_keys_shortcut: true    # no 5x-Shift popup in games
+  disable_share_drag_tray: true
+  disable_widgets: true
+  hide_chat_taskbar: true
+  disable_transparency: true            # fewer compositor effects
+  disable_suggestions: true
+  debloat_search: true

@@ -294,7 +294,7 @@
                 <!-- Footer -->
                 <Border Grid.Row="2" Background="#151525" Padding="16" CornerRadius="12" Margin="12,0,12,16">
                     <StackPanel>
-                        <TextBlock Text="v1.3.1 | PowerShell 7.6+" FontSize="11" 
+                        <TextBlock Text="v1.4.0 | PowerShell 7.6+" FontSize="11" 
                                    Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                         <TextBlock Text="Windows 11 25H2 Ready" FontSize="10" 
                                    Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
@@ -324,7 +324,7 @@
                             <!-- OS Card -->
                             <Border Style="{StaticResource NeonCardStyle}" Margin="0,0,8,0">
                                 <StackPanel>
-                                    <TextBlock Text="v1.3.1" Foreground="#888888" VerticalAlignment="Bottom" Margin="10,0,0,5" FontSize="12"/>
+                                    <TextBlock Text="v1.4.0" Foreground="#888888" VerticalAlignment="Bottom" Margin="10,0,0,5" FontSize="12"/>
                                     <TextBlock Name="txtOSName" Text="Windows 11" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
                                     <TextBlock Name="txtOSVersion" Text="Detecting..." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
@@ -506,6 +506,8 @@
                                                     HorizontalAlignment="Left" Margin="0,8"/>
                                             <Button Name="btnDisableSuggestions" Content="🧹 Disable Suggestions &amp; Ads (Start, Settings, Lock Screen)" Style="{StaticResource SecondaryButtonStyle}"
                                                     HorizontalAlignment="Left" Margin="0,8"/>
+                                            <Button Name="btnRestoreSearchSuggestions" Content="↩️ Restore Search &amp; Suggestions Defaults" Style="{StaticResource SecondaryButtonStyle}"
+                                                    HorizontalAlignment="Left" Margin="0,8"/>
                                             <Button Name="btnDisableTasks" Content="✓ Disable Tasks (Safe)" Style="{StaticResource SecondaryButtonStyle}"
                                                     HorizontalAlignment="Left" Margin="0,8"/>
                                             <Button Name="btnAggressiveTasks" Content="⚠ Disable Tasks (Aggressive)" Style="{StaticResource SecondaryButtonStyle}" 
@@ -631,6 +633,7 @@
 
                                             <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,14"/>
                                             <Button Name="btnApplyQoL" Content="🧰 Apply System QoL Tweaks" Style="{StaticResource PrimaryButtonStyle}"/>
+                                            <Button Name="btnRevertQoL" Content="↩️ Revert Selected Tweaks" Style="{StaticResource SecondaryButtonStyle}" Margin="0,8,0,0"/>
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -798,7 +801,7 @@
                                 <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20"/>
                                 
                                 <TextBlock Text="About" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
-                                <TextBlock Text="Win-Debloat7 v1.3.1" FontSize="14" Foreground="White" Margin="0,4"/>
+                                <TextBlock Text="Win-Debloat7 v1.4.0" FontSize="14" Foreground="White" Margin="0,4"/>
                                 <TextBlock Text="Created by Tomy Tolledo" FontSize="13" 
                                            Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4"/>
                                 <TextBlock Text="PowerShell 7.6+ | Windows 11 25H2 Ready" FontSize="12" 

@@ -12,9 +12,11 @@ We built Win-Debloat7 to be the **"Gold Standard"**:
 3.  **Modernity**: Built strictly for **PowerShell 7.6+**, leveraging `clean` blocks, parallel loops, and improved security.
 4.  **Performance**: O(N) regex-based processing, O(1) batch service queries, and modern collection handling.
 
-## 📊 v1.3.1 at a Glance
+## 📊 v1.4.0 at a Glance
 - **29** registered modules
-- **115** exported functions
+- **135** exported functions
+- **Full reversibility**: every tweak has a revert counterpart; ~85 registry keys snapshotted (value-level, DPAPI-encrypted) before any change
+- **Preview before apply**: profiles show a read-only action plan and require confirmation
 - Pester compliance suite + PSScriptAnalyzer enforced in CI
 - **0** PSScriptAnalyzer errors
 - **11** DNS providers

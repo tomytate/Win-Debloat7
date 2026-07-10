@@ -68,12 +68,14 @@ Unlike legacy debloat scripts that blindly delete registry keys, Win-Debloat7 tr
 
 > **"It's like `terraform apply` for your Windows PC."**
 
-### Key Stats (v1.3.1)
+### Key Stats (v1.4.0)
 
 | Metric | Value |
 |--------|-------|
 | **Modules** | 29 registered |
-| **Functions** | 115 exported (Standard) |
+| **Functions** | 135 exported (Standard) |
+| **Reversibility** | Every tweak has a revert; ~85 registry keys snapshotted before changes |
+| **Preview** | Profiles show a read-only action plan before anything runs |
 | **Bloatware Patterns** | 139 apps (tiered) |
 | **DNS Providers** | 11 (including family/security variants) |
 | **Service Presets** | 5 intelligent profiles |

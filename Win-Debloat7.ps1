@@ -29,7 +29,7 @@
     Applies the moderate profile without prompts (for automation).
     
 .NOTES
-    Version: 1.3.1
+    Version: 1.4.0
     Author: tomytate
     License: MIT
     Requires: PowerShell 7.6+, Administrator privileges

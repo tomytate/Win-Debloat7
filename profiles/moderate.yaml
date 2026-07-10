@@ -33,6 +33,17 @@ network:
   dns_servers: [ "1.1.1.1", "8.8.8.8" ]
   disable_ipv6: false
 
+# System QoL (v1.4): balanced cleanup - annoyances off, behavior unchanged
+system:
+  disable_delivery_optimization: true
+  no_auto_reboot_updates: true
+  disable_widgets: true
+  hide_chat_taskbar: true
+  disable_suggestions: true
+  hide_settings_home: true
+  hide_phone_link_start: true
+  debloat_search: true
+
 software:
   package_manager: "Winget"
   install_list:

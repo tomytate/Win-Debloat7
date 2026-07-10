@@ -4,7 +4,7 @@
     # RootModule        = ''
 
     # Version number of this module.
-    ModuleVersion     = '1.3.1'
+    ModuleVersion     = '1.4.0'
 
     # ID used to uniquely identify this module
     GUID              = 'a272c231-f85d-416c-af92-9ae26c4d72dc'
@@ -66,9 +66,9 @@
     FunctionsToExport = @(
         # Core
         'Start-WD7Logging', 'Write-Log', 'Get-WD7LogPath',
-        'Import-WinDebloat7Config', 'Test-WinDebloat7Config',
-        'New-WinDebloat7Snapshot', 'Restore-WinDebloat7Snapshot', 'Get-WinDebloat7Snapshot',
-        'Set-RegistryKey', 'Get-RegistryKey', 'Test-RegistryKey', 'Export-RegistryKey',
+        'Import-WinDebloat7Config', 'Test-WinDebloat7Config', 'Get-WinDebloat7ProfilePlan',
+        'New-WinDebloat7Snapshot', 'Restore-WinDebloat7Snapshot', 'Get-WinDebloat7Snapshot', 'Get-WinDebloat7RegistryTargets',
+        'Set-RegistryKey', 'Get-RegistryKey', 'Test-RegistryKey', 'Export-RegistryKey', 'Remove-RegistryKey',
         'Test-WinDebloat7Sysprep', 'Mount-WinDebloat7DefaultHive', 'Dismount-WinDebloat7DefaultHive',
         'Get-WinDebloat7SystemState', 'Get-WinDebloat7PrivacyScore', 'Get-WinDebloat7RecommendedProfile',
         # Modules
@@ -113,15 +113,25 @@
         # UI Tweaks
         'Set-WinDebloat7TaskbarAlignment', 'Set-WinDebloat7ContextMenu', 'Set-WinDebloat7Explorer', 'Set-WinDebloat7StartMenu',
         'Set-WinDebloat7Search', 'Set-WinDebloat7TaskbarTweaks', 'Set-WinDebloat7ContextMenuItems', 'Restart-WinDebloat7Explorer',
-        # System & QoL Tweaks (adapted from Win11Debloat, MIT)
-        'Disable-WinDebloat7FastStartup', 'Disable-WinDebloat7ModernStandbyNetworking',
-        'Disable-WinDebloat7AutoBitLocker', 'Disable-WinDebloat7DeliveryOptimization',
-        'Disable-WinDebloat7StorageSense', 'Set-WinDebloat7UpdateBehavior',
-        'Disable-WinDebloat7WindowsSuggestions', 'Disable-WinDebloat7SettingsHome',
-        'Disable-WinDebloat7ShareDragTray', 'Disable-WinDebloat7PhoneLinkStart',
-        'Disable-WinDebloat7StickyKeysShortcut', 'Disable-WinDebloat7FindMyDevice',
-        'Disable-WinDebloat7Transparency', 'Disable-WinDebloat7SnapAssist',
-        'Disable-WinDebloat7Widgets', 'Disable-WinDebloat7ChatTaskbar', 'Disable-WinDebloat7StartAllApps',
+        # System & QoL Tweaks (adapted from Win11Debloat, MIT) - each Disable-* has
+        # an Enable-*/revert counterpart for true per-tweak undo (v1.4)
+        'Set-WinDebloat7SystemTweaks',
+        'Disable-WinDebloat7FastStartup', 'Enable-WinDebloat7FastStartup',
+        'Disable-WinDebloat7ModernStandbyNetworking', 'Enable-WinDebloat7ModernStandbyNetworking',
+        'Disable-WinDebloat7AutoBitLocker', 'Enable-WinDebloat7AutoBitLocker',
+        'Disable-WinDebloat7DeliveryOptimization', 'Enable-WinDebloat7DeliveryOptimization',
+        'Disable-WinDebloat7StorageSense', 'Enable-WinDebloat7StorageSense', 'Set-WinDebloat7UpdateBehavior',
+        'Disable-WinDebloat7WindowsSuggestions', 'Enable-WinDebloat7WindowsSuggestions',
+        'Disable-WinDebloat7SettingsHome', 'Enable-WinDebloat7SettingsHome',
+        'Disable-WinDebloat7ShareDragTray', 'Enable-WinDebloat7ShareDragTray',
+        'Disable-WinDebloat7PhoneLinkStart', 'Enable-WinDebloat7PhoneLinkStart',
+        'Disable-WinDebloat7StickyKeysShortcut', 'Enable-WinDebloat7StickyKeysShortcut',
+        'Disable-WinDebloat7FindMyDevice', 'Enable-WinDebloat7FindMyDevice',
+        'Disable-WinDebloat7Transparency', 'Enable-WinDebloat7Transparency',
+        'Disable-WinDebloat7SnapAssist', 'Enable-WinDebloat7SnapAssist',
+        'Disable-WinDebloat7Widgets', 'Enable-WinDebloat7Widgets',
+        'Disable-WinDebloat7ChatTaskbar', 'Enable-WinDebloat7ChatTaskbar',
+        'Disable-WinDebloat7StartAllApps', 'Enable-WinDebloat7StartAllApps',
         # UI
         'Show-MainMenu', 'Show-WinDebloat7GUI',
         'Write-WD7Host', 'Show-WD7Header', 'Show-WD7Separator', 'Show-WD7Progress', 'Show-WD7StatusBadge'
@@ -150,6 +160,24 @@
             
             # Release Notes
             ReleaseNotes = @'
+## v1.4.0 (2026-07-10) - Trust & Reversibility
+- NEW: True value-level registry snapshots - every key the framework touches
+  (~85 cataloged) is captured with its full value set, types, and default
+  (unnamed) values; restore reverts changes, deletes framework-added values,
+  and removes framework-created keys. Handles literal '*' key names (HKCR
+  shell handlers) via raw .NET registry access.
+- NEW: Per-tweak undo - every one-way tweak now has an Enable-*/revert
+  counterpart (16 new functions + revert switches on Search/Explorer/
+  Taskbar/StartMenu). Policy tweaks revert by REMOVING the override so the
+  Windows default applies. TUI: U<number> undo prefix in tweak menus.
+  GUI: "Revert Selected Tweaks" + "Restore Search & Suggestions" buttons.
+- NEW: Profile preview - profiles show a read-only action plan
+  (Get-WinDebloat7ProfilePlan) and require confirmation before applying,
+  in both the TUI profile flow and the GUI Quick Optimize.
+- NEW: Profiles cover System QoL tweaks via the new "system:" section
+  (19 opt-in keys, Set-WinDebloat7SystemTweaks); bundled profiles updated.
+- FIX: Remove-RegistryKey and the raw-path helper exported for API use.
+
 ## v1.3.1 (2026-07-06) - Stability, Correctness & PowerShell 7.6 LTS
 - NEW: Standardized on PowerShell 7.6 LTS (7.6.3, .NET 10); EXE launchers now
   verify the installed version and auto-install/upgrade PowerShell 7.6

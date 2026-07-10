@@ -1,6 +1,6 @@
 # Features & Capabilities
 
-Win-Debloat7 is modular. You can run the entire suite using a Profile, or use individual modules via the CLI/GUI. Version 1.3.1 includes **93 exported functions** across **28 modules**.
+Win-Debloat7 is modular. You can run the entire suite using a Profile, or use individual modules via the CLI/GUI. Version 1.4.0 includes **135 exported functions** across **29 modules** — and every tweak can be previewed before it's applied and reverted afterwards.
 
 ## 🖥️ Dual Interface
 

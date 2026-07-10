@@ -30,6 +30,11 @@ performance:
   disable_background_apps: false
   gaming_mode: false
 
+# System QoL (v1.4): only zero-risk annoyance fixes for work PCs
+system:
+  disable_suggestions: true       # ads/tips off - safe everywhere
+  no_auto_reboot_updates: true    # never lose work to a surprise reboot
+
 software:
   package_manager: "Winget"
   install_list: []
