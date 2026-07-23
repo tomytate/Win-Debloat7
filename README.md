@@ -2,7 +2,7 @@
 
 <img src="assets/logo.png" alt="Win-Debloat7 — Windows 10 and 11 Debloater, Optimizer, and Privacy Tool" width="140" height="140">
 
-# Win-Debloat7
+# Win-Debloat
 
 ### 🚀 The Ultimate Windows 10 & 11 Debloater, Optimizer & Privacy Hardener
 
